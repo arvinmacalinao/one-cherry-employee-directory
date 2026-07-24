@@ -36,7 +36,7 @@ class Dashboard extends Component
         return view('livewire.admin.dashboard', [
             'employeeCount' => $employees->countVisible(),
             'companyCount' => $companies->count(),
-            'unmappedCount' => Company::unmapped()->count() + Department::unmapped()->count() + Designation::unmapped()->count(),
+            'unmappedCount' => Company::needsReview()->count() + Department::needsReview()->count() + Designation::needsReview()->count(),
             'lastSync' => ApiSyncLog::latest('started_at')->first(),
             'recentAudits' => $audit->recent(5),
             'quickLinks' => [

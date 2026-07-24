@@ -57,30 +57,49 @@ class AdminSyncSettingsAuditTest extends TestCase
         $this->assertDatabaseCount('api_sync_logs', 1);
     }
 
-    public function test_sync_creates_unmapped_stubs_and_admin_can_merge_them(): void
+    public function test_sync_flags_new_designation_names_and_admin_can_merge_a_duplicate(): void
     {
-        // Simulate what HrSyncService would create when it can't resolve a designation id.
+        // Simulate what HrSyncService creates when it sees a designation name it hasn't seen before.
         $company = Company::where('hr_ref_id', 102)->firstOrFail();
-        $stub = Designation::create([
-            'hr_ref_id' => 9999,
+        $duplicate = Designation::create([
             'company_id' => $company->id,
-            'name' => 'Unmapped Designation #9999',
+            'name' => 'Sr. Software Engineer', // near-duplicate of a real seeded name, needs merging
             'hierarchy_level' => 1,
             'is_active' => true,
+            'needs_review' => true,
         ]);
         $employee = Employee::where('employee_id', 'EMP-00021')->firstOrFail();
-        $employee->update(['designation_id' => $stub->id]);
-        $target = Designation::where('company_id', $company->id)->where('id', '!=', $stub->id)->firstOrFail();
+        $employee->update(['designation_id' => $duplicate->id]);
+        $target = Designation::where('company_id', $company->id)->where('id', '!=', $duplicate->id)->firstOrFail();
 
         $this->actingAs($this->admin);
 
         Livewire::test(AdminSync::class)
-            ->assertSee('Unmapped Designation #9999')
-            ->call('mergeUnmapped', 'designation', $stub->id, $target->id)
-            ->assertSet('flash', 'Designation merged and stub record removed.');
+            ->assertSee('New Designation: "Sr. Software Engineer"', false)
+            ->call('mergeUnmapped', 'designation', $duplicate->id, $target->id)
+            ->assertSet('flash', 'Designation merged and duplicate record removed.');
 
-        $this->assertSoftDeleted('designations', ['id' => $stub->id]);
+        $this->assertSoftDeleted('designations', ['id' => $duplicate->id]);
         $this->assertSame($target->id, $employee->fresh()->designation_id);
+    }
+
+    public function test_admin_can_mark_a_flagged_company_as_reviewed_without_merging(): void
+    {
+        $company = Company::create([
+            'name' => 'Cherry Ventures',
+            'slug' => 'cherry-ventures',
+            'is_active' => true,
+            'needs_review' => true,
+        ]);
+
+        $this->actingAs($this->admin);
+
+        Livewire::test(AdminSync::class)
+            ->assertSee('New Company: "Cherry Ventures"', false)
+            ->call('markReviewed', 'company', $company->id)
+            ->assertSet('flash', 'Company marked as reviewed.');
+
+        $this->assertFalse($company->fresh()->needs_review);
     }
 
     public function test_admin_can_save_settings_and_it_affects_the_scheduler_source(): void

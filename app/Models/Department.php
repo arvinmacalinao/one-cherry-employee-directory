@@ -13,11 +13,12 @@ class Department extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'hr_ref_id', 'company_id', 'name', 'department_head_id', 'description', 'is_active',
+        'hr_ref_id', 'company_id', 'name', 'department_head_id', 'description', 'is_active', 'needs_review',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'needs_review' => 'boolean',
     ];
 
     public function company(): BelongsTo
@@ -40,8 +41,12 @@ class Department extends Model
         return $query->where('is_active', true);
     }
 
-    public function scopeUnmapped($query)
+    /**
+     * Not currently set by any sync path (Department is fully Admin-assigned — see
+     * architecture-plan.md §2.4) but kept for symmetry with Company/Designation.
+     */
+    public function scopeNeedsReview($query)
     {
-        return $query->where('name', 'like', 'Unmapped %');
+        return $query->where('needs_review', true);
     }
 }

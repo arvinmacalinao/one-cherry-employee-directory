@@ -98,8 +98,9 @@
                     <x-admin.field label="First Name" :locked="$isSynced" :error="$errors->first('form.first_name')">
                         <input type="text" wire:model="form.first_name" @disabled($isSynced) class="input">
                     </x-admin.field>
-                    <x-admin.field label="Middle Name" :locked="$isSynced">
-                        <input type="text" wire:model="form.middle_name" @disabled($isSynced) class="input">
+                    <x-admin.field label="Middle Name">
+                        <input type="text" wire:model="form.middle_name" class="input">
+                        <p class="text-[11px] text-ink-tertiary">Not provided by HR — set by an Admin.</p>
                     </x-admin.field>
                     <x-admin.field label="Last Name" :locked="$isSynced" :error="$errors->first('form.last_name')">
                         <input type="text" wire:model="form.last_name" @disabled($isSynced) class="input">
@@ -175,17 +176,14 @@
                             </select>
                         @endif
                     </x-admin.field>
-                    <x-admin.field label="Department" :locked="$isSynced" :error="$errors->first('form.department_id')">
-                        @if ($isSynced)
-                            <input type="text" value="{{ \App\Models\Department::find($form['department_id'])?->name }}" disabled class="input">
-                        @else
-                            <select wire:model="form.department_id" class="input">
-                                <option value="">— Select company first —</option>
-                                @foreach ($departmentOptions as $department)
-                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
-                                @endforeach
-                            </select>
-                        @endif
+                    <x-admin.field label="Department" :error="$errors->first('form.department_id')">
+                        <select wire:model="form.department_id" class="input">
+                            <option value="">{{ $departmentOptions->isEmpty() ? '— Select company first —' : '— None —' }}</option>
+                            @foreach ($departmentOptions as $department)
+                                <option value="{{ $department->id }}">{{ $department->name }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-[11px] text-ink-tertiary">Not provided by HR — set by an Admin.</p>
                     </x-admin.field>
                     <x-admin.field label="Designation" :locked="$isSynced" :error="$errors->first('form.designation_id')">
                         @if ($isSynced)
@@ -210,20 +208,18 @@
                             </select>
                         @endif
                     </x-admin.field>
-                    <x-admin.field label="Date Hired" :locked="$isSynced">
-                        <input type="date" wire:model="form.date_hired" @disabled($isSynced) class="input">
+                    <x-admin.field label="Date Hired">
+                        <input type="date" wire:model="form.date_hired" class="input">
+                        <p class="text-[11px] text-ink-tertiary">Not provided by HR — set by an Admin.</p>
                     </x-admin.field>
-                    <x-admin.field label="Immediate Supervisor" :locked="$isSynced">
-                        @if ($isSynced)
-                            <input type="text" value="{{ \App\Models\Employee::find($form['immediate_supervisor_id'])?->full_name ?? '—' }}" disabled class="input">
-                        @else
-                            <select wire:model="form.immediate_supervisor_id" class="input">
-                                <option value="">— None —</option>
-                                @foreach ($supervisorOptions as $option)
-                                    <option value="{{ $option->id }}">{{ $option->full_name }}</option>
-                                @endforeach
-                            </select>
-                        @endif
+                    <x-admin.field label="Immediate Supervisor">
+                        <select wire:model="form.immediate_supervisor_id" class="input">
+                            <option value="">— None —</option>
+                            @foreach ($supervisorOptions as $option)
+                                <option value="{{ $option->id }}">{{ $option->full_name }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-[11px] text-ink-tertiary">Not provided by HR — set by an Admin.</p>
                     </x-admin.field>
                 </div>
             @endif

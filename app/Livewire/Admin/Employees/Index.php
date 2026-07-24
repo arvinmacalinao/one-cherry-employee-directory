@@ -54,9 +54,14 @@ class Index extends Component
 
     protected function rules(): array
     {
+        // Department, middle name, date hired, and supervisor are Admin-managed for
+        // every employee regardless of source — the real HR API doesn't expose them
+        // at all (see architecture-plan.md §2.4), so they're never HR-locked.
         $rules = [
             'form.middle_name' => ['nullable', 'string', 'max:255'],
+            'form.department_id' => ['nullable', 'exists:departments,id'],
             'form.immediate_supervisor_id' => ['nullable', 'exists:employees,id'],
+            'form.date_hired' => ['nullable', 'date'],
             'form.personal_email' => ['nullable', 'email'],
             'form.mobile_number' => ['nullable', 'string', 'max:30'],
             'form.viber_number' => ['nullable', 'string', 'max:30'],
@@ -84,10 +89,8 @@ class Index extends Component
                 'form.last_name' => ['required', 'string', 'max:255'],
                 'form.email' => ['required', 'email', 'max:255', 'unique:employees,email,'.$this->editingId],
                 'form.company_id' => ['required', 'exists:companies,id'],
-                'form.department_id' => ['required', 'exists:departments,id'],
                 'form.designation_id' => ['required', 'exists:designations,id'],
                 'form.employment_status' => ['required'],
-                'form.date_hired' => ['nullable', 'date'],
             ];
         }
 
@@ -183,14 +186,19 @@ class Index extends Component
             'emergency_contact_name', 'emergency_contact_relationship', 'emergency_contact_phone',
         ])->map(fn ($v) => $v === '' ? null : $v)->all();
 
+        // Admin-managed regardless of source — HR doesn't provide any of these.
+        $adminManagedFields = collect($validated)->only([
+            'middle_name', 'department_id', 'immediate_supervisor_id', 'date_hired',
+        ])->map(fn ($v) => $v === '' ? null : $v)->all();
+
         if ($this->editingId) {
             $employee = $employees->find($this->editingId);
+            $employees->update($employee, $adminManagedFields);
 
-            // employees-table fields are HR-controlled once synced — never touch them here.
+            // The rest of the employees-table fields are HR-controlled once synced — never touch them here.
             if (! $this->isSynced) {
                 $employees->update($employee, collect($validated)->only([
-                    'first_name', 'middle_name', 'last_name', 'email', 'company_id',
-                    'department_id', 'designation_id', 'immediate_supervisor_id', 'employment_status', 'date_hired',
+                    'first_name', 'last_name', 'email', 'company_id', 'designation_id', 'employment_status',
                 ])->map(fn ($v) => $v === '' ? null : $v)->all());
             }
 
@@ -199,16 +207,13 @@ class Index extends Component
             $employee = $employees->create([
                 'employee_id' => 'MAN-'.Str::upper(Str::random(6)),
                 'first_name' => $validated['first_name'],
-                'middle_name' => $validated['middle_name'] ?: null,
                 'last_name' => $validated['last_name'],
                 'email' => $validated['email'],
                 'company_id' => $validated['company_id'],
-                'department_id' => $validated['department_id'],
                 'designation_id' => $validated['designation_id'],
-                'immediate_supervisor_id' => $validated['immediate_supervisor_id'] ?: null,
                 'employment_status' => $validated['employment_status'],
-                'date_hired' => $validated['date_hired'] ?: null,
                 'source' => EmployeeSource::Manual,
+                ...$adminManagedFields,
             ]);
 
             $this->flash = 'Employee created';

@@ -8,7 +8,6 @@ use App\Enums\SyncStatus;
 use App\Enums\SyncType;
 use App\Models\ApiSyncLog;
 use App\Models\Company;
-use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Employee;
 use App\Models\User;
@@ -16,6 +15,8 @@ use App\Services\HrSync\Contracts\HrSourceInterface;
 use App\Services\HrSync\DTOs\HrEmployeeData;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -25,6 +26,11 @@ use Throwable;
  * Depends on HrSourceInterface, not a concrete HTTP client, so the HR integration —
  * and later, Active Directory / Google Workspace adapters — can change without this
  * orchestration logic changing.
+ *
+ * HR only actually provides: employee_id, name, email, company, designation, status
+ * (see HrEmployeeData). Department, dates, job level, and supervisor are NOT synced —
+ * they're Admin-managed fields on the same `employees` row. Company/Designation are
+ * matched by name here (not a numeric hr_ref_id) since that's what the real API sends.
  */
 class HrSyncService
 {
@@ -52,7 +58,12 @@ class HrSyncService
                 $seenCodes[] = $data->employeeCode;
 
                 try {
-                    $result = DB::transaction(fn () => $this->upsertEmployee($data, $errors));
+                    // NOT an arrow function: `fn()` auto-captures $errors *by value*, so the
+                    // &$errors reference parameter inside upsertEmployee would silently mutate
+                    // a throwaway copy instead of this loop's $errors — `use (&$errors)` is required.
+                    $result = DB::transaction(function () use ($data, &$errors) {
+                        return $this->upsertEmployee($data, $errors);
+                    });
                     $counts[$result]++;
                 } catch (Throwable $e) {
                     Log::warning("HR sync: failed to upsert {$data->employeeCode}", ['exception' => $e]);
@@ -60,7 +71,6 @@ class HrSyncService
                 }
             }
 
-            $this->resolveSupervisors($records);
             $counts['deactivated'] += $this->deactivateMissingEmployees($seenCodes);
 
             $log->update([
@@ -89,30 +99,32 @@ class HrSyncService
      */
     protected function upsertEmployee(HrEmployeeData $data, array &$errors): string
     {
-        $company = $this->resolveCompany($data->companyHrRefId, $errors);
-        $department = $this->resolveDepartment($data->departmentHrRefId, $company, $errors);
-        $designation = $this->resolveDesignation($data->designationHrRefId, $company, $errors);
+        $company = $this->resolveCompany($data->companyName, $errors);
+        $designation = $this->resolveDesignation($data->designationName, $company, $errors);
         $status = $this->resolveStatus($data->employmentStatusCode, $errors);
 
+        // Department, dates, job level, supervisor, middle name are deliberately absent
+        // here — HR doesn't provide them, so sync never touches them either way.
         $attributes = [
             'first_name' => $data->firstName,
-            'middle_name' => $data->middleName,
             'last_name' => $data->lastName,
             'email' => $data->email,
             'company_id' => $company->id,
-            'department_id' => $department->id,
-            'designation_id' => $designation->id,
             'employment_status' => $status,
-            'date_hired' => $data->dateHired,
-            'date_regularized' => $data->dateRegularized,
-            'date_separated' => $data->dateSeparated,
-            'job_level' => $data->jobLevel,
             'last_synced_at' => now(),
         ];
+
+        if ($designation) {
+            $attributes['designation_id'] = $designation->id;
+        }
 
         $existing = Employee::withTrashed()->where('employee_id', $data->employeeCode)->first();
 
         if (! $existing) {
+            if (! $designation) {
+                throw new RuntimeException('cannot create — HR did not provide a designation for this employee');
+            }
+
             $employee = Employee::create([
                 'employee_id' => $data->employeeCode,
                 'source' => EmployeeSource::HrSync,
@@ -132,7 +144,7 @@ class HrSyncService
 
         $existing->update($attributes);
 
-        if ($wasDesignation !== $designation->id) {
+        if ($designation && $wasDesignation !== $designation->id) {
             return 'transferred';
         }
 
@@ -144,8 +156,9 @@ class HrSyncService
 
     /**
      * Any employee currently active/on_leave in OCED but absent from this run's feed
-     * entirely is marked inactive — HR no longer confirms them, distinct from an
-     * explicit resignation (which arrives as an employment_status change instead).
+     * entirely is marked inactive. This is now the *primary* way a departure is
+     * detected — the live HR feed only ever contains active employees (it filters
+     * server-side), so there's no separate "resigned" status to read from it.
      */
     protected function deactivateMissingEmployees(array $seenCodes): int
     {
@@ -159,82 +172,58 @@ class HrSyncService
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, HrEmployeeData>  $records
+     * Companies are matched by name (case-insensitive) — the HR API returns a
+     * resolved display name, not an ID. A name HR sends that doesn't exist yet
+     * in OCED is auto-created (with no branding/address yet) and flagged for
+     * an Admin to fill in — sync never blocks on it.
      */
-    protected function resolveSupervisors($records): void
+    protected function resolveCompany(string $name, array &$errors): Company
     {
-        foreach ($records as $data) {
-            if (! $data->supervisorEmployeeCode) {
-                continue;
-            }
-
-            $employee = Employee::where('employee_id', $data->employeeCode)->first();
-            $supervisor = Employee::where('employee_id', $data->supervisorEmployeeCode)->first();
-
-            if ($employee && $supervisor && $employee->immediate_supervisor_id !== $supervisor->id) {
-                $employee->update(['immediate_supervisor_id' => $supervisor->id]);
-            }
-        }
-    }
-
-    /**
-     * Identity + admin-curated metadata pattern (architecture-plan.md §2.4): sync only ever
-     * writes `name`. If the hr_ref_id has never been seen before, a stub is auto-created and
-     * flagged so an Admin can fill in the branding/description later — sync never blocks on it.
-     */
-    protected function resolveCompany(int $hrRefId, array &$errors): Company
-    {
-        $company = Company::where('hr_ref_id', $hrRefId)->first();
+        $company = Company::whereRaw('LOWER(name) = ?', [strtolower($name)])->first();
 
         if (! $company) {
             $company = Company::create([
-                'hr_ref_id' => $hrRefId,
-                'name' => "Unmapped Company #{$hrRefId}",
-                'slug' => "unmapped-company-{$hrRefId}",
+                'name' => $name,
+                'slug' => Str::slug($name).'-'.Str::random(4),
                 'is_active' => true,
+                'needs_review' => true,
             ]);
-            $errors[] = "Auto-created stub Company #{$hrRefId} — needs Admin review.";
+            $errors[] = "Auto-created new Company \"{$name}\" from HR — needs Admin review (logo, address, etc.).";
         }
 
         return $company;
     }
 
-    protected function resolveDepartment(int $hrRefId, Company $company, array &$errors): Department
+    /**
+     * Designations are matched by name within the employee's company (same
+     * uniqueness scope as the designations table itself). Null when HR sends
+     * no designation for this record — the caller decides how to handle that.
+     */
+    protected function resolveDesignation(?string $name, Company $company, array &$errors): ?Designation
     {
-        $department = Department::where('hr_ref_id', $hrRefId)->first();
-
-        if (! $department) {
-            $department = Department::create([
-                'hr_ref_id' => $hrRefId,
-                'company_id' => $company->id,
-                'name' => "Unmapped Department #{$hrRefId}",
-                'is_active' => true,
-            ]);
-            $errors[] = "Auto-created stub Department #{$hrRefId} — needs Admin review.";
+        if (! $name) {
+            return null;
         }
 
-        return $department;
-    }
-
-    protected function resolveDesignation(int $hrRefId, Company $company, array &$errors): Designation
-    {
-        $designation = Designation::where('hr_ref_id', $hrRefId)->first();
+        $designation = Designation::where('company_id', $company->id)
+            ->whereRaw('LOWER(name) = ?', [strtolower($name)])
+            ->first();
 
         if (! $designation) {
             $designation = Designation::create([
-                'hr_ref_id' => $hrRefId,
                 'company_id' => $company->id,
-                'name' => "Unmapped Designation #{$hrRefId}",
+                'name' => $name,
                 'hierarchy_level' => 1,
                 'is_active' => true,
+                'needs_review' => true,
             ]);
-            $errors[] = "Auto-created stub Designation #{$hrRefId} — needs Admin review.";
+            $errors[] = "Auto-created new Designation \"{$name}\" at {$company->name} — needs Admin review (hierarchy level, description).";
         }
 
         return $designation;
     }
 
-    protected function resolveStatus(int|string $code, array &$errors): EmploymentStatus
+    protected function resolveStatus(string $code, array &$errors): EmploymentStatus
     {
         $map = config('hr_sync.status_map');
         $value = $map[$code] ?? null;

@@ -72,6 +72,7 @@ class Index extends Component
         }
 
         $validated['department_head_id'] = $validated['department_head_id'] ?: null;
+        $validated['needs_review'] = false;
 
         if ($this->editingId) {
             $departments->update($departments->find($this->editingId), $validated);

@@ -15,14 +15,20 @@ use Illuminate\Support\Str;
  * hire and promotes one existing employee, so the new-hire and promotion code paths
  * in HrSyncService are still exercised end-to-end without a real HR system.
  *
- * Swap the config binding for a real HrRestApiSource once HR API credentials exist;
- * HrSyncService itself never needs to change.
+ * Deliberately more forgiving than the real API here: HrRestApiSource's live feed
+ * only ever contains status="active" records (see its docblock for the on_leave
+ * gap that creates), but this fake echoes back every current employee regardless
+ * of status, so a "Sync Now" in local dev never surprises you by deactivating
+ * your on_leave demo data.
+ *
+ * Matches the confirmed real contract: company/designation by name, no department,
+ * dates, job level, or supervisor — see HrEmployeeData.
  */
 class FakeHrSource implements HrSourceInterface
 {
     public function fetchEmployees(): Collection
     {
-        $roster = Employee::with('department')->get()->map(
+        $roster = Employee::with(['company', 'designation'])->get()->map(
             fn (Employee $employee) => $this->echoBack($employee)
         );
 
@@ -33,28 +39,21 @@ class FakeHrSource implements HrSourceInterface
 
     protected function echoBack(Employee $employee): HrEmployeeData
     {
-        $designationHrRefId = $employee->designation?->hr_ref_id ?? 0;
+        $designationName = $employee->designation?->name;
 
         // Promote the first "Junior Developer" found — demonstrates transfer detection.
-        if ($employee->designation?->name === 'Junior Developer') {
-            $designationHrRefId = $employee->designation->hr_ref_id + 1000; // simulated new designation id
+        if ($designationName === 'Junior Developer') {
+            $designationName = 'Software Engineer';
         }
 
         return new HrEmployeeData(
             employeeCode: $employee->employee_id,
             firstName: $employee->first_name,
-            middleName: $employee->middle_name,
             lastName: $employee->last_name,
             email: $employee->email,
-            companyHrRefId: $employee->company?->hr_ref_id ?? 0,
-            departmentHrRefId: $employee->department?->hr_ref_id ?? 0,
-            designationHrRefId: $designationHrRefId,
-            supervisorEmployeeCode: $employee->supervisor?->employee_id,
+            companyName: $employee->company?->name ?? 'Unknown Company',
+            designationName: $designationName,
             employmentStatusCode: $employee->employment_status->value,
-            dateHired: $employee->date_hired?->toDateString(),
-            dateRegularized: $employee->date_regularized?->toDateString(),
-            dateSeparated: $employee->date_separated?->toDateString(),
-            jobLevel: $employee->job_level,
         );
     }
 
@@ -65,18 +64,11 @@ class FakeHrSource implements HrSourceInterface
         return new HrEmployeeData(
             employeeCode: "SYNC-{$suffix}",
             firstName: 'New',
-            middleName: null,
             lastName: 'Hire',
             email: "new.hire.{$suffix}@onecherry.group",
-            companyHrRefId: 102, // Cherry Digital Solutions
-            departmentHrRefId: 202, // Engineering
-            designationHrRefId: 306, // Junior Developer
-            supervisorEmployeeCode: null,
+            companyName: 'Cherry Digital Solutions',
+            designationName: 'Junior Developer',
             employmentStatusCode: 'active',
-            dateHired: now()->toDateString(),
-            dateRegularized: null,
-            dateSeparated: null,
-            jobLevel: 1,
         );
     }
 }

@@ -98,42 +98,61 @@ database/
   migrations/ factories/ seeders/
 ```
 
-### 2.4 HR sync direction — **confirmed: pull model**
+### 2.4 HR sync direction — **confirmed: pull model, real API contract implemented**
 
 ```
 HR System → REST API → Laravel Scheduler → Sync Service → Employee Directory Database
 ```
 
-OCED pulls. The scheduler (hourly, or nightly if change volume is low — configurable, not hardcoded) invokes `HrSyncService::sync()`, which calls the HR system's REST API, diffs by `employee_id` (immutable, unique key), and writes only to the HR-controlled columns (§3.2). No inbound webhook, no changes required on the HR side, no attack surface added. The same service is reused by a manual "Sync Now" button in `/admin/sync` — one code path, two triggers.
+OCED pulls. The scheduler (hourly, or nightly if change volume is low — configurable from `/admin/settings`, persisted in the `settings` table) invokes `HrSyncService::sync()`, which calls the HR system's REST API and diffs by `employee_id` (immutable, unique key). No inbound webhook, no changes required on the HR side, no attack surface added. The same service is reused by a manual "Sync Now" button in `/admin/sync` — one code path, two triggers.
 
-**Actual HR table (confirmed from the live schema)** is a combined user+employee record:
-`id, first_name, middle_name, last_name, email, username, password, employee_code, date_hired, date_regular, date_separated, location, es_id, is_id, fr_id, job_level, ug_id, r_id, c_id, d_id, u_enabled, u_active, remember_token, ..., first_login, force_rate`
+**⚠️ Revision history on this section:** an earlier draft of this plan assumed the sync would read HR's *internal database columns* directly (`c_id`, `ug_id`, `d_id`, `es_id`, `is_id`, numeric `hr_ref_id` matching, etc. — reconstructed from a `$fillable` array). Once the actual `EmployeeController@index` REST endpoint was shared, it turned out to expose a **much smaller, already-resolved** contract than that internal table. The design below reflects what's actually implemented; the numeric `hr_ref_id` columns and matching logic described in earlier revisions still exist in the schema (harmless, unused by this integration) but are no longer how Company/Designation get resolved — see the "what changed" note at the end of this section if you're comparing against old notes.
 
-| HR column | Meaning | OCED treatment |
+**Confirmed real endpoint:**
+
+```
+GET {HR_SYNC_API_URL}/api/employees
+Authorization: Bearer {HR_SYNC_API_KEY}     (Sanctum personal access token)
+Accept: application/json
+```
+
+Response is a **plain JSON array** (not a paginated resource), already filtered server-side by HR to `where('status', 'active')`:
+
+```json
+[
+  { "employee_id": "EMP-1024", "name": "Ramon Sy", "email": "ramon.sy@onecherry.group",
+    "company": "Cherry Digital Solutions", "designation": "Software Engineer", "status": "active" }
+]
+```
+
+| API field | OCED treatment |
+|---|---|
+| `employee_id` | **sync key** → `employees.employee_id` (immutable) |
+| `name` | single string, split naively on the first space → `employees.first_name` / `employees.last_name`. Multi-word first names, suffixes, and "Last, First" formats will not split correctly — revisit `HrRestApiSource::splitName()` if this becomes a real problem for actual names in the roster. |
+| `email` | synced → `employees.email`, HR-controlled |
+| `company` | a resolved **display name**, not an ID → `employees.company_id`, resolved by case-insensitive name match against `companies.name`. A name never seen before auto-creates the company (see "Identity + review" below). |
+| `designation` | same as company: name match against `designations.name` scoped to that company; auto-creates if new. `null`/missing is tolerated — see below. |
+| `status` | Always `"active"` in practice, because the endpoint's own query filters to it before it ever reaches OCED — see the "known gap" below. |
+
+**Fields the API does *not* expose at all — and what that means:**
+
+| Field OCED originally expected | Reality | Resolution |
 |---|---|---|
-| `employee_code` | business employee ID | **sync key** → `employees.employee_id` (immutable, matches the original "Employee ID as unique key" requirement) |
-| `first_name`, `middle_name`, `last_name` | name parts | synced → `employees.*`, HR-controlled |
-| `email` | corporate email | synced → `employees.email`, HR-controlled |
-| `c_id` | company | synced → `employees.company_id`, resolved via a `companies.hr_ref_id` mapping column |
-| `ug_id` | **user group = Department** in this org's convention | synced → `employees.department_id`, resolved via a `departments.hr_ref_id` mapping column |
-| `d_id` | designation | synced → `employees.designation_id`, resolved via a `designations.hr_ref_id` mapping column — this is the field that changes on a **promotion** |
-| `is_id` | immediate supervisor's HR id | synced → `employees.immediate_supervisor_id`, resolved by matching the referenced record's `employee_code` |
-| `es_id` | employment status id | synced → `employees.employment_status`, translated via a small config-driven map (`config/hr_sync.php`), not a DB table — the status list is short and stable |
-| `date_hired` | hire date | synced → `employees.date_hired` |
-| `date_regular` | regularization date | synced → `employees.date_regularized` (stored, shown in Organization Information as a nice-to-have; not required) |
-| `date_separated` | separation date | synced → `employees.date_separated`; non-null is a second signal (alongside `es_id`) that an employee should be resigned/inactive |
-| `job_level` | numeric level | synced → `employees.job_level`, **stored but not displayed** anywhere in v1 UI — reserved for future use |
-| `location` | plain text site name | **ignored.** Office Location is fully OCED/Admin-owned (and eventually employee-supplied) — no attempt to map or sync it |
-| `fr_id` | unclear/unused | **ignored** for now — not synced, not mapped |
-| `username`, `password`, `remember_token`, `ug_id`'s sibling `r_id`, `u_enabled`, `first_login`, `force_rate` | HR app's own login/session/permission plumbing | **ignored entirely** — irrelevant to OCED, which has its own `users` table and RBAC |
+| Department | Not returned by this endpoint — only `company` and `designation` are. | **Department is fully Admin-assigned**, not HR-synced. `employees.department_id` is nullable; sync never sets or touches it. An Admin assigns it after import (Employees admin form, Organization tab). |
+| Middle name | Not returned (`name` is one string). | Admin-managed, same as Suffix/Nickname/Gender/Birthday always were. |
+| Date hired / regularized / separated | Not returned. | Admin-managed. `employees.date_hired` etc. stay nullable and sync-untouched. |
+| Job level | Not returned. | Dropped from the sync path entirely (the `employees.job_level` column still exists but nothing sets it via sync). |
+| Immediate supervisor | Not returned. | Admin-managed, same as Department. |
 
-**Never touched by sync (directory/employee-supplied, present or future):** Profile Picture, Mobile, Viber, Telephone Extension, Personal Email, About Me, Skills, LinkedIn, Facebook, Emergency Contact, Office Seat/Desk, Pronunciation, Favorite Contacts, Office Location, Suffix, Nickname, Gender, Birthday — none of these exist in HR's table at all, so there's no risk of sync ever overwriting them.
+**Resignation/leave detection — no explicit status to read.** Because the endpoint pre-filters to active employees, `status` is redundant in practice (it's always `"active"`) — HrSyncService still reads it defensively (via `config('hr_sync.status_map')`) in case that filter ever loosens, but the *real* signal for "this person left" is **absence from the feed entirely**: any employee OCED has as `active`/`on_leave` but who doesn't appear in a given sync run gets marked `inactive`. This was already the design's fallback path; it's now the primary path.
 
-**Scope of what the sync actually needs to detect**, per your framing: new hires, resignations, and promotions (designation changes) are the three cases that matter operationally. The sync still diffs *all* HR-controlled fields generically (company/department/supervisor changes included) since that's the same cost as diffing one field — but promotion-via-`d_id`-change and resignation-via-`es_id`/`date_separated` are the flagship logged events.
+**Known gap — on-leave employees:** if HR's underlying `status` column has a distinct value for "on leave" (separate from "active"), those employees would *also* be excluded by the server-side filter and get incorrectly marked `inactive` by the "missing from feed" pass, since there's no way to distinguish "on leave" from "gone" through this endpoint. Worth confirming with HR directly; not something OCED can detect on its own from what this endpoint returns today.
 
-**Identity vs. metadata pattern for Companies/Departments/Designations:** all three are partially HR-driven (their *existence* and *name* come from HR's `c_id`/`ug_id`/`d_id`) but also carry OCED-only descriptive data (logo, color theme, description, department head, hierarchy level). Rule: sync **auto-provisions** a record (via `hr_ref_id`) the first time it sees a new HR id, syncing only `name`; everything else (logo/description/address/head/hierarchy_level) is Admin-curated and never touched by sync. If sync sees an HR id it can't map, it creates a stub (`"Unmapped Department #<id>"`) and flags it in `api_sync_logs` for an Admin to fill in — sync never blocks on this.
+**Identity + review pattern for Company/Designation** (Department is exempt — see above, it's never sync-created): matching is by name, not a numeric ID, since that's what the API actually sends. A `needs_review` boolean (replacing an earlier numeric-ID-based `"Unmapped X #<id>"` naming convention that no longer applies once real names are available) is set `true` when sync auto-creates a Company or Designation it hasn't seen before, and is cleared the moment an Admin opens and saves that record from `/admin/companies` or `/admin/designations` — surfaced as a sidebar badge and on `/admin/sync`, with both a "Merge into existing" action (for when HR sends a near-duplicate name, e.g. a typo or rename) and a "Mark Reviewed" action (when the new name is simply legitimate and just needs its branding/hierarchy filled in).
 
-To keep this swappable (and ready for Active Directory / Google Workspace / Microsoft Graph later, per your API-first direction below), the sync service depends on an interface, not a concrete HTTP client:
+**Known limitation — renaming breaks re-matching.** Because Company/Designation identity is the `name` column itself (not a stable numeric ID), an Admin renaming a HR-synced company or designation will cause the *next* sync run to no longer recognize it — HR will keep sending its original name, which won't match the renamed record, and a new duplicate gets auto-created instead. This is a known trade-off of name-based matching against an API that doesn't expose stable IDs; a full fix (e.g., tracking HR's sent name separately from the Admin-facing display name) is future work, not implemented here.
+
+To keep this swappable (and ready for Active Directory / Google Workspace / Microsoft Graph later, per your API-first direction), the sync service depends on an interface, not a concrete HTTP client:
 
 ```
 interface HrSourceInterface {
@@ -141,7 +160,7 @@ interface HrSourceInterface {
 }
 ```
 
-`HrSyncService` takes an `HrSourceInterface` via constructor injection. Today's binding is `HrRestApiSource`. A future AD/Graph sync for presence or SSO becomes a second adapter (`MicrosoftGraphSource implements DirectorySourceInterface`) plugged in beside it — not a rewrite of the sync engine.
+`HrSyncService` takes an `HrSourceInterface` via constructor injection. `HrRestApiSource` implements it against the real endpoint above; `FakeHrSource` (bound when `HR_SYNC_SOURCE=fake`) is the local-dev/demo stand-in — it echoes back the current roster by name so "Sync Now" is safe to click in a demo, and injects one synthetic new hire plus one promotion so those code paths stay exercised without hitting the real API. A future AD/Graph sync for presence or SSO becomes a second adapter (`MicrosoftGraphSource implements DirectorySourceInterface`) plugged in beside it — not a rewrite of the sync engine.
 
 ---
 
@@ -171,8 +190,8 @@ erDiagram
 
     COMPANIES {
         bigint id PK
-        int hr_ref_id UK "nullable, HR's c_id"
-        string name "synced (identity), rest is Admin-owned"
+        int hr_ref_id UK "nullable, legacy — unused by the real HR integration (see §2.4)"
+        string name "synced, matched by name — identity, rest is Admin-owned"
         string slug UK
         string logo_path
         text description
@@ -182,26 +201,29 @@ erDiagram
         string website
         string color_theme
         boolean is_active
+        boolean needs_review "true when sync auto-created this from a new name"
         timestamp deleted_at
     }
     DEPARTMENTS {
         bigint id PK
-        int hr_ref_id UK "nullable, HR's ug_id (user group)"
+        int hr_ref_id UK "nullable, legacy — Department is not HR-synced at all (see §2.4)"
         bigint company_id FK
-        string name "synced (identity), rest is Admin-owned"
+        string name "fully Admin-owned — HR API doesn't expose department"
         bigint department_head_id FK "nullable, -> employees.id, Admin-owned"
         text description
         boolean is_active
+        boolean needs_review "present for symmetry; no current code path sets this"
         timestamp deleted_at
     }
     DESIGNATIONS {
         bigint id PK
-        int hr_ref_id UK "nullable, HR's d_id"
+        int hr_ref_id UK "nullable, legacy — unused by the real HR integration (see §2.4)"
         bigint company_id FK
-        string name "synced (identity), rest is Admin-owned"
+        string name "synced, matched by name — identity, rest is Admin-owned"
         tinyint hierarchy_level "Admin-owned, org-chart grouping"
         text description
         boolean is_active
+        boolean needs_review "true when sync auto-created this from a new name"
     }
     OFFICE_LOCATIONS {
         bigint id PK
@@ -220,15 +242,15 @@ erDiagram
         string middle_name "HR-controlled"
         string last_name "HR-controlled"
         string email UK "corporate email, HR-controlled"
-        bigint company_id FK "HR-controlled, via c_id"
-        bigint department_id FK "HR-controlled, via ug_id"
-        bigint designation_id FK "HR-controlled, via d_id"
-        bigint immediate_supervisor_id FK "nullable, self, HR-controlled via is_id"
-        enum employment_status "active/on_leave/resigned/inactive, from es_id"
-        date date_hired "HR-controlled"
-        date date_regularized "HR-controlled, optional display"
-        date date_separated "HR-controlled, nullable"
-        tinyint job_level "HR-controlled, stored only, not displayed"
+        bigint company_id FK "HR-controlled, matched by name (see §2.4)"
+        bigint department_id FK "nullable, Admin-assigned — NOT sync'd, HR API doesn't expose it"
+        bigint designation_id FK "HR-controlled, matched by name (see §2.4)"
+        bigint immediate_supervisor_id FK "nullable, self, Admin-assigned — not sync'd"
+        enum employment_status "active/on_leave/resigned/inactive; absence from feed = inactive"
+        date date_hired "Admin-assigned — not sync'd"
+        date date_regularized "Admin-assigned — not sync'd"
+        date date_separated "Admin-assigned — not sync'd"
+        tinyint job_level "unused — no sync path sets this"
         enum source "hr_sync/manual"
         timestamp last_synced_at
         timestamp deleted_at
@@ -536,24 +558,25 @@ Company Detail:
 
 ```
 HrSyncService::sync()
-  1. Fetch employee payload set from HrSourceInterface (REST API pull, paginated)
-  2. Resolve each payload's c_id / ug_id / d_id to companies/departments/designations.id
-       via hr_ref_id lookup; unmapped id → auto-create a named stub record, log a warning
-  3. Match employee on employee_code = employees.employee_id
+  1. Fetch employee array from HrSourceInterface (plain JSON GET, already active-only — see §2.4)
+  2. Resolve each record's company/designation name to companies/designations.id via
+       case-insensitive name match; no match → auto-create with needs_review=true, log a warning
+       (Department is skipped entirely here — it's Admin-assigned, never HR-synced)
+  3. Match employee on employee_id = employees.employee_id
        not found in OCED         → create employees row (source=hr_sync) + empty employee_profiles row  [NEW HIRE]
-       found, d_id changed        → update designation_id, log as PROMOTION (old → new)
-       found, other synced field  → update in place (name, company, department, supervisor, dates, job_level)
-       found, es_id=resigned OR
-              date_separated set  → set employment_status=resigned (or inactive per es_id), keep record  [RESIGNATION]
+                                     (skipped + logged if HR sent no designation — can't satisfy the NOT NULL column)
+       found, designation changed → update designation_id, log as PROMOTION (old → new)
+       found, other synced field  → update in place (first_name, last_name, email, company_id, employment_status)
   4. Any employee currently active/on_leave in OCED but absent from the HR feed entirely
-       → mark employment_status=inactive (data no longer confirmed by HR) — distinct from an explicit resignation
-  5. Write one api_sync_logs row per run: new-hire/promotion/resignation counts + errors (JSON), regardless of outcome
-  6. Dispatch as a queued job so a large sync never blocks the "Sync Now" admin request
-Fields updated by sync: first_name, middle_name, last_name, email, company_id, department_id,
-  designation_id, immediate_supervisor_id, employment_status, date_hired, date_regularized,
-  date_separated, job_level. Never touched: anything in employee_profiles.
-Triggers: Laravel Scheduler (routes/console.php in L12) — hourly by default, configurable to nightly —
-          plus a manual "Sync Now" button in /admin/sync calling the exact same service method.
+       → mark employment_status=inactive — this is the *primary* resignation signal (§2.4), not a fallback
+  5. Write one api_sync_logs row per run: new-hire/promotion/deactivation counts + errors (JSON), regardless of outcome
+Fields updated by sync: first_name, last_name, email, company_id, designation_id, employment_status.
+Never touched by sync: department_id, middle_name, date_hired, date_regularized, date_separated,
+  job_level, immediate_supervisor_id (all Admin-managed — see §2.4), and anything in employee_profiles.
+Triggers: Laravel Scheduler (routes/console.php in L12) — hourly by default, configurable from
+          /admin/settings — plus a manual "Sync Now" button in /admin/sync calling the same service
+          method. Runs synchronously today; queuing it behind a job is a reasonable follow-up once
+          real HR roster size is known, not yet implemented.
 ```
 
 ---
@@ -575,21 +598,22 @@ Triggers: Laravel Scheduler (routes/console.php in L12) — hourly by default, c
 
 **Resolved this round:**
 
-- ✅ HR sync is pull-based, hourly/nightly via Laravel Scheduler, keyed on `employee_code` (§2.4, §7).
-- ✅ Real HR schema confirmed and mapped field-by-field (§2.4) — including that Department = HR's `ug_id` (user group), not a dedicated column.
-- ✅ Status model simplified to `active / on_leave / resigned / inactive`, sourced from `es_id` + `date_separated`; no real-time "Online" presence in v1 (future Microsoft Graph presence — Available/Busy/Away/Offline — noted as a v2 hook, not built now).
-- ✅ Field ownership matrix confirmed: HR-controlled vs. Employee-editable, including new fields (Office Seat/Desk, Pronunciation) not in the original spec (§2.4, §5).
+- ✅ HR sync is pull-based, hourly/nightly via Laravel Scheduler, keyed on `employee_id` (§2.4, §7).
+- ✅ **Real HR REST API contract confirmed and implemented** (`HrRestApiSource`) — a plain JSON array from `GET /api/employees`, pre-filtered to active employees, exposing only `employee_id, name, email, company, designation, status`. This *superseded* an earlier draft that assumed direct access to HR's internal DB columns (`c_id`/`ug_id`/`d_id`/`es_id`/`is_id`) — see the revision note at the top of §2.4.
+- ✅ Department is **not** HR-synced at all (the earlier "Department = HR's `ug_id`" note was based on the internal table, not the real endpoint, and turned out to be wrong once the actual endpoint was shared) — it's fully Admin-assigned, `employees.department_id` is now nullable.
+- ✅ Status model simplified to `active / on_leave / resigned / inactive`; no real-time "Online" presence in v1 (future Microsoft Graph presence — Available/Busy/Away/Offline — noted as a v2 hook, not built now). In practice `status` from the API is always `"active"` (server-side filtered) — see the on-leave gap noted below.
+- ✅ Field ownership matrix confirmed: HR-controlled (name, email, company, designation, employment status) vs. Admin-managed (department, dates, job level, supervisor, everything in `employee_profiles`) (§2.4, §5).
 - ✅ Fonts self-hosted from `public/fonts/` via `@font-face`, no external font service.
-- ✅ `job_level` is stored (synced) but not surfaced in any v1 UI; `designations.hierarchy_level` remains the Admin-owned field actually used for org-chart grouping — these two stay decoupled since only the latter was asked to drive display.
-- ✅ HR's `location` string and `fr_id` are explicitly ignored by sync — Office Location is entirely OCED-owned/future employee-supplied.
+- ✅ Company/Designation identity resolved by **name match**, not numeric ID — auto-creates with `needs_review=true` on a name never seen before, reviewed/merged from `/admin/sync` (§2.4).
 
 **Still open:**
 
-1. **Designations/Departments scope** — confirmed per-company in the schema (matches HR's `d_id`/`ug_id` being company-specific in practice) — flag if any designation/department is actually meant to be shared *across* companies in the group.
+1. **Designations scope** — confirmed per-company in the schema — flag if any designation is actually meant to be shared *across* companies in the group.
 2. **Cross-company visibility** — should any employee see every company's directory by default (current assumption), or are there company-scoped visibility restrictions (e.g. holding company vs. subsidiary)?
 3. **Expected scale** — approximate total employee count and concurrent users, to decide whether Meilisearch/Redis are worth standing up at launch vs. added later as a fast-follow.
-4. **HR API contract** — endpoint, auth method (API key/OAuth), pagination, and whether it returns readable status labels or only raw `es_id` integers (determines how the `config/hr_sync.php` status map gets built).
-5. **Sensitive field visibility** — should Personal Email/Emergency Contact be visible to all employees, or restricted to the employee + their manager + Admin? (§10)
+4. **On-leave detection gap** — if HR's underlying status column has a value for "on leave" distinct from "active", those employees would be excluded by the API's own server-side filter and incorrectly marked `inactive` by the "missing from feed" pass, since OCED has no way to tell "on leave" apart from "gone" through this endpoint. Needs confirming with HR directly.
+5. **Name-based re-matching risk** — renaming a HR-synced Company/Designation in OCED breaks the *next* sync's ability to recognize it (HR keeps sending the original name), producing a duplicate. Flagged as a known limitation (§2.4), not fixed — worth deciding whether it's worth solving before real HR data starts flowing.
+6. **Sensitive field visibility** — should Personal Email/Emergency Contact be visible to all employees, or restricted to the employee + their manager + Admin? (§10)
 
 ---
 
@@ -597,7 +621,7 @@ Triggers: Laravel Scheduler (routes/console.php in L12) — hourly by default, c
 
 - **Profile completeness indicator** on the admin employee list and on `/profile` — nudges data quality (a directory is only as good as how filled-in it is) without adding real complexity. Especially relevant now that most contact fields are entirely employee-supplied.
 - **Structured `skills` table** instead of freeform text, enabling "who knows X" search later (§3.2) — low cost now, expensive to retrofit later.
-- **Unmapped-record review queue** — since Companies/Departments/Designations can now be auto-stubbed by sync when an unrecognized `c_id`/`ug_id`/`d_id` shows up (§2.4), surface these stubs prominently in `/admin/sync` so they don't quietly sit as "Unmapped Department #14" for months.
+- ~~**Unmapped-record review queue**~~ — **implemented.** Company/Designation auto-created from a new HR name are flagged (`needs_review`) and surfaced on `/admin/sync` with Merge/Mark Reviewed actions, plus a sidebar badge count (§2.4).
 - **Meilisearch-backed search** for the hero/autocomplete experience — the difference between "feels premium" and "feels like a form" at the scale you're describing is almost entirely search latency + typo tolerance.
 - **Redis-based Recently Viewed** instead of a table — avoids an unbounded write-heavy table with little query value (§3.2).
 - **Sensitive-field visibility matrix** — personal email, mobile, Viber, emergency contact are more sensitive than work email; consider whether these should be visible to all employees, or only to the employee themselves + their manager + Admin. Worth deciding deliberately rather than defaulting to "everyone sees everything."

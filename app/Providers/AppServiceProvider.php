@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\Designation;
 use App\Services\HrSync\Contracts\HrSourceInterface;
 use App\Services\HrSync\FakeHrSource;
+use App\Services\HrSync\HrRestApiSource;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -19,7 +20,12 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(HrSourceInterface::class, function () {
             return match (config('hr_sync.source')) {
-                // 'rest_api' => new HrRestApiSource(config('hr_sync.api.base_url'), config('hr_sync.api.api_key')),
+                'rest_api' => new HrRestApiSource(
+                    baseUrl: config('hr_sync.api.base_url'),
+                    apiKey: config('hr_sync.api.api_key'),
+                    endpoint: config('hr_sync.api.endpoint'),
+                    timeout: config('hr_sync.api.timeout'),
+                ),
                 default => new FakeHrSource,
             };
         });
@@ -32,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('layouts.admin', function ($view) {
             $view->with('unmappedCount',
-                Company::unmapped()->count() + Department::unmapped()->count() + Designation::unmapped()->count()
+                Company::needsReview()->count() + Department::needsReview()->count() + Designation::needsReview()->count()
             );
         });
     }

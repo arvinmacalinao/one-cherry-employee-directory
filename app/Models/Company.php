@@ -17,11 +17,12 @@ class Company extends Model implements HasMedia
 
     protected $fillable = [
         'hr_ref_id', 'name', 'slug', 'description', 'address',
-        'phone', 'email', 'website', 'color_theme', 'is_active',
+        'phone', 'email', 'website', 'color_theme', 'is_active', 'needs_review',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'needs_review' => 'boolean',
     ];
 
     protected static function booted(): void
@@ -57,11 +58,12 @@ class Company extends Model implements HasMedia
     }
 
     /**
-     * Auto-provisioned stub records (see HrSyncService) awaiting Admin review.
+     * Auto-created by HrSyncService when HR sends a company name OCED hasn't seen
+     * before — flagged until an Admin opens and saves the record (see Admin\Companies\Index).
      */
-    public function scopeUnmapped($query)
+    public function scopeNeedsReview($query)
     {
-        return $query->where('name', 'like', 'Unmapped %');
+        return $query->where('needs_review', true);
     }
 
     public function registerMediaCollections(): void

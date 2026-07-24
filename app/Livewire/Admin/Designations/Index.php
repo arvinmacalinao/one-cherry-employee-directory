@@ -69,6 +69,9 @@ class Index extends Component
             unset($validated['name']);
         }
 
+        // Saving is how an Admin acknowledges an auto-created record from HR sync.
+        $validated['needs_review'] = false;
+
         if ($this->editingId) {
             $designations->update($designations->find($this->editingId), $validated);
             $this->flash = 'Designation updated';

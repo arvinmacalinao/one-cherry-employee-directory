@@ -23,6 +23,10 @@ return [
     'api' => [
         'base_url' => env('HR_SYNC_API_URL'),
         'api_key' => env('HR_SYNC_API_KEY'),
+        // Assumed to be a standard Laravel paginated JSON resource (data/links/meta).
+        // Adjust HrRestApiSource once the real HR API's actual shape is confirmed.
+        'endpoint' => env('HR_SYNC_API_ENDPOINT', '/api/employees'),
+        'timeout' => (int) env('HR_SYNC_API_TIMEOUT', 30),
     ],
 
     /*

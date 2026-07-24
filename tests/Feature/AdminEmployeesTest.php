@@ -71,23 +71,28 @@ class AdminEmployeesTest extends TestCase
         $this->assertEqualsCanonicalizing(['Contracts', 'Compliance'], $employee->skills->pluck('name')->all());
     }
 
-    public function test_hr_synced_employee_org_fields_are_locked_but_profile_fields_editable(): void
+    public function test_hr_synced_employee_identity_fields_stay_locked_but_admin_managed_fields_are_editable(): void
     {
         $this->actingAs($this->admin);
         $employee = Employee::where('employee_id', 'EMP-00021')->firstOrFail(); // Andrea Reyes, hr_sync
-        $originalDept = $employee->department_id;
+        $originalFirstName = $employee->first_name;
+        // A different department in the same company, per DepartmentSeeder.
+        $newDepartment = Department::where('company_id', $employee->company_id)
+            ->where('id', '!=', $employee->department_id)->firstOrFail();
 
         Livewire::test(AdminEmployees::class)
             ->call('openEdit', $employee->id)
             ->assertSet('isSynced', true)
-            ->set('form.department_id', 999999) // should be ignored since locked
+            ->set('form.first_name', 'Should Not Stick') // still HR-controlled — must be ignored
+            ->set('form.department_id', (string) $newDepartment->id) // department is Admin-managed now — must stick
             ->set('form.office_seat', 'BGC-5F-002')
             ->set('form.about_me', 'Updated bio via admin.')
             ->call('save')
             ->assertHasNoErrors();
 
         $employee->refresh();
-        $this->assertSame($originalDept, $employee->department_id, 'HR-controlled department must not change');
+        $this->assertSame($originalFirstName, $employee->first_name, 'HR-controlled first name must not change');
+        $this->assertSame($newDepartment->id, $employee->department_id, 'department is Admin-managed and must be settable even when HR-synced');
         $this->assertSame('BGC-5F-002', $employee->profile->office_seat);
         $this->assertSame('Updated bio via admin.', $employee->profile->about_me);
     }

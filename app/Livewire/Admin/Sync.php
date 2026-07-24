@@ -29,8 +29,21 @@ class Sync extends Component
     }
 
     /**
-     * Reassign every employee from an auto-created stub onto a real target record,
-     * then remove the stub. This is how an "Unmapped #id" gets resolved permanently.
+     * Dismiss the flag without merging — the name HR sent is legitimately new/correct,
+     * it just hasn't had its branding/description/hierarchy filled in yet.
+     */
+    public function markReviewed(string $type, int $id): void
+    {
+        $model = $type === 'company' ? Company::class : Designation::class;
+        $model::whereKey($id)->update(['needs_review' => false]);
+        $this->flash = ucfirst($type).' marked as reviewed.';
+    }
+
+    /**
+     * Reassign every employee from a duplicate/auto-created record onto a real target
+     * record, then remove the duplicate. Mainly useful now for Companies/Designations,
+     * since HR sends names rather than stable IDs — a typo or renaming on HR's side can
+     * produce a near-duplicate that this merges away.
      */
     public function mergeUnmapped(string $type, int $stubId, int $targetId): void
     {
@@ -57,7 +70,7 @@ class Sync extends Component
 
         Employee::where($column, $stubId)->update([$column => $targetId]);
         $stub->delete();
-        $this->flash = ucfirst($type).' merged and stub record removed.';
+        $this->flash = ucfirst($type).' merged and duplicate record removed.';
     }
 
     public function render()
@@ -66,11 +79,11 @@ class Sync extends Component
 
         return view('livewire.admin.sync', [
             'lastSync' => $lastSync,
-            'unmappedCompanies' => Company::unmapped()->withCount('employees')->get(),
-            'unmappedDepartments' => Department::unmapped()->with('company')->withCount('employees')->get(),
-            'unmappedDesignations' => Designation::unmapped()->with('company')->withCount('employees')->get(),
+            // Department is no longer HR-synced at all (the API doesn't expose it — see
+            // architecture-plan.md §2.4), so it never gets flagged here, only Company/Designation.
+            'needsReviewCompanies' => Company::needsReview()->withCount('employees')->get(),
+            'needsReviewDesignations' => Designation::needsReview()->with('company')->withCount('employees')->get(),
             'companyOptions' => Company::active()->orderBy('name')->get(),
-            'departmentOptions' => Department::active()->orderBy('name')->get(),
             'designationOptions' => Designation::active()->orderBy('name')->get(),
             'history' => ApiSyncLog::with('triggeredBy')->latest('started_at')->paginate(10),
         ])->layout('layouts.admin', ['header' => 'API Sync']);

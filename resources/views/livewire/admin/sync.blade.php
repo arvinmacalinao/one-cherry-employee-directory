@@ -23,27 +23,27 @@
         <div class="rounded-card border border-line bg-surface-raised p-4"><p class="font-display text-xl font-bold tabular-nums {{ ($lastSync?->errors ? count($lastSync->errors) : 0) > 0 ? 'text-danger' : '' }}">{{ $lastSync?->errors ? count($lastSync->errors) : 0 }}</p><p class="text-xs text-ink-secondary">Warnings</p></div>
     </div>
 
-    @php $totalUnmapped = $unmappedCompanies->count() + $unmappedDepartments->count() + $unmappedDesignations->count(); @endphp
+    @php $totalNeedsReview = $needsReviewCompanies->count() + $needsReviewDesignations->count(); @endphp
     <div>
         <div class="mb-3 flex items-center justify-between">
-            <p class="text-xs font-bold tracking-wide text-ink-tertiary uppercase">Unmapped records</p>
-            <span class="text-xs text-ink-tertiary">Auto-created as stubs so sync never blocks</span>
+            <p class="text-xs font-bold tracking-wide text-ink-tertiary uppercase">Needs review</p>
+            <span class="text-xs text-ink-tertiary">Auto-created from a new HR company/designation name so sync never blocks</span>
         </div>
 
-        @if ($totalUnmapped === 0)
+        @if ($totalNeedsReview === 0)
             <div class="card flex flex-col items-center gap-2.5 px-6 py-10 text-center">
                 <div class="flex h-11 w-11 items-center justify-center rounded-full bg-success-tint text-success"><i class="fa-solid fa-check"></i></div>
                 <p class="text-sm font-semibold">All clear</p>
-                <p class="text-xs text-ink-secondary">Every HR record maps cleanly to an existing company, department, and designation.</p>
+                <p class="text-xs text-ink-secondary">Every company and designation HR sends has already been reviewed.</p>
             </div>
         @else
             <div class="flex flex-col gap-2.5">
-                @foreach ($unmappedCompanies as $stub)
+                @foreach ($needsReviewCompanies as $stub)
                     <div class="flex flex-wrap items-center gap-3.5 rounded-card bg-warning-tint p-4" wire:key="uc-{{ $stub->id }}">
                         <div class="flex h-8.5 w-8.5 flex-shrink-0 items-center justify-center rounded-lg bg-bg text-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
                         <div class="min-w-[200px] flex-1">
-                            <p class="text-sm font-semibold">Unmapped Company #{{ $stub->hr_ref_id }}</p>
-                            <p class="text-xs text-ink-secondary">{{ $stub->employees_count }} employee(s) reference this ID with no local match</p>
+                            <p class="text-sm font-semibold">New Company: "{{ $stub->name }}"</p>
+                            <p class="text-xs text-ink-secondary">{{ $stub->employees_count }} employee(s) · HR sent this name for the first time — add logo, address, etc.</p>
                         </div>
                         <div class="flex items-center gap-2" x-data="{ target: '' }">
                             <select x-model="target" class="input max-w-[200px]">
@@ -53,37 +53,18 @@
                                 @endforeach
                             </select>
                             <button type="button" class="btn-secondary text-xs" @click="target && $wire.mergeUnmapped('company', {{ $stub->id }}, parseInt(target))">Merge</button>
-                            <a href="{{ route('admin.companies.index') }}" wire:navigate class="btn-primary text-xs">Rename</a>
+                            <button type="button" wire:click="markReviewed('company', {{ $stub->id }})" class="btn-secondary text-xs">Mark Reviewed</button>
+                            <a href="{{ route('admin.companies.index') }}" wire:navigate class="btn-primary text-xs">Edit</a>
                         </div>
                     </div>
                 @endforeach
 
-                @foreach ($unmappedDepartments as $stub)
-                    <div class="flex flex-wrap items-center gap-3.5 rounded-card bg-warning-tint p-4" wire:key="ud-{{ $stub->id }}">
-                        <div class="flex h-8.5 w-8.5 flex-shrink-0 items-center justify-center rounded-lg bg-bg text-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div class="min-w-[200px] flex-1">
-                            <p class="text-sm font-semibold">Unmapped Department #{{ $stub->hr_ref_id }}</p>
-                            <p class="text-xs text-ink-secondary">{{ $stub->employees_count }} employee(s) at {{ $stub->company->name }} reference this ID with no local match</p>
-                        </div>
-                        <div class="flex items-center gap-2" x-data="{ target: '' }">
-                            <select x-model="target" class="input max-w-[200px]">
-                                <option value="">Merge into…</option>
-                                @foreach ($departmentOptions->where('company_id', $stub->company_id)->reject(fn ($d) => $d->id === $stub->id) as $option)
-                                    <option value="{{ $option->id }}">{{ $option->name }}</option>
-                                @endforeach
-                            </select>
-                            <button type="button" class="btn-secondary text-xs" @click="target && $wire.mergeUnmapped('department', {{ $stub->id }}, parseInt(target))">Merge</button>
-                            <a href="{{ route('admin.departments.index') }}" wire:navigate class="btn-primary text-xs">Rename</a>
-                        </div>
-                    </div>
-                @endforeach
-
-                @foreach ($unmappedDesignations as $stub)
+                @foreach ($needsReviewDesignations as $stub)
                     <div class="flex flex-wrap items-center gap-3.5 rounded-card bg-warning-tint p-4" wire:key="ug-{{ $stub->id }}">
                         <div class="flex h-8.5 w-8.5 flex-shrink-0 items-center justify-center rounded-lg bg-bg text-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
                         <div class="min-w-[200px] flex-1">
-                            <p class="text-sm font-semibold">Unmapped Designation #{{ $stub->hr_ref_id }}</p>
-                            <p class="text-xs text-ink-secondary">{{ $stub->employees_count }} employee(s) at {{ $stub->company->name }} reference this ID with no local match</p>
+                            <p class="text-sm font-semibold">New Designation: "{{ $stub->name }}"</p>
+                            <p class="text-xs text-ink-secondary">{{ $stub->employees_count }} employee(s) at {{ $stub->company->name }} · set its hierarchy level and description</p>
                         </div>
                         <div class="flex items-center gap-2" x-data="{ target: '' }">
                             <select x-model="target" class="input max-w-[200px]">
@@ -93,7 +74,8 @@
                                 @endforeach
                             </select>
                             <button type="button" class="btn-secondary text-xs" @click="target && $wire.mergeUnmapped('designation', {{ $stub->id }}, parseInt(target))">Merge</button>
-                            <a href="{{ route('admin.designations.index') }}" wire:navigate class="btn-primary text-xs">Rename</a>
+                            <button type="button" wire:click="markReviewed('designation', {{ $stub->id }})" class="btn-secondary text-xs">Mark Reviewed</button>
+                            <a href="{{ route('admin.designations.index') }}" wire:navigate class="btn-primary text-xs">Edit</a>
                         </div>
                     </div>
                 @endforeach

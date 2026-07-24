@@ -13,12 +13,13 @@ class Designation extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'hr_ref_id', 'company_id', 'name', 'hierarchy_level', 'description', 'is_active',
+        'hr_ref_id', 'company_id', 'name', 'hierarchy_level', 'description', 'is_active', 'needs_review',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'hierarchy_level' => 'integer',
+        'needs_review' => 'boolean',
     ];
 
     public function company(): BelongsTo
@@ -36,8 +37,13 @@ class Designation extends Model
         return $query->where('is_active', true);
     }
 
-    public function scopeUnmapped($query)
+    /**
+     * Auto-created by HrSyncService when HR sends a designation name OCED hasn't
+     * seen before at that company — flagged until an Admin opens and saves the
+     * record (see Admin\Designations\Index).
+     */
+    public function scopeNeedsReview($query)
     {
-        return $query->where('name', 'like', 'Unmapped %');
+        return $query->where('needs_review', true);
     }
 }

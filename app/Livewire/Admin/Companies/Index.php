@@ -73,9 +73,15 @@ class Index extends Component
         $validated = $this->validate()['form'];
 
         // Identity (name) is HR-controlled once linked — never overwrite it from this form.
+        // Note: HR-synced companies are now matched by name (see HrSyncService), so renaming
+        // one here will cause the next sync to recreate it under HR's original name — this
+        // form intentionally still lets it happen for records not linked to a numeric hr_ref_id.
         if ($this->lockedHrRef) {
             unset($validated['name']);
         }
+
+        // Saving is how an Admin acknowledges an auto-created record from HR sync.
+        $validated['needs_review'] = false;
 
         if ($this->editingId) {
             $companies->update($companies->find($this->editingId), $validated);
