@@ -1,0 +1,90 @@
+<div class="flex flex-col gap-5">
+    @include('livewire.partials.flash-banner')
+
+    <div class="flex flex-wrap items-center gap-2.5">
+        <div class="flex min-w-[220px] max-w-sm flex-1 items-center gap-2 rounded-control border border-line bg-surface-raised px-3 py-2">
+            <i class="fa-solid fa-magnifying-glass text-ink-tertiary"></i>
+            <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search departments…" class="w-full border-0 bg-transparent text-sm outline-none">
+        </div>
+        <span class="text-xs text-ink-tertiary">{{ $departments->count() }} departments</span>
+        <button wire:click="openCreate" class="btn-primary ml-auto text-xs"><i class="fa-solid fa-plus"></i>Add Department</button>
+    </div>
+
+    <div class="table-wrap overflow-x-auto rounded-card border border-line bg-surface-raised">
+        <table class="w-full min-w-[720px] border-collapse text-sm">
+            <thead>
+                <tr class="border-b border-line bg-surface text-left text-[10.5px] font-bold tracking-wide text-ink-tertiary uppercase">
+                    <th class="px-4 py-3">Department</th>
+                    <th class="px-4 py-3">Company</th>
+                    <th class="px-4 py-3">Head</th>
+                    <th class="px-4 py-3">Employees</th>
+                    <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($departments as $department)
+                    <tr class="border-b border-line last:border-b-0 hover:bg-surface">
+                        <td class="px-4 py-3">
+                            <p class="font-semibold">{{ $department->name }}</p>
+                            <p class="text-xs text-ink-tertiary">{{ $department->hr_ref_id ? "ug_id: {$department->hr_ref_id}" : 'Directory-managed' }}</p>
+                        </td>
+                        <td class="px-4 py-3 text-ink-secondary">{{ $department->company->name }}</td>
+                        <td class="px-4 py-3 text-ink-secondary">{{ $department->head?->full_name ?? '—' }}</td>
+                        <td class="px-4 py-3">{{ $department->employees_count }}</td>
+                        <td class="px-4 py-3"><span class="badge {{ $department->is_active ? 'badge-active' : 'badge-inactive' }}">{{ $department->is_active ? 'Active' : 'Inactive' }}</span></td>
+                        <td class="px-4 py-3 text-right">
+                            <button wire:click="openEdit({{ $department->id }})" class="rounded-lg p-2 text-ink-secondary hover:bg-surface hover:text-ink"><i class="fa-solid fa-pen"></i></button>
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="6" class="px-4 py-10 text-center text-ink-secondary">No departments match.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    @if ($showForm)
+        <x-admin.drawer :title="$editingId ? 'Edit Department' : 'Add Department'">
+            @if ($lockedHrRef)
+                <div class="mb-4 flex items-start gap-2.5 rounded-lg bg-brand-tint px-3.5 py-3 text-xs text-ink-secondary">
+                    <i class="fa-solid fa-circle-info mt-0.5 text-brand"></i>
+                    <span>Linked to HR record <code class="rounded bg-surface-raised px-1.5 py-0.5">ug_id: {{ $lockedHrRef }}</code> (user group). Name stays in sync automatically.</span>
+                </div>
+            @endif
+
+            <div class="grid grid-cols-1 gap-4">
+                <x-admin.field label="Department Name" :locked="(bool) $lockedHrRef">
+                    <input type="text" wire:model="form.name" @disabled($lockedHrRef) class="input">
+                </x-admin.field>
+                <x-admin.field label="Company" :error="$errors->first('form.company_id')">
+                    <select wire:model.live="form.company_id" class="input">
+                        <option value="">— Select —</option>
+                        @foreach ($companyOptions as $company)
+                            <option value="{{ $company->id }}">{{ $company->name }}</option>
+                        @endforeach
+                    </select>
+                </x-admin.field>
+                <x-admin.field label="Department Head">
+                    <select wire:model="form.department_head_id" class="input">
+                        <option value="">— None —</option>
+                        @foreach ($headOptions as $option)
+                            <option value="{{ $option->id }}">{{ $option->full_name }}</option>
+                        @endforeach
+                    </select>
+                </x-admin.field>
+                <x-admin.field label="Description">
+                    <textarea wire:model="form.description" rows="3" placeholder="What this department is responsible for…" class="input"></textarea>
+                </x-admin.field>
+                <x-admin.field label="Active">
+                    <label class="flex items-center gap-2.5">
+                        <span class="switch {{ $form['is_active'] ? 'switch-on' : 'switch-off' }}" wire:click="$toggle('form.is_active')">
+                            <span class="switch-dot" style="transform: translateX({{ $form['is_active'] ? '20px' : '2px' }})"></span>
+                        </span>
+                        <span class="text-xs text-ink-secondary">Inactive departments are hidden from filters</span>
+                    </label>
+                </x-admin.field>
+            </div>
+        </x-admin.drawer>
+    @endif
+</div>

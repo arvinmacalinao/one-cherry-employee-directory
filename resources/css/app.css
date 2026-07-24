@@ -1,0 +1,252 @@
+@import 'tailwindcss';
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+/* Respond to the manual toggle (data-theme) in both directions, on top of OS preference. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * Brand fonts are self-hosted per the client's branding spec (titles: Proxima Nova,
+ * body: Mint Sans) — licensed binaries are NOT included in this repo. Drop the .woff2
+ * files into public/fonts/ (see public/fonts/README.md) and these declarations pick
+ * them up automatically. Until then, the fallback stack renders a close system-font
+ * equivalent so the app is never broken.
+ */
+@font-face {
+    font-family: 'Proxima Nova';
+    src: url('/fonts/ProximaNova-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Proxima Nova';
+    src: url('/fonts/ProximaNova-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Mint Sans';
+    src: url('/fonts/MintSans-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Mint Sans';
+    src: url('/fonts/MintSans-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+/*
+ * Semantic tokens as plain CSS custom properties, overridden per-theme, then mapped
+ * into Tailwind's @theme below. This is what lets `bg-surface`, `text-ink`, etc. flip
+ * automatically with the OS preference or the manual toggle, without a `dark:` prefix
+ * on every single utility.
+ */
+:root {
+    --brand: #790002;
+    --brand-hover: #5c0002;
+    --brand-tint: #fbeaea;
+    --brand-tint-strong: #f1cfce;
+    --on-brand: #ffffff;
+
+    --ink: #1c1c1e;
+    --ink-secondary: #77787b;
+    --ink-tertiary: #a6a7a9;
+
+    --bg: #ffffff;
+    --surface: #f6f6f6;
+    --surface-raised: #ffffff;
+    --line: #e5e5e5;
+    --line-strong: #d8d8d9;
+
+    --success: #34c759;
+    --success-tint: #e7f9ec;
+    --danger: #ff3b30;
+    --danger-tint: #ffebea;
+    --warning: #b26a00;
+    --warning-tint: #fff2de;
+
+    --shadow-card: 0 1px 2px rgba(20, 10, 10, 0.05), 0 1px 1px rgba(20, 10, 10, 0.03);
+    --shadow-raised: 0 6px 16px rgba(20, 10, 10, 0.07), 0 2px 5px rgba(20, 10, 10, 0.04);
+    --shadow-popover: 0 18px 40px rgba(20, 10, 10, 0.14), 0 6px 12px rgba(20, 10, 10, 0.06);
+
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --brand: #e1554d;
+        --brand-hover: #f16a62;
+        --brand-tint: #3a2020;
+        --brand-tint-strong: #4a2726;
+        --ink: #f5efee;
+        --ink-secondary: #b3a8a7;
+        --ink-tertiary: #8a7f7e;
+        --bg: #1a1213;
+        --surface: #211819;
+        --surface-raised: #291e1f;
+        --line: #3a2c2c;
+        --line-strong: #4a3838;
+        --success: #3ddc73;
+        --success-tint: #14301f;
+        --danger: #ff6259;
+        --danger-tint: #3a1917;
+        --warning: #e3a34e;
+        --warning-tint: #3a2a10;
+        color-scheme: dark;
+    }
+}
+[data-theme='dark'] {
+    --brand: #e1554d;
+    --brand-hover: #f16a62;
+    --brand-tint: #3a2020;
+    --brand-tint-strong: #4a2726;
+    --ink: #f5efee;
+    --ink-secondary: #b3a8a7;
+    --ink-tertiary: #8a7f7e;
+    --bg: #1a1213;
+    --surface: #211819;
+    --surface-raised: #291e1f;
+    --line: #3a2c2c;
+    --line-strong: #4a3838;
+    --success: #3ddc73;
+    --success-tint: #14301f;
+    --danger: #ff6259;
+    --danger-tint: #3a1917;
+    --warning: #e3a34e;
+    --warning-tint: #3a2a10;
+    color-scheme: dark;
+}
+[data-theme='light'] {
+    --brand: #790002;
+    --brand-hover: #5c0002;
+    --brand-tint: #fbeaea;
+    --brand-tint-strong: #f1cfce;
+    --ink: #1c1c1e;
+    --ink-secondary: #77787b;
+    --ink-tertiary: #a6a7a9;
+    --bg: #ffffff;
+    --surface: #f6f6f6;
+    --surface-raised: #ffffff;
+    --line: #e5e5e5;
+    --line-strong: #d8d8d9;
+    --success: #34c759;
+    --success-tint: #e7f9ec;
+    --danger: #ff3b30;
+    --danger-tint: #ffebea;
+    --warning: #b26a00;
+    --warning-tint: #fff2de;
+    color-scheme: light;
+}
+
+@theme {
+    --font-display: 'Proxima Nova', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+        sans-serif;
+    --font-body: 'Mint Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+    --color-brand: var(--brand);
+    --color-brand-hover: var(--brand-hover);
+    --color-brand-tint: var(--brand-tint);
+    --color-brand-tint-strong: var(--brand-tint-strong);
+    --color-on-brand: var(--on-brand);
+
+    --color-ink: var(--ink);
+    --color-ink-secondary: var(--ink-secondary);
+    --color-ink-tertiary: var(--ink-tertiary);
+
+    --color-bg: var(--bg);
+    --color-surface: var(--surface);
+    --color-surface-raised: var(--surface-raised);
+    --color-line: var(--line);
+    --color-line-strong: var(--line-strong);
+
+    --color-success: var(--success);
+    --color-success-tint: var(--success-tint);
+    --color-danger: var(--danger);
+    --color-danger-tint: var(--danger-tint);
+    --color-warning: var(--warning);
+    --color-warning-tint: var(--warning-tint);
+
+    --radius-card: 12px;
+    --radius-control: 8px;
+    --radius-panel: 16px;
+
+    --shadow-card: var(--shadow-card);
+    --shadow-raised: var(--shadow-raised);
+    --shadow-popover: var(--shadow-popover);
+}
+
+@layer base {
+    body {
+        font-family: var(--font-body);
+        background: var(--color-bg);
+        color: var(--color-ink);
+    }
+    h1,
+    h2,
+    h3,
+    h4 {
+        font-family: var(--font-display);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        text-wrap: balance;
+    }
+}
+
+@layer components {
+    .card {
+        @apply rounded-card border border-line bg-surface-raised shadow-card;
+    }
+    .btn-primary {
+        @apply inline-flex items-center gap-2 rounded-control bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-colors duration-200 hover:bg-brand-hover;
+    }
+    .btn-secondary {
+        @apply inline-flex items-center gap-2 rounded-control border border-line bg-surface-raised px-4 py-2 text-sm font-semibold text-ink transition-colors duration-200 hover:border-line-strong hover:bg-surface;
+    }
+    .btn-ghost {
+        @apply inline-flex items-center gap-2 rounded-control px-4 py-2 text-sm font-semibold text-ink-secondary transition-colors duration-200 hover:bg-surface hover:text-ink;
+    }
+    .badge {
+        @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold;
+    }
+    .badge-active {
+        @apply bg-success-tint text-success;
+    }
+    .badge-leave {
+        @apply bg-warning-tint text-warning;
+    }
+    .badge-resigned,
+    .badge-inactive {
+        @apply bg-danger-tint text-danger;
+    }
+    .nav-item {
+        @apply flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-ink-secondary transition-colors duration-200 hover:bg-surface-raised hover:text-ink;
+    }
+    .nav-item-active {
+        @apply bg-brand-tint text-brand hover:bg-brand-tint hover:text-brand;
+    }
+    .input {
+        @apply w-full rounded-control border border-line bg-surface-raised px-3 py-2 text-sm text-ink placeholder:text-ink-tertiary focus:border-brand focus:ring-4 focus:ring-brand-tint focus:outline-none disabled:cursor-not-allowed disabled:bg-surface disabled:text-ink-secondary;
+    }
+    .switch {
+        @apply relative inline-flex h-5.5 w-10 flex-shrink-0 items-center rounded-full transition-colors duration-200;
+    }
+    .switch-on {
+        @apply bg-success;
+    }
+    .switch-off {
+        @apply bg-line-strong;
+    }
+    .switch-dot {
+        @apply inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200;
+    }
+}

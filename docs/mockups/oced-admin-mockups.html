@@ -1,0 +1,1191 @@
+<title>One Cherry Employee Directory — Admin Panel Mockups</title>
+<style>
+  :root{
+    --color-bg:#FFFFFF; --color-surface:#F6F6F6; --color-surface-raised:#FFFFFF;
+    --color-border:#E5E5E5; --color-border-strong:#D8D8D9; --color-text:#1C1C1E;
+    --color-text-secondary:#77787B; --color-text-tertiary:#A6A7A9;
+    --color-accent:#790002; --color-accent-hover:#5C0002; --color-accent-tint:#FBEAEA; --color-accent-tint-strong:#F1CFCE;
+    --color-on-accent:#FFFFFF;
+    --color-success:#34C759; --color-success-tint:#E7F9EC;
+    --color-danger:#FF3B30; --color-danger-tint:#FFEBEA;
+    --color-warning:#B26A00; --color-warning-tint:#FFF2DE;
+    --shadow-sm:0 1px 2px rgba(20,10,10,.05), 0 1px 1px rgba(20,10,10,.03);
+    --shadow-md:0 6px 16px rgba(20,10,10,.07), 0 2px 5px rgba(20,10,10,.04);
+    --shadow-lg:0 18px 40px rgba(20,10,10,.14), 0 6px 12px rgba(20,10,10,.06);
+    --radius-sm:8px; --radius-md:12px; --radius-lg:16px;
+    --font-display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --ease:cubic-bezier(.4,0,.2,1);
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --color-bg:#1A1213; --color-surface:#211819; --color-surface-raised:#291E1F;
+      --color-border:#3A2C2C; --color-border-strong:#4A3838; --color-text:#F5EFEE;
+      --color-text-secondary:#B3A8A7; --color-text-tertiary:#8A7F7E;
+      --color-accent:#E1554D; --color-accent-hover:#F16A62; --color-accent-tint:#3A2020; --color-accent-tint-strong:#4A2726;
+      --color-success:#3DDC73; --color-success-tint:#14301F; --color-danger:#FF6259; --color-danger-tint:#3A1917;
+      --color-warning:#E3A34E; --color-warning-tint:#3A2A10;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.35); --shadow-md:0 6px 16px rgba(0,0,0,.4); --shadow-lg:0 20px 44px rgba(0,0,0,.55);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --color-bg:#1A1213; --color-surface:#211819; --color-surface-raised:#291E1F;
+    --color-border:#3A2C2C; --color-border-strong:#4A3838; --color-text:#F5EFEE;
+    --color-text-secondary:#B3A8A7; --color-text-tertiary:#8A7F7E;
+    --color-accent:#E1554D; --color-accent-hover:#F16A62; --color-accent-tint:#3A2020; --color-accent-tint-strong:#4A2726;
+    --color-success:#3DDC73; --color-success-tint:#14301F; --color-danger:#FF6259; --color-danger-tint:#3A1917;
+    --color-warning:#E3A34E; --color-warning-tint:#3A2A10;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.35); --shadow-md:0 6px 16px rgba(0,0,0,.4); --shadow-lg:0 20px 44px rgba(0,0,0,.55);
+    color-scheme:dark;
+  }
+  :root[data-theme="light"]{
+    --color-bg:#FFFFFF; --color-surface:#F6F6F6; --color-surface-raised:#FFFFFF;
+    --color-border:#E5E5E5; --color-border-strong:#D8D8D9; --color-text:#1C1C1E;
+    --color-text-secondary:#77787B; --color-text-tertiary:#A6A7A9;
+    --color-accent:#790002; --color-accent-hover:#5C0002; --color-accent-tint:#FBEAEA; --color-accent-tint-strong:#F1CFCE;
+    --color-success:#34C759; --color-success-tint:#E7F9EC; --color-danger:#FF3B30; --color-danger-tint:#FFEBEA;
+    --color-warning:#B26A00; --color-warning-tint:#FFF2DE;
+    --shadow-sm:0 1px 2px rgba(20,10,10,.05), 0 1px 1px rgba(20,10,10,.03);
+    --shadow-md:0 6px 16px rgba(20,10,10,.07), 0 2px 5px rgba(20,10,10,.04);
+    --shadow-lg:0 18px 40px rgba(20,10,10,.14), 0 6px 12px rgba(20,10,10,.06);
+    color-scheme:light;
+  }
+
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:var(--font-body);background:var(--color-bg);color:var(--color-text);-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5}
+  h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;margin:0;text-wrap:balance;letter-spacing:-.01em}
+  p{margin:0}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px;border-radius:4px}
+  svg{display:block}
+  .icon{width:18px;height:18px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--color-surface);padding:1px 5px;border-radius:4px;font-size:.92em}
+  @media (prefers-reduced-motion:reduce){ *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important} }
+
+  /* ---------- Shell ---------- */
+  .app{display:flex;min-height:100vh;background:var(--color-bg)}
+  .scrim{position:fixed;inset:0;background:rgba(10,5,5,.4);opacity:0;pointer-events:none;transition:opacity .2s var(--ease);z-index:40}
+  .scrim.show{opacity:1;pointer-events:auto}
+
+  .sidebar{width:240px;flex-shrink:0;height:100vh;position:sticky;top:0;background:var(--color-surface);border-right:1px solid var(--color-border);display:flex;flex-direction:column;padding:20px 14px;gap:16px;z-index:45}
+  .brand{display:flex;align-items:center;gap:10px;padding:6px 8px 4px}
+  .brand-mark{width:34px;height:34px;border-radius:10px;background:var(--color-accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:16px;flex-shrink:0}
+  .brand-text{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+  .brand-text strong{font-family:var(--font-display);font-size:14.5px;font-weight:700;white-space:nowrap}
+  .brand-text span{font-size:11px;color:var(--color-text-secondary);white-space:nowrap}
+  .admin-tag{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--color-accent);background:var(--color-accent-tint);padding:5px 10px;border-radius:7px;margin:0 6px}
+
+  .sidebar-nav{display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto}
+  .nav-sep{height:1px;background:var(--color-border);margin:10px 6px}
+  .nav-item{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;color:var(--color-text-secondary);font-size:13.5px;font-weight:500;text-align:left;transition:background .15s var(--ease),color .15s var(--ease)}
+  .nav-item .icon{width:17px;height:17px}
+  .nav-item:hover{background:var(--color-surface-raised);color:var(--color-text)}
+  .nav-item.active{background:var(--color-accent-tint);color:var(--color-accent)}
+  .nav-item.active .icon{stroke:var(--color-accent)}
+  .nav-badge{margin-left:auto;background:var(--color-warning);color:#fff;font-size:10.5px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+
+  .sidebar-footer{display:flex;flex-direction:column;gap:10px;padding-top:10px;border-top:1px solid var(--color-border)}
+  .theme-toggle{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;color:var(--color-text-secondary);font-size:13px;font-weight:500;border:1px solid var(--color-border);background:var(--color-surface-raised)}
+  .theme-toggle:hover{color:var(--color-text);border-color:var(--color-border-strong)}
+  .fontnote{font-size:10.5px;color:var(--color-text-tertiary);padding:0 2px;line-height:1.4}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{height:60px;flex-shrink:0;display:flex;align-items:center;gap:14px;padding:0 28px;border-bottom:1px solid var(--color-border);background:var(--color-bg);position:sticky;top:0;z-index:20}
+  .menu-btn-inline{display:none;padding:6px;border-radius:8px;color:var(--color-text-secondary)}
+  .menu-btn-inline:hover{background:var(--color-surface)}
+  .topbar-title{font-size:16px}
+  .topbar-spacer{flex:1}
+  .icon-btn{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary);transition:background .15s var(--ease),color .15s var(--ease)}
+  .icon-btn:hover{background:var(--color-surface);color:var(--color-text)}
+  .avatar-btn{border-radius:50%}
+
+  .view-root{padding:28px 32px 72px;max-width:1360px;margin:0 auto;width:100%}
+  .view{display:flex;flex-direction:column;gap:28px}
+
+  @media (max-width:940px){
+    .sidebar{position:fixed;left:0;top:0;transform:translateX(-100%);transition:transform .22s var(--ease);box-shadow:var(--shadow-lg)}
+    .sidebar.open{transform:translateX(0)}
+    .menu-btn-inline{display:flex}
+    .view-root{padding:18px 16px 56px}
+    .topbar{padding:0 16px}
+  }
+
+  /* ---------- Primitives ---------- */
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:8px;font-size:13.5px;font-weight:600;white-space:nowrap;transition:background .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease),transform .1s var(--ease);border:1px solid transparent}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:var(--color-accent);color:var(--color-on-accent)}
+  .btn-primary:hover{background:var(--color-accent-hover)}
+  .btn-secondary{background:var(--color-surface-raised);color:var(--color-text);border-color:var(--color-border)}
+  .btn-secondary:hover{border-color:var(--color-border-strong);background:var(--color-surface)}
+  .btn-ghost{color:var(--color-text-secondary)}
+  .btn-ghost:hover{color:var(--color-text);background:var(--color-surface)}
+  .btn-danger{background:var(--color-danger-tint);color:var(--color-danger)}
+  .btn-danger:hover{background:var(--color-danger);color:#fff}
+  .btn-sm{padding:6px 11px;font-size:12.5px;border-radius:7px}
+  .btn .icon{width:15px;height:15px}
+  .btn:disabled{opacity:.55;cursor:default}
+
+  .field{display:flex;align-items:center;gap:9px;padding:9px 13px;border-radius:8px;background:var(--color-surface-raised);border:1px solid var(--color-border);color:var(--color-text-secondary)}
+  .field:focus-within{border-color:var(--color-accent);box-shadow:0 0 0 3px var(--color-accent-tint)}
+  .field input{border:0;background:none;outline:none;color:var(--color-text);width:100%;font-size:13.5px}
+  .field input::placeholder{color:var(--color-text-tertiary)}
+  .field .icon{width:16px;height:16px;flex-shrink:0}
+
+  select.select{appearance:none;-webkit-appearance:none;padding:8px 30px 8px 12px;border-radius:8px;background:var(--color-surface-raised) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2377787B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 9px center;border:1px solid var(--color-border);color:var(--color-text);font-size:13px;font-weight:500;cursor:pointer}
+  select.select:hover{border-color:var(--color-border-strong)}
+
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+  .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .badge-active{background:var(--color-success-tint);color:var(--color-success)}
+  .badge-leave{background:var(--color-warning-tint);color:var(--color-warning)}
+  .badge-resigned{background:var(--color-danger-tint);color:var(--color-danger)}
+  .badge-inactive{background:var(--color-surface);color:var(--color-text-tertiary)}
+  .badge-neutral{background:var(--color-surface);color:var(--color-text-secondary)}
+  .badge-neutral::before{display:none}
+  .badge-accent{background:var(--color-accent-tint);color:var(--color-accent)}
+  .badge-accent::before{display:none}
+
+  .avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;flex-shrink:0;color:#fff}
+  .avatar-xs{width:26px;height:26px;font-size:10.5px}
+  .avatar-sm{width:34px;height:34px;font-size:12px}
+  .avatar-md{width:44px;height:44px;font-size:14.5px}
+
+  .card{background:var(--color-surface-raised);border:1px solid var(--color-border);border-radius:var(--radius-md);box-shadow:var(--shadow-sm)}
+  .section-head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .section-eyebrow{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-tertiary)}
+  .section-title{font-size:17px}
+  .section-sub{font-size:12.5px;color:var(--color-text-secondary)}
+  .section-head .spacer{flex:1}
+
+  /* ---------- Toasts / skeleton / empty ---------- */
+  .toast-stack{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:10px;z-index:200}
+  .toast{display:flex;align-items:center;gap:10px;background:var(--color-text);color:var(--color-bg);padding:11px 16px;border-radius:8px;box-shadow:var(--shadow-lg);font-size:13px;font-weight:600;animation:toast-in .22s var(--ease)}
+  .toast .icon{width:16px;height:16px;color:var(--color-success)}
+  @keyframes toast-in{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+  .skeleton{position:relative;overflow:hidden;background:var(--color-surface);border-radius:8px}
+  .skeleton::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:shimmer 1.2s infinite}
+  :root[data-theme="dark"] .skeleton::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}
+  @media (prefers-color-scheme:dark){ .skeleton::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)} }
+  @keyframes shimmer{100%{transform:translateX(100%)}}
+  .empty-state{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:56px 20px;color:var(--color-text-secondary)}
+  .empty-state .icon-wrap{width:52px;height:52px;border-radius:50%;background:var(--color-surface);display:flex;align-items:center;justify-content:center;border:1px solid var(--color-border)}
+  .empty-state .icon-wrap .icon{width:22px;height:22px;color:var(--color-text-tertiary)}
+  .empty-state h3{font-size:15px;color:var(--color-text)}
+  .empty-state p{font-size:13px;max-width:320px}
+
+  /* ---------- Stat tiles ---------- */
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .stat-tile{padding:18px 20px;display:flex;flex-direction:column;gap:9px;transition:transform .18s var(--ease),box-shadow .18s var(--ease)}
+  .stat-tile:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+  .stat-tile-top{display:flex;align-items:center;justify-content:space-between}
+  .stat-icon{width:32px;height:32px;border-radius:9px;background:var(--color-accent-tint);color:var(--color-accent);display:flex;align-items:center;justify-content:center}
+  .stat-icon.warn{background:var(--color-warning-tint);color:var(--color-warning)}
+  .stat-icon .icon{width:16px;height:16px}
+  .stat-value{font-family:var(--font-display);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .stat-label{font-size:12px;color:var(--color-text-secondary);font-weight:500}
+
+  /* ---------- Alert banner ---------- */
+  .alert-banner{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:var(--radius-md);background:var(--color-warning-tint);cursor:pointer;transition:filter .15s var(--ease)}
+  .alert-banner:hover{filter:brightness(.97)}
+  .alert-banner .icon-wrap{width:34px;height:34px;border-radius:9px;background:var(--color-bg);color:var(--color-warning);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .alert-banner strong{font-size:13.5px;color:var(--color-text);display:block}
+  .alert-banner span{font-size:12.5px;color:var(--color-text-secondary)}
+
+  /* ---------- Data table ---------- */
+  .table-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .table-toolbar .field{flex:1 1 240px;min-width:200px}
+  .table-toolbar .spacer{flex:1}
+  .table-wrap{overflow-x:auto;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface-raised)}
+  table.data-table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+  .data-table thead th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--color-text-tertiary);font-weight:700;padding:12px 16px;border-bottom:1px solid var(--color-border);white-space:nowrap;background:var(--color-surface)}
+  .data-table tbody td{padding:11px 16px;border-bottom:1px solid var(--color-border);vertical-align:middle}
+  .data-table tbody tr:last-child td{border-bottom:0}
+  .data-table tbody tr:hover{background:var(--color-surface)}
+  .row-actions{display:flex;gap:4px;justify-content:flex-end}
+  .row-actions button{width:29px;height:29px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary)}
+  .row-actions button:hover{background:var(--color-surface);color:var(--color-text)}
+  .row-actions button.danger:hover{background:var(--color-danger-tint);color:var(--color-danger)}
+  .row-actions .icon{width:15px;height:15px}
+  .cell-main{display:flex;align-items:center;gap:10px}
+  .cell-main strong{font-size:13px;display:block;font-weight:600}
+  .cell-main span{font-size:11.5px;color:var(--color-text-secondary)}
+  .co-dot{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+  .result-count{font-size:12px;color:var(--color-text-tertiary)}
+
+  @media (max-width:1180px){ .stat-grid{grid-template-columns:repeat(2,1fr)} }
+
+  /* ---------- Drawer / form ---------- */
+  .drawer-overlay{position:fixed;inset:0;background:rgba(10,5,5,.45);display:flex;justify-content:flex-end;z-index:100;opacity:0;pointer-events:none;transition:opacity .22s var(--ease)}
+  .drawer-overlay.open{opacity:1;pointer-events:auto}
+  .drawer{width:min(560px,100%);height:100%;background:var(--color-bg);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:translateX(24px);transition:transform .25s var(--ease);overflow:hidden}
+  .drawer-overlay.open .drawer{transform:none}
+  .drawer-head{display:flex;align-items:center;gap:12px;padding:20px 24px;border-bottom:1px solid var(--color-border);flex-shrink:0}
+  .drawer-head h3{font-size:16.5px;flex:1}
+  .drawer-close{color:var(--color-text-secondary);padding:6px;border-radius:8px}
+  .drawer-close:hover{background:var(--color-surface);color:var(--color-text)}
+  .drawer-tabs{display:flex;gap:4px;padding:0 24px;border-bottom:1px solid var(--color-border);flex-shrink:0}
+  .drawer-tab{padding:10px 4px;margin-right:18px;font-size:13px;font-weight:600;color:var(--color-text-secondary);border-bottom:2px solid transparent;position:relative;top:1px}
+  .drawer-tab.active{color:var(--color-accent);border-color:var(--color-accent)}
+  .drawer-body{padding:22px 24px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:18px}
+  .drawer-footer{padding:16px 24px;border-top:1px solid var(--color-border);display:flex;justify-content:flex-end;gap:10px;flex-shrink:0}
+  .sync-note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:9px;background:var(--color-accent-tint);font-size:12px;color:var(--color-text-secondary)}
+  .sync-note .icon{width:15px;height:15px;color:var(--color-accent);flex-shrink:0;margin-top:1px}
+  .sync-note code{background:var(--color-surface-raised)}
+
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+  .form-field{display:flex;flex-direction:column;gap:6px}
+  .form-field.full{grid-column:1/-1}
+  .form-field label{font-size:12px;font-weight:600;color:var(--color-text-secondary);display:flex;align-items:center;gap:5px}
+  .form-field input[type=text],.form-field input[type=number],.form-field input[type=date],.form-field input[type=email],.form-field input[type=tel],.form-field textarea,.form-field select{
+    padding:9px 12px;border-radius:8px;border:1px solid var(--color-border);background:var(--color-surface-raised);font-size:13px;color:var(--color-text);font-family:inherit;width:100%;
+  }
+  .form-field textarea{resize:vertical;min-height:64px}
+  .form-field input:focus,.form-field select:focus,.form-field textarea:focus{outline:none;border-color:var(--color-accent);box-shadow:0 0 0 3px var(--color-accent-tint)}
+  .form-field input:disabled,.locked-input{background:var(--color-surface) !important;color:var(--color-text-secondary) !important;cursor:not-allowed}
+  .lock-note{font-size:10.5px;color:var(--color-text-tertiary);display:flex;align-items:center;gap:4px;margin-top:1px}
+  .lock-note .icon{width:11px;height:11px}
+  .form-row-inline{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid var(--color-border);border-radius:9px}
+  .form-row-inline strong{font-size:13px;display:block}
+  .form-row-inline span{font-size:11.5px;color:var(--color-text-secondary)}
+
+  .switch{position:relative;width:40px;height:22px;border-radius:20px;background:var(--color-border-strong);flex-shrink:0;transition:background .15s var(--ease);border:none;padding:0}
+  .switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:var(--shadow-sm);transition:transform .15s var(--ease)}
+  .switch.on{background:var(--color-success)}
+  .switch.on::after{transform:translateX(18px)}
+
+  .swatch-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .swatch{width:28px;height:28px;border-radius:8px;border:2px solid transparent;cursor:pointer;transition:transform .12s var(--ease)}
+  .swatch:hover{transform:scale(1.08)}
+  .swatch.selected{border-color:var(--color-text)}
+
+  .logo-upload{width:76px;height:76px;border-radius:16px;border:1.5px dashed var(--color-border-strong);display:flex;align-items:center;justify-content:center;color:var(--color-text-tertiary);flex-shrink:0;cursor:pointer}
+  .logo-upload:hover{border-color:var(--color-accent);color:var(--color-accent)}
+
+  /* ---------- Sync page ---------- */
+  .sync-hero{display:flex;align-items:center;gap:16px;padding:20px 22px;flex-wrap:wrap}
+  .sync-hero-info{flex:1;min-width:220px}
+  .sync-hero-info strong{font-size:15px;display:block}
+  .sync-hero-info span{font-size:12.5px;color:var(--color-text-secondary)}
+  .sync-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .unmapped-list{display:flex;flex-direction:column;gap:10px}
+  .unmapped-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--radius-md);background:var(--color-warning-tint)}
+  .unmapped-item .icon-wrap{width:34px;height:34px;border-radius:9px;background:var(--color-bg);color:var(--color-warning);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .unmapped-item-main{flex:1;min-width:0}
+  .unmapped-item-main strong{font-size:13px;display:block}
+  .unmapped-item-main span{font-size:11.5px;color:var(--color-text-secondary)}
+  .unmapped-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .unmapped-actions select{max-width:180px}
+
+  @media (max-width:900px){ .sync-summary-grid{grid-template-columns:repeat(2,1fr)} .form-grid{grid-template-columns:1fr} }
+
+  /* ---------- Audit log ---------- */
+  .audit-list{display:flex;flex-direction:column}
+  .audit-row{border-bottom:1px solid var(--color-border)}
+  .audit-row:last-child{border-bottom:0}
+  .audit-row-head{display:flex;align-items:center;gap:12px;padding:13px 4px;cursor:pointer}
+  .audit-row-head .avatar{flex-shrink:0}
+  .audit-row-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .audit-row-main .line1{font-size:13px}
+  .audit-row-main .line1 strong{font-weight:700}
+  .audit-row-main time{font-size:11.5px;color:var(--color-text-tertiary)}
+  .audit-chev{color:var(--color-text-tertiary);transition:transform .15s var(--ease)}
+  .audit-row.open .audit-chev{transform:rotate(90deg)}
+  .audit-detail{display:none;padding:0 4px 16px 60px}
+  .audit-row.open .audit-detail{display:block}
+  .diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:520px}
+  .diff-box{padding:10px 12px;border-radius:8px;font-size:12.5px}
+  .diff-old{background:var(--color-danger-tint);color:var(--color-danger);text-decoration:line-through;opacity:.8}
+  .diff-new{background:var(--color-success-tint);color:var(--color-success)}
+  .diff-label{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-tertiary);margin-bottom:4px;display:block}
+
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  .radio-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--color-border);border-radius:9px;cursor:pointer}
+  .radio-row.selected{border-color:var(--color-accent);background:var(--color-accent-tint)}
+  .radio-dot{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--color-border-strong);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .radio-row.selected .radio-dot{border-color:var(--color-accent)}
+  .radio-row.selected .radio-dot::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--color-accent)}
+  .radio-row strong{font-size:13px;display:block}
+  .radio-row span{font-size:11.5px;color:var(--color-text-secondary)}
+  @media (max-width:900px){ .settings-grid{grid-template-columns:1fr} }
+
+  @media (max-width:640px){ .drawer{width:100%} .form-grid{grid-template-columns:1fr} }
+</style>
+
+<div class="app" id="app">
+  <div class="scrim" id="scrim"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">OC</div>
+      <div class="brand-text"><strong>One Cherry</strong><span>Employee Directory</span></div>
+    </div>
+    <span class="admin-tag">Admin Panel</span>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="dashboard"><svg class="icon"><use href="#i-grid"/></svg> Dashboard</button>
+      <button class="nav-item" data-view="employees"><svg class="icon"><use href="#i-users"/></svg> Employees</button>
+      <button class="nav-item" data-view="companies"><svg class="icon"><use href="#i-building"/></svg> Companies</button>
+      <button class="nav-item" data-view="departments"><svg class="icon"><use href="#i-layers"/></svg> Departments</button>
+      <button class="nav-item" data-view="designations"><svg class="icon"><use href="#i-award"/></svg> Designations</button>
+      <button class="nav-item" data-view="offices"><svg class="icon"><use href="#i-pin"/></svg> Office Locations</button>
+      <div class="nav-sep"></div>
+      <button class="nav-item" data-view="sync"><svg class="icon"><use href="#i-database"/></svg> API Sync <span class="nav-badge" id="syncNavBadge">2</span></button>
+      <button class="nav-item" data-view="settings"><svg class="icon"><use href="#i-settings"/></svg> Settings</button>
+      <button class="nav-item" data-view="audit"><svg class="icon"><use href="#i-shield"/></svg> Audit Logs</button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle"><svg class="icon" id="themeIcon"><use href="#i-sun"/></svg><span id="themeLabel">Light mode</span></button>
+      <p class="fontnote">Preview uses system fonts for Proxima Nova / Mint Sans. Production ships the licensed families self-hosted from <code>public/fonts</code>.</p>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn-inline" id="menuBtn" aria-label="Open navigation"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <h1 class="topbar-title" id="topbarTitle">Dashboard</h1>
+      <div class="topbar-spacer"></div>
+      <button class="icon-btn" aria-label="Notifications"><svg class="icon"><use href="#i-bell"/></svg></button>
+      <button class="avatar-btn" aria-label="Admin account"><span class="avatar avatar-sm" style="background:#4A4F6B">CU</span></button>
+    </header>
+
+    <main class="view-root" id="viewRoot">
+
+      <!-- ============ DASHBOARD ============ -->
+      <section class="view" id="view-dashboard">
+        <div class="alert-banner" id="unmappedBanner" data-view="sync">
+          <div class="icon-wrap"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>
+          <div style="flex:1"><strong id="unmappedBannerTitle">2 records need your review</strong><span>The last HR sync found IDs it couldn't match to an existing department or designation.</span></div>
+          <svg class="icon" style="color:var(--color-text-tertiary)"><use href="#i-chevron-right"/></svg>
+        </div>
+
+        <div class="stat-grid" id="dashStats"></div>
+
+        <div class="card" style="padding:22px">
+          <div class="section-head">
+            <span class="section-title">Sync health</span><div class="spacer"></div>
+            <button class="btn btn-primary btn-sm" id="dashSyncBtn"><svg class="icon"><use href="#i-refresh"/></svg>Run Sync Now</button>
+          </div>
+          <div class="sync-summary-grid" id="dashSyncSummary"></div>
+        </div>
+
+        <div>
+          <div class="section-head"><span class="section-title">Recent audit activity</span><div class="spacer"></div>
+            <a class="btn btn-ghost btn-sm" data-view="audit">View all <svg class="icon"><use href="#i-chevron-right"/></svg></a>
+          </div>
+          <div class="card" style="padding:6px 18px" id="dashAudit"></div>
+        </div>
+
+        <div>
+          <div class="section-head"><span class="section-eyebrow">Manage</span></div>
+          <div class="stat-grid" id="dashQuickLinks" style="grid-template-columns:repeat(4,1fr)"></div>
+        </div>
+      </section>
+
+      <!-- ============ EMPLOYEES ============ -->
+      <section class="view" id="view-employees" hidden>
+        <div class="table-toolbar">
+          <div class="field"><svg class="icon"><use href="#i-search"/></svg><input id="empSearch" placeholder="Search employees…"/></div>
+          <select class="select" id="empCompanyFilter"><option value="">All Companies</option></select>
+          <select class="select" id="empStatusFilter">
+            <option value="">All Statuses</option>
+            <option value="active">Active Employee</option>
+            <option value="on_leave">On Leave</option>
+            <option value="resigned">Resigned</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <div class="spacer"></div>
+          <span class="result-count" id="empCount"></span>
+          <button class="btn btn-primary btn-sm" id="empAddBtn"><svg class="icon"><use href="#i-plus"/></svg>Add Employee</button>
+        </div>
+        <div class="table-wrap"><table class="data-table">
+          <thead><tr><th>Employee</th><th>Company</th><th>Department</th><th>Designation</th><th>Source</th><th>Status</th><th></th></tr></thead>
+          <tbody id="empTableBody"></tbody>
+        </table></div>
+      </section>
+
+      <!-- ============ COMPANIES ============ -->
+      <section class="view" id="view-companies" hidden>
+        <div class="table-toolbar">
+          <div class="field"><svg class="icon"><use href="#i-search"/></svg><input id="coSearch" placeholder="Search companies…"/></div>
+          <div class="spacer"></div>
+          <span class="result-count" id="coCount"></span>
+          <button class="btn btn-primary btn-sm" data-add="company"><svg class="icon"><use href="#i-plus"/></svg>Add Company</button>
+        </div>
+        <div class="table-wrap"><table class="data-table">
+          <thead><tr><th>Company</th><th>HR Ref</th><th>Employees</th><th>Address</th><th>Status</th><th></th></tr></thead>
+          <tbody id="coTableBody"></tbody>
+        </table></div>
+      </section>
+
+      <!-- ============ DEPARTMENTS ============ -->
+      <section class="view" id="view-departments" hidden>
+        <div class="table-toolbar">
+          <div class="field"><svg class="icon"><use href="#i-search"/></svg><input id="deptSearch" placeholder="Search departments…"/></div>
+          <div class="spacer"></div>
+          <span class="result-count" id="deptCount"></span>
+          <button class="btn btn-primary btn-sm" data-add="department"><svg class="icon"><use href="#i-plus"/></svg>Add Department</button>
+        </div>
+        <div class="table-wrap"><table class="data-table">
+          <thead><tr><th>Department</th><th>Company</th><th>Head</th><th>Employees</th><th>Status</th><th></th></tr></thead>
+          <tbody id="deptTableBody"></tbody>
+        </table></div>
+      </section>
+
+      <!-- ============ DESIGNATIONS ============ -->
+      <section class="view" id="view-designations" hidden>
+        <div class="table-toolbar">
+          <div class="field"><svg class="icon"><use href="#i-search"/></svg><input id="desigSearch" placeholder="Search designations…"/></div>
+          <div class="spacer"></div>
+          <span class="result-count" id="desigCount"></span>
+          <button class="btn btn-primary btn-sm" data-add="designation"><svg class="icon"><use href="#i-plus"/></svg>Add Designation</button>
+        </div>
+        <div class="table-wrap"><table class="data-table">
+          <thead><tr><th>Designation</th><th>Company</th><th>Hierarchy Level</th><th>Employees</th><th>Status</th><th></th></tr></thead>
+          <tbody id="desigTableBody"></tbody>
+        </table></div>
+      </section>
+
+      <!-- ============ OFFICE LOCATIONS ============ -->
+      <section class="view" id="view-offices" hidden>
+        <div class="table-toolbar">
+          <div class="field"><svg class="icon"><use href="#i-search"/></svg><input id="offSearch" placeholder="Search office locations…"/></div>
+          <div class="spacer"></div>
+          <span class="result-count" id="offCount"></span>
+          <button class="btn btn-primary btn-sm" data-add="office"><svg class="icon"><use href="#i-plus"/></svg>Add Office Location</button>
+        </div>
+        <div class="table-wrap"><table class="data-table">
+          <thead><tr><th>Office</th><th>City / Country</th><th>Company</th><th>Phone</th><th>Status</th><th></th></tr></thead>
+          <tbody id="offTableBody"></tbody>
+        </table></div>
+      </section>
+
+      <!-- ============ API SYNC ============ -->
+      <section class="view" id="view-sync" hidden>
+        <div class="card sync-hero">
+          <div class="stat-icon" style="width:44px;height:44px"><svg class="icon"><use href="#i-database"/></svg></div>
+          <div class="sync-hero-info"><strong id="syncLastRun">Last synced 42 minutes ago</strong><span>Pulled from the HR REST API · keyed on <code>employee_code</code> · runs hourly via Laravel Scheduler</span></div>
+          <button class="btn btn-primary" id="syncNowBtn"><svg class="icon"><use href="#i-refresh"/></svg>Run Sync Now</button>
+        </div>
+
+        <div class="sync-summary-grid" id="syncSummary"></div>
+
+        <div>
+          <div class="section-head"><span class="section-title">Unmapped records</span><div class="spacer"></div><span class="section-sub">Auto-created as stubs so sync never blocks</span></div>
+          <div class="unmapped-list" id="unmappedList"></div>
+        </div>
+
+        <div>
+          <div class="section-head"><span class="section-title">Sync history</span></div>
+          <div class="table-wrap"><table class="data-table">
+            <thead><tr><th>Date &amp; Time</th><th>Type</th><th>Status</th><th>New</th><th>Promotions</th><th>Resigned</th><th>Errors</th><th>Triggered By</th></tr></thead>
+            <tbody id="syncHistoryBody"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ============ SETTINGS ============ -->
+      <section class="view" id="view-settings" hidden>
+        <div class="settings-grid">
+          <div class="card" style="padding:22px">
+            <div class="section-head"><span class="section-title">General</span></div>
+            <div class="form-grid">
+              <div class="form-field full"><label>Application Name</label><input type="text" value="One Cherry Employee Directory"/></div>
+              <div class="form-field"><label>Support Email</label><input type="email" value="directory-support@onecherry.group"/></div>
+              <div class="form-field"><label>Timezone</label>
+                <select><option>Asia/Manila (GMT+8)</option><option>UTC</option></select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:22px">
+            <div class="section-head"><span class="section-title">HR Sync Schedule</span></div>
+            <div style="display:flex;flex-direction:column;gap:10px" id="scheduleOptions"></div>
+          </div>
+
+          <div class="card" style="padding:22px">
+            <div class="section-head"><span class="section-title">Branding</span></div>
+            <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px">
+              <div class="logo-upload"><svg class="icon"><use href="#i-upload"/></svg></div>
+              <div style="font-size:12.5px;color:var(--color-text-secondary)">Logo, titles use <strong style="color:var(--color-text)">Proxima Nova</strong>, body text uses <strong style="color:var(--color-text)">Mint Sans</strong>, self-hosted from <code>public/fonts</code>.</div>
+            </div>
+            <div class="section-eyebrow" style="margin-bottom:8px">Brand Palette</div>
+            <div class="swatch-row" id="brandSwatches"></div>
+          </div>
+
+          <div class="card" style="padding:22px">
+            <div class="section-head"><span class="section-title">Roles</span></div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div class="form-row-inline"><div><strong>Employee</strong><span>Search &amp; view only — cannot edit any record</span></div><span class="badge badge-neutral">2 permissions</span></div>
+              <div class="form-row-inline"><div><strong>Administrator</strong><span>Full CRUD on Employees, Companies, Departments, Designations, Offices</span></div><span class="badge badge-accent">Full access</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" id="settingsSaveBtn"><svg class="icon"><use href="#i-check"/></svg>Save Settings</button></div>
+      </section>
+
+      <!-- ============ AUDIT LOGS ============ -->
+      <section class="view" id="view-audit" hidden>
+        <div class="table-toolbar">
+          <div class="field"><svg class="icon"><use href="#i-search"/></svg><input id="auditSearch" placeholder="Search audit logs…"/></div>
+          <select class="select" id="auditActionFilter">
+            <option value="">All Actions</option>
+            <option value="created">Created</option>
+            <option value="updated">Updated</option>
+            <option value="deleted">Deleted</option>
+            <option value="synced">Synced</option>
+          </select>
+          <div class="spacer"></div>
+          <span class="result-count" id="auditCount"></span>
+        </div>
+        <div class="card" style="padding:6px 18px">
+          <div class="audit-list" id="auditList"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<div class="drawer-overlay" id="drawerOverlay">
+  <div class="drawer" role="dialog" aria-modal="true" aria-label="Edit record">
+    <div class="drawer-head">
+      <h3 id="drawerTitle">Edit Record</h3>
+      <button class="drawer-close" id="drawerClose" aria-label="Close"><svg class="icon"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="drawer-tabs" id="drawerTabs"></div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-footer">
+      <button class="btn btn-secondary" id="drawerCancelBtn">Cancel</button>
+      <button class="btn btn-primary" id="drawerSaveBtn"><svg class="icon"><use href="#i-check"/></svg>Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.2c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/></symbol>
+  <symbol id="i-building" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+  <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+</svg>
+
+<script>
+(function(){
+  "use strict";
+  var TODAY = new Date("2026-07-24T09:00:00");
+
+  /* ---------------- Data ---------------- */
+  var COMPANIES = [
+    {id:"cdm",hrRef:101,name:"Cherry Mobile Communications",short:"CMC",accent:"#790002",address:"21F Cherry Tower, Ayala Ave, Makati City",phone:"+63 2 8888 1000",email:"info@cherrymobile.onecherry.group",website:"cherrymobile.onecherry.group",desc:"Handset retail, telco partnerships and after-sales service.",active:true},
+    {id:"cds",hrRef:102,name:"Cherry Digital Solutions",short:"CDS",accent:"#2F5D8A",address:"12F Cherry Tower, Ayala Ave, Makati City",phone:"+63 2 8888 1200",email:"hello@cherrydigital.onecherry.group",website:"cherrydigital.onecherry.group",desc:"Builds and maintains technology platforms across the Group.",active:true},
+    {id:"crd",hrRef:103,name:"Cherry Realty & Development",short:"CRD",accent:"#6B7A3F",address:"8F Cherry Realty Center, BGC, Taguig",phone:"+63 2 8888 1300",email:"info@cherryrealty.onecherry.group",website:"cherryrealty.onecherry.group",desc:"Develops and manages commercial and residential properties.",active:true},
+    {id:"clf",hrRef:104,name:"Cherry Logistics & Fulfillment",short:"CLF",accent:"#B8722A",address:"Cherry Logistics Hub, Sta. Rosa, Laguna",phone:"+63 49 511 2200",email:"ops@cherrylogistics.onecherry.group",website:"cherrylogistics.onecherry.group",desc:"Warehousing, fleet and last-mile fulfillment.",active:true},
+    {id:"cfs",hrRef:105,name:"Cherry Financial Services",short:"CFS",accent:"#4A4F6B",address:"30F Cherry Tower, Ayala Ave, Makati City",phone:"+63 2 8888 1400",email:"info@cherryfinancial.onecherry.group",website:"cherryfinancial.onecherry.group",desc:"Lending, insurance and treasury services.",active:true},
+    {id:"crg",hrRef:106,name:"Cherry Retail Group",short:"CRG",accent:"#8A4B6B",address:"Cherry Retail Plaza, Cebu Business Park, Cebu City",phone:"+63 32 888 1500",email:"info@cherryretail.onecherry.group",website:"cherryretail.onecherry.group",desc:"Retail storefronts and the regional sales network.",active:true}
+  ];
+  var DEPARTMENTS = [
+    {id:"d1",hrRef:201,name:"Product Design",companyId:"cds",head:"Christian Uy",active:true},
+    {id:"d2",hrRef:202,name:"Engineering",companyId:"cds",head:"Christian Uy",active:true},
+    {id:"d3",hrRef:203,name:"IT Support",companyId:"cds",head:"Miguel Torres",active:true},
+    {id:"d4",hrRef:204,name:"Human Resources",companyId:"cdm",head:"Patricia Lim",active:true},
+    {id:"d5",hrRef:205,name:"Finance & Accounting",companyId:"cfs",head:"Kristine Navarro",active:true},
+    {id:"d6",hrRef:206,name:"Sales & Business Development",companyId:"crg",head:"Julian Castillo",active:true},
+    {id:"d7",hrRef:207,name:"Marketing",companyId:"cdm",head:"Jasmine Cruz",active:true},
+    {id:"d8",hrRef:208,name:"Customer Experience",companyId:"cdm",head:"Isabel Ramos",active:true},
+    {id:"d9",hrRef:209,name:"Legal & Compliance",companyId:"crd",head:"Nathaniel Ong",active:true},
+    {id:"d10",hrRef:210,name:"Operations",companyId:"clf",head:"Diego Fernandez",active:true},
+    {id:"d11",hrRef:211,name:"Property Management",companyId:"crd",head:"Gabriel Rivera",active:true}
+  ];
+  var DESIGNATIONS = [
+    {id:"g1",hrRef:301,name:"Senior UX Designer",companyId:"cds",level:4,active:true},
+    {id:"g2",hrRef:302,name:"Product Designer",companyId:"cds",level:3,active:true},
+    {id:"g3",hrRef:303,name:"IT Support Specialist",companyId:"cds",level:2,active:true},
+    {id:"g4",hrRef:304,name:"Software Engineer",companyId:"cds",level:3,active:true},
+    {id:"g5",hrRef:305,name:"Backend Engineer",companyId:"cds",level:3,active:true},
+    {id:"g6",hrRef:306,name:"Junior Developer",companyId:"cds",level:1,active:true},
+    {id:"g7",hrRef:307,name:"Marketing Manager",companyId:"cdm",level:4,active:true},
+    {id:"g8",hrRef:309,name:"HR Business Partner",companyId:"cdm",level:4,active:true},
+    {id:"g9",hrRef:311,name:"Customer Experience Lead",companyId:"cdm",level:4,active:true},
+    {id:"g10",hrRef:313,name:"Sales Executive",companyId:"crg",level:2,active:true},
+    {id:"g11",hrRef:314,name:"Regional Sales Manager",companyId:"crg",level:5,active:true},
+    {id:"g12",hrRef:315,name:"Financial Analyst",companyId:"cfs",level:3,active:true},
+    {id:"g13",hrRef:316,name:"Accounting Supervisor",companyId:"cfs",level:4,active:true},
+    {id:"g14",hrRef:317,name:"Operations Supervisor",companyId:"clf",level:4,active:true},
+    {id:"g15",hrRef:320,name:"Legal Counsel",companyId:"crd",level:5,active:true},
+    {id:"g16",hrRef:321,name:"Property Manager",companyId:"crd",level:4,active:true}
+  ];
+  var OFFICES = [
+    {id:"ma",name:"Makati HQ",city:"Makati City",country:"Philippines",phone:"+63 2 8888 1000",companyId:"",active:true},
+    {id:"bgc",name:"BGC Tower",city:"Taguig City",country:"Philippines",phone:"+63 2 8888 1200",companyId:"cds",active:true},
+    {id:"ceb",name:"Cebu Business Park",city:"Cebu City",country:"Philippines",phone:"+63 32 888 1500",companyId:"crg",active:true},
+    {id:"lag",name:"Sta. Rosa Hub",city:"Sta. Rosa, Laguna",country:"Philippines",phone:"+63 49 511 2200",companyId:"clf",active:true},
+    {id:"dav",name:"Davao Branch",city:"Davao City",country:"Philippines",phone:"+63 82 888 1600",companyId:"",active:true},
+    {id:"clk",name:"Clark Office",city:"Clark Freeport, Pampanga",country:"Philippines",phone:"+63 45 888 1700",companyId:"",active:false}
+  ];
+  var EMPLOYEES = [
+    {id:"e01",code:"EMP-00021",first:"Andrea",last:"Reyes",desig:"g1",dept:"d1",company:"cds",status:"active",office:"bgc",source:"hr_sync"},
+    {id:"e02",code:"EMP-00034",first:"Miguel",last:"Torres",desig:"g3",dept:"d3",company:"cds",status:"active",office:"bgc",source:"hr_sync"},
+    {id:"e03",code:"EMP-00007",first:"Jasmine",last:"Cruz",desig:"g7",dept:"d7",company:"cdm",status:"active",office:"ma",source:"hr_sync"},
+    {id:"e04",code:"EMP-00045",first:"Rafael",last:"Bautista",desig:"g4",dept:"d2",company:"cds",status:"active",office:"bgc",source:"hr_sync"},
+    {id:"e05",code:"EMP-00012",first:"Patricia",last:"Lim",desig:"g8",dept:"d4",company:"cdm",status:"active",office:"ma",source:"hr_sync"},
+    {id:"e06",code:"EMP-00061",first:"Enzo",last:"Villanueva",desig:"g10",dept:"d6",company:"crg",status:"on_leave",office:"ceb",source:"hr_sync"},
+    {id:"e07",code:"EMP-00052",first:"Camille",last:"Santos",desig:"g12",dept:"d5",company:"cfs",status:"active",office:"ma",source:"hr_sync"},
+    {id:"e08",code:"EMP-00003",first:"Diego",last:"Fernandez",desig:"g14",dept:"d10",company:"clf",status:"active",office:"lag",source:"hr_sync"},
+    {id:"e09",code:"EMP-00019",first:"Isabel",last:"Ramos",desig:"g9",dept:"d8",company:"cdm",status:"active",office:"ma",source:"hr_sync"},
+    {id:"e10",code:"EMP-00028",first:"Nathaniel",last:"Ong",desig:"g15",dept:"d9",company:"crd",status:"active",office:"bgc",source:"hr_sync"},
+    {id:"e11",code:"EMP-00071",first:"Bianca",last:"Aquino",desig:"g2",dept:"d1",company:"cds",status:"active",office:"bgc",source:"hr_sync"},
+    {id:"e12",code:"EMP-00044",first:"Marco",last:"Dela Peña",desig:"g5",dept:"d2",company:"cds",status:"active",office:"bgc",source:"hr_sync"},
+    {id:"e13",code:"EMP-00066",first:"Julian",last:"Castillo",desig:"g11",dept:"d6",company:"crg",status:"active",office:"ceb",source:"hr_sync"},
+    {id:"e14",code:"EMP-00088",first:"Renz",last:"Aguilar",desig:"g6",dept:"d2",company:"cds",status:"active",office:"bgc",source:"hr_sync"},
+    {id:"e15",code:"EMP-00091",first:"Faith",last:"Delgado",desig:"g9",dept:"d8",company:"cdm",status:"active",office:"ma",source:"hr_sync"},
+    {id:"e16",code:"—",first:"Carla",last:"Jimenez",desig:"g15",dept:"d9",company:"crd",status:"active",office:"bgc",source:"manual"}
+  ];
+  var UNMAPPED = [
+    {id:"u1",kind:"Department",hrRef:214,company:"crd",employees:3,resolved:false},
+    {id:"u2",kind:"Designation",hrRef:322,company:"cdm",employees:1,resolved:false}
+  ];
+  var SYNC_HISTORY = [
+    {ts:"2026-07-24 13:00",type:"Scheduled",status:"success",n:2,p:1,r:0,err:0,by:"System"},
+    {ts:"2026-07-24 09:00",type:"Scheduled",status:"success",n:0,p:0,r:1,err:0,by:"System"},
+    {ts:"2026-07-23 18:12",type:"Manual",status:"partial",n:1,p:0,r:0,err:2,by:"Christian Uy"},
+    {ts:"2026-07-23 09:00",type:"Scheduled",status:"success",n:0,p:2,r:0,err:0,by:"System"},
+    {ts:"2026-07-22 09:00",type:"Scheduled",status:"success",n:1,p:0,r:0,err:0,by:"System"}
+  ];
+  var AUDIT_LOGS = [
+    {ts:"2026-07-24 13:02",user:"System",avatarBg:"#43505E",action:"synced",entity:"Employee",name:"Faith Delgado",summary:"was imported from the HR sync as a new hire.",diff:null},
+    {ts:"2026-07-24 11:41",user:"Miguel Torres",avatarBg:"#43505E",action:"updated",entity:"Employee",name:"Faith Delgado",summary:"updated the Office Seat.",diff:{field:"Office Seat",old:"—",now:"CX-14"}},
+    {ts:"2026-07-24 10:15",user:"Christian Uy",avatarBg:"#2F5D8A",action:"created",entity:"Department",name:"Property Management",summary:"created a new department under Cherry Realty & Development.",diff:null},
+    {ts:"2026-07-24 09:00",user:"System",avatarBg:"#43505E",action:"synced",entity:"Employee",name:"Enzo Villanueva",summary:"was marked On Leave from the HR feed (es_id changed).",diff:{field:"Employment Status",old:"Active Employee",now:"On Leave"}},
+    {ts:"2026-07-23 18:20",user:"Christian Uy",avatarBg:"#2F5D8A",action:"updated",entity:"Company",name:"Cherry Retail Group",summary:"changed the Color Theme.",diff:{field:"Color Theme",old:"#6B4A33",now:"#8A4B6B"}},
+    {ts:"2026-07-23 16:05",user:"Patricia Lim",avatarBg:"#6B3350",action:"deleted",entity:"Office Location",name:"Quezon City Annex",summary:"deactivated an unused office location.",diff:null},
+    {ts:"2026-07-22 14:33",user:"Miguel Torres",avatarBg:"#43505E",action:"updated",entity:"Employee",name:"Andrea Reyes",summary:"updated the profile photo and About Me.",diff:null},
+    {ts:"2026-07-21 09:00",user:"System",avatarBg:"#43505E",action:"synced",entity:"Employee",name:"Renz Aguilar",summary:"was imported from the HR sync as a new hire.",diff:null}
+  ];
+
+  var BRAND_SWATCHES = ["#790002","#77787B","#F6F6F6","#34C759","#FF3B30"];
+
+  var byId=function(arr){var m={};arr.forEach(function(x){m[x.id]=x});return m;};
+  var companyById = byId(COMPANIES), deptById = byId(DEPARTMENTS), desigById = byId(DESIGNATIONS), officeById = byId(OFFICES), empById = byId(EMPLOYEES);
+
+  var STATE = { view:"dashboard", scheduleFreq:"hourly", empFilters:{search:"",company:"",status:""}, coSearch:"", deptSearch:"", desigSearch:"", offSearch:"", auditFilters:{search:"",action:""} };
+
+  /* ---------------- Helpers ---------------- */
+  function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function initials(first,last){ return (first[0]+last[0]).toUpperCase(); }
+  function statusLabel(s){ return {active:"Active Employee",on_leave:"On Leave",resigned:"Resigned",inactive:"Inactive"}[s]||s; }
+  function statusBadgeClass(s){ return {active:"badge-active",on_leave:"badge-leave",resigned:"badge-resigned",inactive:"badge-inactive"}[s]||""; }
+  function toast(msg){
+    var stack = document.getElementById("toastStack");
+    var el = document.createElement("div");
+    el.className="toast";
+    el.innerHTML='<svg class="icon"><use href="#i-check"/></svg><span>'+esc(msg)+'</span>';
+    stack.appendChild(el);
+    setTimeout(function(){ el.style.transition="opacity .2s ease,transform .2s ease"; el.style.opacity="0"; el.style.transform="translateY(6px)"; setTimeout(function(){el.remove();},220); }, 2400);
+  }
+
+  /* ---------------- Theme ---------------- */
+  var themeToggle=document.getElementById("themeToggle"), themeIcon=document.getElementById("themeIcon"), themeLabel=document.getElementById("themeLabel");
+  function applyThemeUI(){
+    var isDark = document.documentElement.getAttribute("data-theme")==="dark" || (!document.documentElement.getAttribute("data-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    themeIcon.innerHTML='<use href="#'+(isDark?'i-moon':'i-sun')+'"/>';
+    themeLabel.textContent = isDark ? "Dark mode" : "Light mode";
+  }
+  themeToggle.addEventListener("click", function(){
+    var cur=document.documentElement.getAttribute("data-theme");
+    var isDark = cur==="dark" || (!cur && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.setAttribute("data-theme", isDark?"light":"dark");
+    applyThemeUI();
+  });
+  applyThemeUI();
+
+  /* ---------------- Sidebar mobile ---------------- */
+  var sidebar=document.getElementById("sidebar"), scrim=document.getElementById("scrim");
+  function openSidebar(){ sidebar.classList.add("open"); scrim.classList.add("show"); }
+  function closeSidebar(){ sidebar.classList.remove("open"); scrim.classList.remove("show"); }
+  document.getElementById("menuBtn").addEventListener("click", openSidebar);
+  scrim.addEventListener("click", closeSidebar);
+
+  /* ---------------- Router ---------------- */
+  var TITLES = {dashboard:"Dashboard",employees:"Employees",companies:"Companies",departments:"Departments",designations:"Designations",offices:"Office Locations",sync:"API Sync",settings:"Settings",audit:"Audit Logs"};
+  function showView(name){
+    document.querySelectorAll(".view").forEach(function(v){ v.hidden=true; });
+    var t=document.getElementById("view-"+name); if(t) t.hidden=false;
+    document.getElementById("topbarTitle").textContent = TITLES[name]||name;
+    document.querySelectorAll(".nav-item[data-view]").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-view")===name); });
+    STATE.view = name;
+    closeSidebar();
+  }
+  document.addEventListener("click", function(e){
+    var el = e.target.closest("[data-view]");
+    if(!el) return;
+    if(el.closest(".drawer")) return;
+    e.preventDefault();
+    showView(el.getAttribute("data-view"));
+  });
+
+  /* ================= DASHBOARD ================= */
+  function renderDashboard(){
+    var stats = [
+      {icon:"i-users", val: EMPLOYEES.length + " (sample)", label:"Total Employees (prod: 1,284)"},
+      {icon:"i-alert-triangle", val: UNMAPPED.filter(function(u){return !u.resolved;}).length, label:"Unmapped Records", warn:true},
+      {icon:"i-building", val: COMPANIES.length, label:"Active Companies"},
+      {icon:"i-database", val:"Success", label:"Last Sync Status"}
+    ];
+    document.getElementById("dashStats").innerHTML = stats.map(function(s){
+      return '<div class="card stat-tile"><div class="stat-tile-top"><div class="stat-icon'+(s.warn?' warn':'')+'"><svg class="icon"><use href="#'+s.icon+'"/></svg></div></div><div class="stat-value">'+s.val+'</div><div class="stat-label">'+s.label+'</div></div>';
+    }).join("");
+    renderSyncSummary("dashSyncSummary");
+    updateUnmappedBanner();
+
+    document.getElementById("dashAudit").innerHTML = AUDIT_LOGS.slice(0,4).map(function(a){
+      var avatarInner = a.user==="System" ? '<svg class="icon" style="width:15px;height:15px"><use href="#i-database"/></svg>' : initials(a.user.split(" ")[0], a.user.split(" ")[1]||a.user.split(" ")[0]);
+      return '<div class="mini-row" style="display:flex;gap:12px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--color-border)">' +
+        '<span class="avatar avatar-sm" style="background:'+a.avatarBg+'">'+avatarInner+'</span>' +
+        '<div style="flex:1;min-width:0;font-size:13px"><strong>'+esc(a.user)+'</strong> '+esc(a.summary)+'</div>' +
+        '<span style="font-size:11px;color:var(--color-text-tertiary);white-space:nowrap">'+esc(a.ts)+'</span></div>';
+    }).join("");
+
+    var links = [
+      {view:"employees",icon:"i-users",label:"Employees",n:EMPLOYEES.length},
+      {view:"companies",icon:"i-building",label:"Companies",n:COMPANIES.length},
+      {view:"departments",icon:"i-layers",label:"Departments",n:DEPARTMENTS.length},
+      {view:"designations",icon:"i-award",label:"Designations",n:DESIGNATIONS.length}
+    ];
+    document.getElementById("dashQuickLinks").innerHTML = links.map(function(l){
+      return '<button class="card stat-tile" data-view="'+l.view+'" style="text-align:left;cursor:pointer"><div class="stat-tile-top"><div class="stat-icon"><svg class="icon"><use href="#'+l.icon+'"/></svg></div></div><div class="stat-value">'+l.n+'</div><div class="stat-label">'+l.label+'</div></button>';
+    }).join("");
+  }
+  function updateUnmappedBanner(){
+    var open = UNMAPPED.filter(function(u){return !u.resolved;});
+    var banner = document.getElementById("unmappedBanner");
+    document.getElementById("syncNavBadge").textContent = open.length;
+    document.getElementById("syncNavBadge").style.display = open.length ? "flex" : "none";
+    if(open.length===0){ banner.style.display="none"; return; }
+    banner.style.display="flex";
+    document.getElementById("unmappedBannerTitle").textContent = open.length + " record" + (open.length===1?"":"s") + " need" + (open.length===1?"s":"") + " your review";
+  }
+
+  function renderSyncSummary(targetId){
+    var last = SYNC_HISTORY[0];
+    var tiles = [
+      {icon:"i-users", val:last.n, label:"New Hires"},
+      {icon:"i-award", val:last.p, label:"Promotions"},
+      {icon:"i-x", val:last.r, label:"Resigned"},
+      {icon:"i-alert-triangle", val:last.err, label:"Errors", warn: last.err>0}
+    ];
+    document.getElementById(targetId).innerHTML = tiles.map(function(t){
+      return '<div class="card stat-tile"><div class="stat-tile-top"><div class="stat-icon'+(t.warn?' warn':'')+'"><svg class="icon"><use href="#'+t.icon+'"/></svg></div></div><div class="stat-value">'+t.val+'</div><div class="stat-label">'+t.label+'</div></div>';
+    }).join("");
+  }
+
+  function runSync(){
+    [document.getElementById("dashSyncBtn"), document.getElementById("syncNowBtn")].forEach(function(b){ if(b){ b.disabled=true; b.innerHTML='<svg class="icon"><use href="#i-refresh"/></svg>Syncing…'; }});
+    setTimeout(function(){
+      SYNC_HISTORY.unshift({ts:"2026-07-24 14:00",type:"Manual",status:"success",n:0,p:0,r:0,err:0,by:"Christian Uy"});
+      [document.getElementById("dashSyncBtn"), document.getElementById("syncNowBtn")].forEach(function(b){ if(b){ b.disabled=false; b.innerHTML='<svg class="icon"><use href="#i-refresh"/></svg>Run Sync Now'; }});
+      document.getElementById("syncLastRun").textContent = "Last synced just now";
+      renderSyncSummary("dashSyncSummary");
+      if(STATE.view==="sync") renderSyncView();
+      toast("Sync complete — everything is up to date");
+    }, 900);
+  }
+  document.getElementById("dashSyncBtn").addEventListener("click", runSync);
+  document.getElementById("syncNowBtn").addEventListener("click", runSync);
+
+  /* ================= EMPLOYEES ================= */
+  function empRowHTML(e){
+    var co = companyById[e.company], dep = deptById[e.dept], g = desigById[e.desig];
+    return '<tr>' +
+      '<td><div class="cell-main"><span class="avatar avatar-sm" style="background:'+co.accent+'">'+initials(e.first,e.last)+'</span>' +
+      '<div><strong>'+esc(e.first+" "+e.last)+'</strong><span>'+esc(e.code)+'</span></div></div></td>' +
+      '<td>'+esc(co.short)+'</td><td>'+esc(dep.name)+'</td><td>'+esc(g.name)+'</td>' +
+      '<td><span class="badge '+(e.source==="hr_sync"?"badge-neutral":"badge-accent")+'">'+(e.source==="hr_sync"?"HR Synced":"Manually Added")+'</span></td>' +
+      '<td><span class="badge '+statusBadgeClass(e.status)+'">'+statusLabel(e.status)+'</span></td>' +
+      '<td><div class="row-actions"><button title="View" data-view-emp="'+e.id+'"><svg class="icon"><use href="#i-eye"/></svg></button>' +
+      '<button title="Edit" data-edit="employee:'+e.id+'"><svg class="icon"><use href="#i-edit"/></svg></button></div></td></tr>';
+  }
+  function renderEmployees(){
+    var f = STATE.empFilters;
+    var list = EMPLOYEES.filter(function(e){
+      if(f.company && e.company!==f.company) return false;
+      if(f.status && e.status!==f.status) return false;
+      if(f.search){
+        var q=f.search.toLowerCase();
+        if((e.first+" "+e.last+" "+e.code).toLowerCase().indexOf(q)===-1) return false;
+      }
+      return true;
+    });
+    document.getElementById("empCount").textContent = list.length + " of " + EMPLOYEES.length + " shown";
+    document.getElementById("empTableBody").innerHTML = list.map(empRowHTML).join("") || '<tr><td colspan="7"><div class="empty-state"><div class="icon-wrap"><svg class="icon"><use href="#i-search"/></svg></div><h3>No employees match</h3><p>Try clearing your filters.</p></div></td></tr>';
+  }
+  (function initEmpFilterSelect(){
+    var sel = document.getElementById("empCompanyFilter");
+    COMPANIES.forEach(function(c){ sel.insertAdjacentHTML("beforeend",'<option value="'+c.id+'">'+esc(c.name)+'</option>'); });
+  })();
+  document.getElementById("empSearch").addEventListener("input", function(e){ STATE.empFilters.search=e.target.value; renderEmployees(); });
+  document.getElementById("empCompanyFilter").addEventListener("change", function(e){ STATE.empFilters.company=e.target.value; renderEmployees(); });
+  document.getElementById("empStatusFilter").addEventListener("change", function(e){ STATE.empFilters.status=e.target.value; renderEmployees(); });
+  document.getElementById("empAddBtn").addEventListener("click", function(){ openEmployeeDrawer(null); });
+  document.addEventListener("click", function(e){
+    var v=e.target.closest("[data-view-emp]"); if(v){ toast("Opening read-only profile preview…"); }
+    var ed=e.target.closest("[data-edit]"); if(ed){ var parts=ed.getAttribute("data-edit").split(":"); if(parts[0]==="employee") openEmployeeDrawer(parts[1]); else openEntityDrawer(parts[0],parts[1]); }
+    var add=e.target.closest("[data-add]"); if(add){ openEntityDrawer(add.getAttribute("data-add"), null); }
+  });
+
+  /* ================= COMPANIES / DEPARTMENTS / DESIGNATIONS / OFFICES (generic tables) ================= */
+  function renderCompaniesTable(){
+    var q = STATE.coSearch.toLowerCase();
+    var list = COMPANIES.filter(function(c){ return !q || c.name.toLowerCase().indexOf(q)>-1; });
+    document.getElementById("coCount").textContent = list.length + " companies";
+    document.getElementById("coTableBody").innerHTML = list.map(function(c){
+      var count = EMPLOYEES.filter(function(e){return e.company===c.id;}).length;
+      return '<tr><td><div class="cell-main"><span class="avatar avatar-sm" style="background:'+c.accent+'">'+esc(c.short)+'</span><div><strong>'+esc(c.name)+'</strong><span>'+esc(c.website)+'</span></div></div></td>' +
+        '<td><code>c_id: '+c.hrRef+'</code></td><td>'+count+'</td><td>'+esc(c.address)+'</td>' +
+        '<td><span class="badge '+(c.active?"badge-active":"badge-inactive")+'">'+(c.active?"Active":"Inactive")+'</span></td>' +
+        '<td><div class="row-actions"><button title="Edit" data-edit="company:'+c.id+'"><svg class="icon"><use href="#i-edit"/></svg></button></div></td></tr>';
+    }).join("");
+  }
+  function renderDepartmentsTable(){
+    var q = STATE.deptSearch.toLowerCase();
+    var list = DEPARTMENTS.filter(function(d){ return !q || d.name.toLowerCase().indexOf(q)>-1; });
+    document.getElementById("deptCount").textContent = list.length + " departments";
+    document.getElementById("deptTableBody").innerHTML = list.map(function(d){
+      var co = companyById[d.companyId];
+      var count = EMPLOYEES.filter(function(e){return e.dept===d.id;}).length;
+      return '<tr><td><div class="cell-main"><span class="co-dot" style="background:'+co.accent+'"></span><div><strong>'+esc(d.name)+'</strong><span>ug_id: '+d.hrRef+'</span></div></div></td>' +
+        '<td>'+esc(co.short)+'</td><td>'+esc(d.head)+'</td><td>'+count+'</td>' +
+        '<td><span class="badge '+(d.active?"badge-active":"badge-inactive")+'">'+(d.active?"Active":"Inactive")+'</span></td>' +
+        '<td><div class="row-actions"><button title="Edit" data-edit="department:'+d.id+'"><svg class="icon"><use href="#i-edit"/></svg></button></div></td></tr>';
+    }).join("");
+  }
+  function renderDesignationsTable(){
+    var q = STATE.desigSearch.toLowerCase();
+    var list = DESIGNATIONS.filter(function(g){ return !q || g.name.toLowerCase().indexOf(q)>-1; });
+    document.getElementById("desigCount").textContent = list.length + " designations";
+    document.getElementById("desigTableBody").innerHTML = list.map(function(g){
+      var co = companyById[g.companyId];
+      var count = EMPLOYEES.filter(function(e){return e.desig===g.id;}).length;
+      return '<tr><td><div class="cell-main"><span class="co-dot" style="background:'+co.accent+'"></span><div><strong>'+esc(g.name)+'</strong><span>d_id: '+g.hrRef+'</span></div></div></td>' +
+        '<td>'+esc(co.short)+'</td><td>Level '+g.level+'</td><td>'+count+'</td>' +
+        '<td><span class="badge '+(g.active?"badge-active":"badge-inactive")+'">'+(g.active?"Active":"Inactive")+'</span></td>' +
+        '<td><div class="row-actions"><button title="Edit" data-edit="designation:'+g.id+'"><svg class="icon"><use href="#i-edit"/></svg></button></div></td></tr>';
+    }).join("");
+  }
+  function renderOfficesTable(){
+    var q = STATE.offSearch.toLowerCase();
+    var list = OFFICES.filter(function(o){ return !q || o.name.toLowerCase().indexOf(q)>-1; });
+    document.getElementById("offCount").textContent = list.length + " offices";
+    document.getElementById("offTableBody").innerHTML = list.map(function(o){
+      var co = o.companyId ? companyById[o.companyId] : null;
+      return '<tr><td><div class="cell-main"><span class="stat-icon" style="width:30px;height:30px"><svg class="icon" style="width:14px;height:14px"><use href="#i-pin"/></svg></span><strong>'+esc(o.name)+'</strong></div></td>' +
+        '<td>'+esc(o.city)+', '+esc(o.country)+'</td><td>'+(co?esc(co.short):'<span class="badge badge-neutral">Shared</span>')+'</td><td>'+esc(o.phone)+'</td>' +
+        '<td><span class="badge '+(o.active?"badge-active":"badge-inactive")+'">'+(o.active?"Active":"Inactive")+'</span></td>' +
+        '<td><div class="row-actions"><button title="Edit" data-edit="office:'+o.id+'"><svg class="icon"><use href="#i-edit"/></svg></button></div></td></tr>';
+    }).join("");
+  }
+  document.getElementById("coSearch").addEventListener("input", function(e){ STATE.coSearch=e.target.value; renderCompaniesTable(); });
+  document.getElementById("deptSearch").addEventListener("input", function(e){ STATE.deptSearch=e.target.value; renderDepartmentsTable(); });
+  document.getElementById("desigSearch").addEventListener("input", function(e){ STATE.desigSearch=e.target.value; renderDesignationsTable(); });
+  document.getElementById("offSearch").addEventListener("input", function(e){ STATE.offSearch=e.target.value; renderOfficesTable(); });
+
+  /* ================= API SYNC ================= */
+  function renderSyncView(){
+    renderSyncSummary("syncSummary");
+    var open = UNMAPPED.filter(function(u){ return !u.resolved; });
+    var list = document.getElementById("unmappedList");
+    if(!open.length){
+      list.innerHTML = '<div class="empty-state"><div class="icon-wrap"><svg class="icon"><use href="#i-check"/></svg></div><h3>All clear</h3><p>Every HR record maps cleanly to an existing company, department and designation.</p></div>';
+    } else {
+      list.innerHTML = open.map(function(u){
+        var co = companyById[u.company];
+        var options = (u.kind==="Department"?DEPARTMENTS:DESIGNATIONS).filter(function(x){return x.companyId===u.company;})
+          .map(function(x){ return '<option value="'+x.id+'">'+esc(x.name)+'</option>'; }).join("");
+        return '<div class="unmapped-item" data-uid="'+u.id+'"><div class="icon-wrap"><svg class="icon"><use href="#i-alert-triangle"/></svg></div>' +
+          '<div class="unmapped-item-main"><strong>Unmapped '+u.kind+' #'+u.hrRef+'</strong><span>'+u.employees+' employee(s) at '+esc(co.name)+' reference this ID with no local match</span></div>' +
+          '<div class="unmapped-actions"><select class="select"><option value="">Map to existing…</option>'+options+'</select>' +
+          '<button class="btn btn-secondary btn-sm" data-resolve="'+u.id+'" data-mode="map">Map</button>' +
+          '<button class="btn btn-primary btn-sm" data-resolve="'+u.id+'" data-mode="create">Create New</button></div></div>';
+      }).join("");
+    }
+    var histBody = document.getElementById("syncHistoryBody");
+    histBody.innerHTML = SYNC_HISTORY.map(function(s){
+      var statusCls = s.status==="success"?"badge-active":(s.status==="partial"?"badge-leave":"badge-resigned");
+      return '<tr><td>'+esc(s.ts)+'</td><td>'+esc(s.type)+'</td><td><span class="badge '+statusCls+'">'+esc(s.status.charAt(0).toUpperCase()+s.status.slice(1))+'</span></td>' +
+        '<td>'+s.n+'</td><td>'+s.p+'</td><td>'+s.r+'</td><td>'+(s.err>0?'<span style="color:var(--color-danger);font-weight:700">'+s.err+'</span>':'0')+'</td><td>'+esc(s.by)+'</td></tr>';
+    }).join("");
+  }
+  document.addEventListener("click", function(e){
+    var btn = e.target.closest("[data-resolve]");
+    if(!btn) return;
+    var id = btn.getAttribute("data-resolve");
+    var item = UNMAPPED.find(function(u){return u.id===id;});
+    if(item){ item.resolved = true; }
+    toast(btn.dataset.mode==="create" ? "New record created and linked" : "Mapped to existing record");
+    updateUnmappedBanner();
+    renderSyncView();
+  });
+
+  /* ================= SETTINGS ================= */
+  function renderSettings(){
+    var opts = [
+      {id:"hourly",title:"Every hour",desc:"Recommended when the Group hires or transfers people frequently."},
+      {id:"nightly",title:"Every midnight",desc:"Lighter load — fine if HR changes are infrequent."}
+    ];
+    document.getElementById("scheduleOptions").innerHTML = opts.map(function(o){
+      return '<div class="radio-row'+(STATE.scheduleFreq===o.id?" selected":"")+'" data-freq="'+o.id+'"><span class="radio-dot"></span><div><strong>'+o.title+'</strong><span>'+o.desc+'</span></div></div>';
+    }).join("");
+    document.querySelectorAll("[data-freq]").forEach(function(row){
+      row.addEventListener("click", function(){ STATE.scheduleFreq = row.getAttribute("data-freq"); renderSettings(); });
+    });
+    document.getElementById("brandSwatches").innerHTML = BRAND_SWATCHES.map(function(c,i){
+      return '<span class="swatch'+(i===0?" selected":"")+'" style="background:'+c+'" title="'+c+'"></span>';
+    }).join("") + '<span style="font-size:11.5px;color:var(--color-text-tertiary);margin-left:6px">Defined in design tokens, not editable here</span>';
+  }
+  document.getElementById("settingsSaveBtn").addEventListener("click", function(){ toast("Settings saved"); });
+
+  /* ================= AUDIT LOGS ================= */
+  function renderAudit(){
+    var f = STATE.auditFilters;
+    var list = AUDIT_LOGS.filter(function(a){
+      if(f.action && a.action!==f.action) return false;
+      if(f.search){ var q=f.search.toLowerCase(); if((a.user+" "+a.name+" "+a.summary).toLowerCase().indexOf(q)===-1) return false; }
+      return true;
+    });
+    document.getElementById("auditCount").textContent = list.length + " entries";
+    var actionBadge = {created:"badge-active",updated:"badge-accent",deleted:"badge-resigned",synced:"badge-neutral"};
+    document.getElementById("auditList").innerHTML = list.map(function(a,i){
+      return '<div class="audit-row" data-idx="'+i+'"><div class="audit-row-head">' +
+        '<span class="avatar avatar-sm" style="background:'+a.avatarBg+'">'+initials(a.user.split(" ")[0], a.user.split(" ")[1]||a.user.split(" ")[0])+'</span>' +
+        '<div class="audit-row-main"><span class="line1"><strong>'+esc(a.user)+'</strong> '+esc(a.summary)+'</span><time>'+esc(a.ts)+' · '+esc(a.entity)+' · '+esc(a.name)+'</time></div>' +
+        '<span class="badge '+actionBadge[a.action]+'">'+esc(a.action)+'</span>' +
+        (a.diff ? '<svg class="icon audit-chev"><use href="#i-chevron-right"/></svg>' : '<span style="width:18px"></span>') +
+        '</div>' +
+        (a.diff ? '<div class="audit-detail"><div class="diff-grid"><div class="diff-box diff-old"><span class="diff-label">Before · '+esc(a.diff.field)+'</span>'+esc(a.diff.old)+'</div><div class="diff-box diff-new"><span class="diff-label">After · '+esc(a.diff.field)+'</span>'+esc(a.diff.now)+'</div></div></div>' : '') +
+        '</div>';
+    }).join("") || '<div class="empty-state"><div class="icon-wrap"><svg class="icon"><use href="#i-search"/></svg></div><h3>No matching entries</h3><p>Try a different search or filter.</p></div>';
+    document.querySelectorAll(".audit-row-head").forEach(function(head){
+      head.addEventListener("click", function(){
+        var row = head.closest(".audit-row");
+        if(row.querySelector(".audit-detail")) row.classList.toggle("open");
+      });
+    });
+  }
+  document.getElementById("auditSearch").addEventListener("input", function(e){ STATE.auditFilters.search=e.target.value; renderAudit(); });
+  document.getElementById("auditActionFilter").addEventListener("change", function(e){ STATE.auditFilters.action=e.target.value; renderAudit(); });
+
+  /* ================= DRAWER: entity forms (company/department/designation/office) ================= */
+  var drawerOverlay = document.getElementById("drawerOverlay");
+  var drawerTitle = document.getElementById("drawerTitle");
+  var drawerTabsEl = document.getElementById("drawerTabs");
+  var drawerBody = document.getElementById("drawerBody");
+  var drawerSaveBtn = document.getElementById("drawerSaveBtn");
+
+  function openDrawer(){ drawerOverlay.classList.add("open"); }
+  function closeDrawer(){ drawerOverlay.classList.remove("open"); }
+  document.getElementById("drawerClose").addEventListener("click", closeDrawer);
+  document.getElementById("drawerCancelBtn").addEventListener("click", closeDrawer);
+  drawerOverlay.addEventListener("click", function(e){ if(e.target===drawerOverlay) closeDrawer(); });
+
+  function companyOptionsHTML(selectedId){
+    return COMPANIES.map(function(c){ return '<option value="'+c.id+'"'+(c.id===selectedId?" selected":"")+'>'+esc(c.name)+'</option>'; }).join("");
+  }
+
+  function openEntityDrawer(type, id){
+    drawerTabsEl.innerHTML = "";
+    drawerTabsEl.style.display = "none";
+    var isNew = !id;
+    var save;
+
+    if(type==="company"){
+      var c = id ? companyById[id] : {name:"",address:"",phone:"",email:"",website:"",desc:"",accent:"#790002",hrRef:null,active:true};
+      drawerTitle.textContent = isNew ? "Add Company" : "Edit Company";
+      drawerBody.innerHTML =
+        (c.hrRef ? '<div class="sync-note"><svg class="icon"><use href="#i-info"/></svg><span>Linked to HR record <code>c_id: '+c.hrRef+'</code>. The Name field stays in sync automatically; everything else here is managed in the Directory only.</span></div>' : "") +
+        '<div style="display:flex;gap:16px;align-items:center"><div class="logo-upload"><svg class="icon"><use href="#i-upload"/></svg></div><div style="font-size:12px;color:var(--color-text-secondary)">PNG or SVG, square, at least 256×256px.</div></div>' +
+        '<div class="form-grid">' +
+          '<div class="form-field full"><label>'+(c.hrRef?'<svg class="icon"><use href="#i-lock"/></svg>':'')+'Company Name</label><input type="text" value="'+esc(c.name)+'" '+(c.hrRef?'disabled':'')+'/>'+(c.hrRef?'<span class="lock-note"><svg class="icon"><use href="#i-lock"/></svg>Synced from HR</span>':'')+'</div>' +
+          '<div class="form-field full"><label>Description</label><textarea>'+esc(c.desc||"")+'</textarea></div>' +
+          '<div class="form-field full"><label>Address</label><input type="text" value="'+esc(c.address||"")+'"/></div>' +
+          '<div class="form-field"><label>Phone</label><input type="tel" value="'+esc(c.phone||"")+'"/></div>' +
+          '<div class="form-field"><label>Email</label><input type="email" value="'+esc(c.email||"")+'"/></div>' +
+          '<div class="form-field full"><label>Website</label><input type="text" value="'+esc(c.website||"")+'"/></div>' +
+          '<div class="form-field full"><label>Color Theme</label><div class="swatch-row" id="companyColorRow"></div></div>' +
+          '<div class="form-field full"><div class="form-row-inline"><div><strong>Active</strong><span>Inactive companies are hidden from the directory</span></div><button class="switch'+(c.active!==false?" on":"")+'" id="companyActiveSwitch"></button></div></div>' +
+        '</div>';
+      var palette = ["#790002","#2F5D8A","#6B7A3F","#B8722A","#4A4F6B","#8A4B6B"];
+      document.getElementById("companyColorRow").innerHTML = palette.map(function(p){ return '<span class="swatch'+(p.toLowerCase()===(c.accent||"").toLowerCase()?" selected":"")+'" style="background:'+p+'" data-swatch="'+p+'"></span>'; }).join("");
+      document.querySelectorAll("#companyColorRow .swatch").forEach(function(sw){ sw.addEventListener("click", function(){ document.querySelectorAll("#companyColorRow .swatch").forEach(function(s2){s2.classList.remove("selected");}); sw.classList.add("selected"); }); });
+      document.getElementById("companyActiveSwitch").addEventListener("click", function(){ this.classList.toggle("on"); });
+      save = function(){ toast(isNew ? "Company created" : "Company updated"); closeDrawer(); if(STATE.view==="companies") renderCompaniesTable(); };
+    }
+
+    if(type==="department"){
+      var d = id ? deptById[id] : {name:"",companyId:COMPANIES[0].id,head:"",active:true,hrRef:null};
+      drawerTitle.textContent = isNew ? "Add Department" : "Edit Department";
+      drawerBody.innerHTML =
+        (d.hrRef ? '<div class="sync-note"><svg class="icon"><use href="#i-info"/></svg><span>Linked to HR record <code>ug_id: '+d.hrRef+'</code> (user group). Name stays in sync automatically.</span></div>' : "") +
+        '<div class="form-grid">' +
+          '<div class="form-field full"><label>'+(d.hrRef?'<svg class="icon"><use href="#i-lock"/></svg>':'')+'Department Name</label><input type="text" value="'+esc(d.name)+'" '+(d.hrRef?'disabled':'')+'/>'+(d.hrRef?'<span class="lock-note"><svg class="icon"><use href="#i-lock"/></svg>Synced from HR</span>':'')+'</div>' +
+          '<div class="form-field full"><label>Company</label><select>'+companyOptionsHTML(d.companyId)+'</select></div>' +
+          '<div class="form-field full"><label>Department Head</label><select><option value="">— None —</option>' + EMPLOYEES.filter(function(e){return e.company===d.companyId;}).map(function(e){return '<option'+(e.first+" "+e.last===d.head?" selected":"")+'>'+esc(e.first+" "+e.last)+'</option>';}).join("") + '</select></div>' +
+          '<div class="form-field full"><label>Description</label><textarea placeholder="What this department is responsible for…"></textarea></div>' +
+          '<div class="form-field full"><div class="form-row-inline"><div><strong>Active</strong><span>Inactive departments are hidden from filters</span></div><button class="switch'+(d.active!==false?" on":"")+'" id="deptActiveSwitch"></button></div></div>' +
+        '</div>';
+      document.getElementById("deptActiveSwitch").addEventListener("click", function(){ this.classList.toggle("on"); });
+      save = function(){ toast(isNew ? "Department created" : "Department updated"); closeDrawer(); if(STATE.view==="departments") renderDepartmentsTable(); };
+    }
+
+    if(type==="designation"){
+      var g = id ? desigById[id] : {name:"",companyId:COMPANIES[0].id,level:1,active:true,hrRef:null};
+      drawerTitle.textContent = isNew ? "Add Designation" : "Edit Designation";
+      drawerBody.innerHTML =
+        (g.hrRef ? '<div class="sync-note"><svg class="icon"><use href="#i-info"/></svg><span>Linked to HR record <code>d_id: '+g.hrRef+'</code>. Name stays in sync automatically — this is the field that changes on a promotion.</span></div>' : "") +
+        '<div class="form-grid">' +
+          '<div class="form-field full"><label>'+(g.hrRef?'<svg class="icon"><use href="#i-lock"/></svg>':'')+'Designation Name</label><input type="text" value="'+esc(g.name)+'" '+(g.hrRef?'disabled':'')+'/>'+(g.hrRef?'<span class="lock-note"><svg class="icon"><use href="#i-lock"/></svg>Synced from HR</span>':'')+'</div>' +
+          '<div class="form-field full"><label>Company</label><select>'+companyOptionsHTML(g.companyId)+'</select></div>' +
+          '<div class="form-field full"><label>Hierarchy Level <span style="color:var(--color-text-tertiary);font-weight:400">(used for org-chart grouping — separate from HR\'s internal job_level)</span></label><input type="number" min="1" max="6" value="'+g.level+'"/></div>' +
+          '<div class="form-field full"><label>Description</label><textarea placeholder="Typical scope and seniority for this role…"></textarea></div>' +
+          '<div class="form-field full"><div class="form-row-inline"><div><strong>Active</strong><span>Inactive designations are hidden from filters</span></div><button class="switch'+(g.active!==false?" on":"")+'" id="desigActiveSwitch"></button></div></div>' +
+        '</div>';
+      document.getElementById("desigActiveSwitch").addEventListener("click", function(){ this.classList.toggle("on"); });
+      save = function(){ toast(isNew ? "Designation created" : "Designation updated"); closeDrawer(); if(STATE.view==="designations") renderDesignationsTable(); };
+    }
+
+    if(type==="office"){
+      var o = id ? officeById[id] : {name:"",city:"",country:"Philippines",phone:"",companyId:"",active:true};
+      drawerTitle.textContent = isNew ? "Add Office Location" : "Edit Office Location";
+      drawerBody.innerHTML =
+        '<div class="sync-note"><svg class="icon"><use href="#i-info"/></svg><span>Office Locations are fully Directory-managed — HR does not track structured site data, so nothing here is ever overwritten by sync.</span></div>' +
+        '<div class="form-grid">' +
+          '<div class="form-field full"><label>Office Name</label><input type="text" value="'+esc(o.name)+'"/></div>' +
+          '<div class="form-field full"><label>Address</label><input type="text" placeholder="Street address"/></div>' +
+          '<div class="form-field"><label>City</label><input type="text" value="'+esc(o.city)+'"/></div>' +
+          '<div class="form-field"><label>Country</label><input type="text" value="'+esc(o.country)+'"/></div>' +
+          '<div class="form-field full"><label>Phone</label><input type="tel" value="'+esc(o.phone)+'"/></div>' +
+          '<div class="form-field full"><label>Company (optional — leave blank if shared)</label><select><option value="">— Shared across companies —</option>'+companyOptionsHTML(o.companyId)+'</select></div>' +
+          '<div class="form-field full"><div class="form-row-inline"><div><strong>Active</strong><span>Inactive offices are hidden from filters</span></div><button class="switch'+(o.active!==false?" on":"")+'" id="offActiveSwitch"></button></div></div>' +
+        '</div>';
+      document.getElementById("offActiveSwitch").addEventListener("click", function(){ this.classList.toggle("on"); });
+      save = function(){ toast(isNew ? "Office location created" : "Office location updated"); closeDrawer(); if(STATE.view==="offices") renderOfficesTable(); };
+    }
+
+    drawerSaveBtn.onclick = save;
+    openDrawer();
+  }
+
+  /* ================= DRAWER: employee form (tabbed) ================= */
+  var EMP_TABS = ["Personal","Contact","Organization","Additional"];
+  function openEmployeeDrawer(id){
+    var isNew = !id;
+    var e = id ? empById[id] : null;
+    var isSynced = e ? e.source==="hr_sync" : false;
+    drawerTitle.textContent = isNew ? "Add Employee" : ("Edit " + e.first + " " + e.last);
+    drawerTabsEl.style.display = "flex";
+    drawerTabsEl.innerHTML = EMP_TABS.map(function(t,i){ return '<button class="drawer-tab'+(i===0?" active":"")+'" data-tab="'+t+'">'+t+'</button>'; }).join("");
+
+    function lockLabel(text){ return '<label><svg class="icon"><use href="#i-lock"/></svg>'+text+'</label>'; }
+    function lockNote(){ return '<span class="lock-note"><svg class="icon"><use href="#i-lock"/></svg>Synced from HR</span>'; }
+
+    var panels = {
+      "Personal": '<div class="form-grid">' +
+        '<div class="form-field"><label>Employee ID</label><input type="text" value="'+(e?esc(e.code):'—')+'" disabled/></div>' +
+        (isSynced ? '<div class="form-field">'+lockLabel("First Name")+'<input type="text" value="'+esc(e.first)+'" disabled/>'+lockNote()+'</div>' : '<div class="form-field"><label>First Name</label><input type="text" value="'+(e?esc(e.first):'')+'"/></div>') +
+        (isSynced ? '<div class="form-field">'+lockLabel("Middle Name")+'<input type="text" value="Molina" disabled/>'+lockNote()+'</div>' : '<div class="form-field"><label>Middle Name</label><input type="text"/></div>') +
+        (isSynced ? '<div class="form-field">'+lockLabel("Last Name")+'<input type="text" value="'+esc(e.last)+'" disabled/>'+lockNote()+'</div>' : '<div class="form-field"><label>Last Name</label><input type="text" value="'+(e?esc(e.last):'')+'"/></div>') +
+        '<div class="form-field"><label>Suffix</label><input type="text" placeholder="Jr., III, …"/></div>' +
+        '<div class="form-field"><label>Nickname</label><input type="text"/></div>' +
+        '<div class="form-field"><label>Gender</label><select><option>Female</option><option>Male</option><option>Prefer not to say</option></select></div>' +
+        '<div class="form-field"><label>Birthday</label><input type="date"/></div>' +
+        '<div class="form-field"><label>Pronunciation <span style="color:var(--color-text-tertiary);font-weight:400">(optional)</span></label><input type="text" placeholder="e.g. an-DRAY-ah"/></div>' +
+        '</div>',
+      "Contact": '<div class="form-grid">' +
+        (isSynced ? '<div class="form-field full">'+lockLabel("Corporate Email")+'<input type="text" value="'+esc(e.first.toLowerCase()+"."+e.last.toLowerCase().replace(" ",""))+'@onecherry.group" disabled/>'+lockNote()+'</div>' : '<div class="form-field full"><label>Corporate Email</label><input type="email"/></div>') +
+        '<div class="form-field full"><label>Personal Email</label><input type="email"/></div>' +
+        '<div class="form-field"><label>Mobile Number</label><input type="tel"/></div>' +
+        '<div class="form-field"><label>Viber Number</label><input type="tel"/></div>' +
+        '<div class="form-field"><label>Telephone</label><input type="tel"/></div>' +
+        '<div class="form-field"><label>Local Extension</label><input type="text"/></div>' +
+        '<div class="form-field full"><label>Office Seat / Desk</label><input type="text" placeholder="e.g. BGC-3F-014"/></div>' +
+        '</div>',
+      "Organization": '<div class="form-grid">' +
+        (isSynced ? '<div class="form-field">'+lockLabel("Company")+'<input type="text" value="'+esc(companyById[e.company].name)+'" disabled/>'+lockNote()+'</div>' : '<div class="form-field full"><label>Company</label><select>'+companyOptionsHTML(null)+'</select></div>') +
+        (isSynced ? '<div class="form-field">'+lockLabel("Department")+'<input type="text" value="'+esc(deptById[e.dept].name)+'" disabled/>'+lockNote()+'</div>' : '') +
+        (isSynced ? '<div class="form-field">'+lockLabel("Designation")+'<input type="text" value="'+esc(desigById[e.desig].name)+'" disabled/>'+lockNote()+'</div>' : '') +
+        (isSynced ? '<div class="form-field">'+lockLabel("Employment Status")+'<input type="text" value="'+statusLabel(e.status)+'" disabled/>'+lockNote()+'</div>' : '') +
+        (isSynced ? '<div class="form-field">'+lockLabel("Date Hired")+'<input type="text" value="Mar 15, 2021" disabled/>'+lockNote()+'</div>' : '') +
+        (isSynced ? '<div class="form-field">'+lockLabel("Immediate Supervisor")+'<input type="text" value="Christian Uy" disabled/>'+lockNote()+'</div>' : '') +
+        '<div class="form-field full"><label>Office Location</label><select>' + OFFICES.map(function(o){ return '<option'+(e && e.office===o.id?" selected":"")+'>'+esc(o.name)+'</option>'; }).join("") + '</select></div>' +
+        '</div>',
+      "Additional": '<div class="form-grid">' +
+        '<div class="form-field full"><label>Skills <span style="color:var(--color-text-tertiary);font-weight:400">(comma separated)</span></label><input type="text" placeholder="Figma, Design Systems, User Research"/></div>' +
+        '<div class="form-field full"><label>About Me</label><textarea placeholder="A short bio shown on the public profile…"></textarea></div>' +
+        '<div class="form-field"><label>LinkedIn</label><input type="text" placeholder="linkedin.com/in/…"/></div>' +
+        '<div class="form-field"><label>Facebook</label><input type="text" placeholder="facebook.com/…"/></div>' +
+        '<div class="form-field full"><label>Emergency Contact Name</label><input type="text"/></div>' +
+        '<div class="form-field"><label>Relationship</label><input type="text"/></div>' +
+        '<div class="form-field"><label>Emergency Contact Phone</label><input type="tel"/></div>' +
+        '<div class="form-field full"><div class="form-row-inline"><div><strong>Directory Account Active</strong><span>Turn off to hide this profile without changing HR employment status</span></div><button class="switch on" id="empActiveSwitch"></button></div></div>' +
+        '</div>'
+    };
+    drawerBody.innerHTML = panels["Personal"];
+    var activeSwitch = document.getElementById("empActiveSwitch");
+    if(activeSwitch) activeSwitch.addEventListener("click", function(){ this.classList.toggle("on"); });
+
+    drawerTabsEl.querySelectorAll(".drawer-tab").forEach(function(tab){
+      tab.addEventListener("click", function(){
+        drawerTabsEl.querySelectorAll(".drawer-tab").forEach(function(t){t.classList.remove("active");});
+        tab.classList.add("active");
+        drawerBody.innerHTML = panels[tab.getAttribute("data-tab")];
+        var sw = document.getElementById("empActiveSwitch");
+        if(sw) sw.addEventListener("click", function(){ this.classList.toggle("on"); });
+      });
+    });
+
+    drawerSaveBtn.onclick = function(){ toast(isNew ? "Employee created" : "Employee updated"); closeDrawer(); renderEmployees(); };
+    openDrawer();
+  }
+
+  /* ---------------- Init ---------------- */
+  renderDashboard();
+  renderEmployees();
+  renderCompaniesTable();
+  renderDepartmentsTable();
+  renderDesignationsTable();
+  renderOfficesTable();
+  renderSyncView();
+  renderSettings();
+  renderAudit();
+
+})();
+</script>

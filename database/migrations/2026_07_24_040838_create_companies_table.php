@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('companies', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedInteger('hr_ref_id')->nullable()->unique()->comment("HR system's c_id \u{2014} identity stays in sync, everything else is Admin-owned");
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->text('description')->nullable();
+            $table->string('address')->nullable();
+            $table->string('phone', 30)->nullable();
+            $table->string('email')->nullable();
+            $table->string('website')->nullable();
+            $table->string('color_theme', 7)->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->index('is_active');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('companies');
+    }
+};

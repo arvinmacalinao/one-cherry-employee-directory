@@ -1,0 +1,1580 @@
+<title>One Cherry Employee Directory — UI Mockups</title>
+<style>
+  :root{
+    --color-bg:#FFFFFF;
+    --color-surface:#F6F6F6;
+    --color-surface-raised:#FFFFFF;
+    --color-border:#E5E5E5;
+    --color-border-strong:#D8D8D9;
+    --color-text:#1C1C1E;
+    --color-text-secondary:#77787B;
+    --color-text-tertiary:#A6A7A9;
+    --color-accent:#790002;
+    --color-accent-hover:#5C0002;
+    --color-accent-tint:#FBEAEA;
+    --color-accent-tint-strong:#F1CFCE;
+    --color-on-accent:#FFFFFF;
+    --color-success:#34C759;
+    --color-success-tint:#E7F9EC;
+    --color-danger:#FF3B30;
+    --color-danger-tint:#FFEBEA;
+    --color-warning:#B26A00;
+    --color-warning-tint:#FFF2DE;
+    --shadow-sm:0 1px 2px rgba(20,10,10,.05), 0 1px 1px rgba(20,10,10,.03);
+    --shadow-md:0 6px 16px rgba(20,10,10,.07), 0 2px 5px rgba(20,10,10,.04);
+    --shadow-lg:0 18px 40px rgba(20,10,10,.14), 0 6px 12px rgba(20,10,10,.06);
+    --radius-sm:8px;
+    --radius-md:12px;
+    --radius-lg:16px;
+    --font-display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --ease:cubic-bezier(.4,0,.2,1);
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --color-bg:#1A1213;
+      --color-surface:#211819;
+      --color-surface-raised:#291E1F;
+      --color-border:#3A2C2C;
+      --color-border-strong:#4A3838;
+      --color-text:#F5EFEE;
+      --color-text-secondary:#B3A8A7;
+      --color-text-tertiary:#8A7F7E;
+      --color-accent:#E1554D;
+      --color-accent-hover:#F16A62;
+      --color-accent-tint:#3A2020;
+      --color-accent-tint-strong:#4A2726;
+      --color-on-accent:#FFFFFF;
+      --color-success:#3DDC73;
+      --color-success-tint:#14301F;
+      --color-danger:#FF6259;
+      --color-danger-tint:#3A1917;
+      --color-warning:#E3A34E;
+      --color-warning-tint:#3A2A10;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.35);
+      --shadow-md:0 6px 16px rgba(0,0,0,.4);
+      --shadow-lg:0 20px 44px rgba(0,0,0,.55);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --color-bg:#1A1213; --color-surface:#211819; --color-surface-raised:#291E1F;
+    --color-border:#3A2C2C; --color-border-strong:#4A3838; --color-text:#F5EFEE;
+    --color-text-secondary:#B3A8A7; --color-text-tertiary:#8A7F7E;
+    --color-accent:#E1554D; --color-accent-hover:#F16A62; --color-accent-tint:#3A2020; --color-accent-tint-strong:#4A2726;
+    --color-success:#3DDC73; --color-success-tint:#14301F; --color-danger:#FF6259; --color-danger-tint:#3A1917;
+    --color-warning:#E3A34E; --color-warning-tint:#3A2A10;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.35); --shadow-md:0 6px 16px rgba(0,0,0,.4); --shadow-lg:0 20px 44px rgba(0,0,0,.55);
+    color-scheme:dark;
+  }
+  :root[data-theme="light"]{
+    --color-bg:#FFFFFF; --color-surface:#F6F6F6; --color-surface-raised:#FFFFFF;
+    --color-border:#E5E5E5; --color-border-strong:#D8D8D9; --color-text:#1C1C1E;
+    --color-text-secondary:#77787B; --color-text-tertiary:#A6A7A9;
+    --color-accent:#790002; --color-accent-hover:#5C0002; --color-accent-tint:#FBEAEA; --color-accent-tint-strong:#F1CFCE;
+    --color-success:#34C759; --color-success-tint:#E7F9EC; --color-danger:#FF3B30; --color-danger-tint:#FFEBEA;
+    --color-warning:#B26A00; --color-warning-tint:#FFF2DE;
+    --shadow-sm:0 1px 2px rgba(20,10,10,.05), 0 1px 1px rgba(20,10,10,.03);
+    --shadow-md:0 6px 16px rgba(20,10,10,.07), 0 2px 5px rgba(20,10,10,.04);
+    --shadow-lg:0 18px 40px rgba(20,10,10,.14), 0 6px 12px rgba(20,10,10,.06);
+    color-scheme:light;
+  }
+
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--font-body);
+    background:var(--color-bg);
+    color:var(--color-text);
+    -webkit-font-smoothing:antialiased;
+    font-size:14px;
+    line-height:1.5;
+  }
+  h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;margin:0;text-wrap:balance;letter-spacing:-.01em;color:var(--color-text)}
+  p{margin:0}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{
+    outline:2px solid var(--color-accent);outline-offset:2px;border-radius:4px;
+  }
+  ::selection{background:var(--color-accent-tint-strong)}
+  svg{display:block}
+  .icon{width:18px;height:18px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+  }
+
+  /* ---------- App shell ---------- */
+  .app{display:flex;min-height:100vh;background:var(--color-bg)}
+
+  .scrim{position:fixed;inset:0;background:rgba(10,5,5,.4);opacity:0;pointer-events:none;transition:opacity .2s var(--ease);z-index:40}
+  .scrim.show{opacity:1;pointer-events:auto}
+
+  .sidebar{
+    width:250px;flex-shrink:0;height:100vh;position:sticky;top:0;
+    background:var(--color-surface);border-right:1px solid var(--color-border);
+    display:flex;flex-direction:column;padding:20px 14px;gap:18px;z-index:45;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:6px 8px 10px}
+  .brand-mark{
+    width:34px;height:34px;border-radius:10px;background:var(--color-accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:16px;flex-shrink:0;
+  }
+  .brand-text{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+  .brand-text strong{font-family:var(--font-display);font-size:14.5px;font-weight:700;white-space:nowrap}
+  .brand-text span{font-size:11px;color:var(--color-text-secondary);white-space:nowrap}
+
+  .sidebar-nav{display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto}
+  .nav-sep{height:1px;background:var(--color-border);margin:10px 6px}
+  .nav-item{
+    display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:var(--radius-sm);
+    color:var(--color-text-secondary);font-size:13.5px;font-weight:500;text-align:left;transition:background .15s var(--ease),color .15s var(--ease);
+  }
+  .nav-item .icon{width:17px;height:17px}
+  .nav-item:hover{background:var(--color-surface-raised);color:var(--color-text)}
+  .nav-item.active{background:var(--color-accent-tint);color:var(--color-accent)}
+  .nav-item.active .icon{stroke:var(--color-accent)}
+  .nav-count{
+    margin-left:auto;background:var(--color-accent);color:#fff;font-size:10.5px;font-weight:700;
+    min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;
+  }
+
+  .sidebar-footer{display:flex;flex-direction:column;gap:10px;padding-top:10px;border-top:1px solid var(--color-border)}
+  .theme-toggle{
+    display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);
+    color:var(--color-text-secondary);font-size:13px;font-weight:500;border:1px solid var(--color-border);background:var(--color-surface-raised);
+  }
+  .theme-toggle:hover{color:var(--color-text);border-color:var(--color-border-strong)}
+  .fontnote{font-size:10.5px;color:var(--color-text-tertiary);padding:0 2px;line-height:1.4}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{
+    height:60px;flex-shrink:0;display:flex;align-items:center;gap:14px;padding:0 28px;
+    border-bottom:1px solid var(--color-border);background:var(--color-bg);position:sticky;top:0;z-index:20;
+  }
+  .menu-btn-inline{display:none;padding:6px;border-radius:8px;color:var(--color-text-secondary)}
+  .menu-btn-inline:hover{background:var(--color-surface)}
+  .topbar-title{font-size:16px}
+  .topbar-spacer{flex:1}
+  .icon-btn{
+    width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    color:var(--color-text-secondary);transition:background .15s var(--ease),color .15s var(--ease);
+  }
+  .icon-btn:hover{background:var(--color-surface);color:var(--color-text)}
+  .avatar-btn{border-radius:50%;transition:box-shadow .15s var(--ease)}
+  .avatar-btn:hover{box-shadow:0 0 0 3px var(--color-accent-tint)}
+
+  .view-root{padding:30px 34px 72px;max-width:1360px;margin:0 auto;width:100%}
+  .view{display:flex;flex-direction:column;gap:34px}
+
+  @media (max-width:900px){
+    .sidebar{position:fixed;left:0;top:0;transform:translateX(-100%);transition:transform .22s var(--ease);box-shadow:var(--shadow-lg)}
+    .sidebar.open{transform:translateX(0)}
+    .menu-btn-inline{display:flex}
+    .view-root{padding:20px 16px 56px}
+    .topbar{padding:0 16px}
+  }
+
+  /* ---------- Primitives ---------- */
+  .btn{
+    display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:var(--radius-sm);
+    font-size:13.5px;font-weight:600;white-space:nowrap;transition:background .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease),transform .1s var(--ease);
+    border:1px solid transparent;
+  }
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:var(--color-accent);color:var(--color-on-accent)}
+  .btn-primary:hover{background:var(--color-accent-hover)}
+  .btn-secondary{background:var(--color-surface-raised);color:var(--color-text);border-color:var(--color-border)}
+  .btn-secondary:hover{border-color:var(--color-border-strong);background:var(--color-surface)}
+  .btn-ghost{color:var(--color-text-secondary)}
+  .btn-ghost:hover{color:var(--color-text);background:var(--color-surface)}
+  .btn-sm{padding:6px 11px;font-size:12.5px;border-radius:7px}
+  .btn .icon{width:15px;height:15px}
+
+  .field{
+    display:flex;align-items:center;gap:9px;padding:9px 13px;border-radius:var(--radius-sm);
+    background:var(--color-surface-raised);border:1px solid var(--color-border);color:var(--color-text-secondary);
+    transition:border-color .15s var(--ease),box-shadow .15s var(--ease);
+  }
+  .field:focus-within{border-color:var(--color-accent);box-shadow:0 0 0 3px var(--color-accent-tint)}
+  .field input{border:0;background:none;outline:none;color:var(--color-text);width:100%;font-size:13.5px}
+  .field input::placeholder{color:var(--color-text-tertiary)}
+  .field .icon{width:16px;height:16px;flex-shrink:0}
+
+  select.select{
+    appearance:none;-webkit-appearance:none;padding:8px 30px 8px 12px;border-radius:var(--radius-sm);
+    background:var(--color-surface-raised) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2377787B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 9px center;
+    border:1px solid var(--color-border);color:var(--color-text);font-size:13px;font-weight:500;cursor:pointer;
+  }
+  select.select:hover{border-color:var(--color-border-strong)}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;
+    letter-spacing:.02em;
+  }
+  .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .badge-active{background:var(--color-success-tint);color:var(--color-success)}
+  .badge-leave{background:var(--color-warning-tint);color:var(--color-warning)}
+  .badge-resigned{background:var(--color-danger-tint);color:var(--color-danger)}
+  .badge-inactive{background:var(--color-surface);color:var(--color-text-tertiary)}
+
+  .chip{
+    display:inline-flex;align-items:center;padding:5px 11px;border-radius:20px;background:var(--color-surface);
+    border:1px solid var(--color-border);font-size:12px;font-weight:500;color:var(--color-text-secondary);
+  }
+
+  .avatar{
+    border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);
+    font-weight:700;flex-shrink:0;color:#fff;
+  }
+  .avatar-xs{width:26px;height:26px;font-size:10.5px}
+  .avatar-sm{width:34px;height:34px;font-size:12px}
+  .avatar-md{width:46px;height:46px;font-size:15px}
+  .avatar-lg{width:64px;height:64px;font-size:20px}
+  .avatar-xl{width:104px;height:104px;font-size:32px;border:4px solid var(--color-bg)}
+
+  .card{
+    background:var(--color-surface-raised);border:1px solid var(--color-border);border-radius:var(--radius-md);
+    box-shadow:var(--shadow-sm);
+  }
+
+  .section-head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+  .section-eyebrow{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-tertiary)}
+  .section-title{font-size:17px}
+  .section-head .spacer{flex:1}
+  .link-more{font-size:12.5px;font-weight:600;color:var(--color-accent);display:flex;align-items:center;gap:3px}
+  .link-more .icon{width:14px;height:14px}
+
+  .scroll-row{display:flex;gap:14px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+  .scroll-row::-webkit-scrollbar{height:6px}
+  .scroll-row::-webkit-scrollbar-thumb{background:var(--color-border-strong);border-radius:3px}
+
+  /* ---------- Toasts ---------- */
+  .toast-stack{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:10px;z-index:200}
+  .toast{
+    display:flex;align-items:center;gap:10px;background:var(--color-text);color:var(--color-bg);
+    padding:11px 16px;border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);font-size:13px;font-weight:600;
+    animation:toast-in .22s var(--ease);
+  }
+  .toast .icon{width:16px;height:16px;color:var(--color-success)}
+  @keyframes toast-in{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+
+  /* ---------- Skeleton ---------- */
+  .skeleton{position:relative;overflow:hidden;background:var(--color-surface);border-radius:var(--radius-sm)}
+  .skeleton::after{
+    content:"";position:absolute;inset:0;transform:translateX(-100%);
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
+    animation:shimmer 1.2s infinite;
+  }
+  :root[data-theme="dark"] .skeleton::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}
+  @media (prefers-color-scheme:dark){ .skeleton::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)} }
+  @keyframes shimmer{100%{transform:translateX(100%)}}
+  @media (prefers-reduced-motion:reduce){ .skeleton::after{display:none} }
+
+  /* ---------- Empty state ---------- */
+  .empty-state{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:64px 20px;color:var(--color-text-secondary)}
+  .empty-state .icon-wrap{
+    width:56px;height:56px;border-radius:50%;background:var(--color-surface);display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--color-border);
+  }
+  .empty-state .icon-wrap .icon{width:24px;height:24px;color:var(--color-text-tertiary)}
+  .empty-state h3{font-size:15px;color:var(--color-text)}
+  .empty-state p{font-size:13px;max-width:320px}
+
+  /* ================= DASHBOARD ================= */
+  .hero{
+    background:linear-gradient(180deg,var(--color-surface),var(--color-bg));
+    border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:40px 32px;text-align:center;
+  }
+  .hero-eyebrow{font-size:12px;font-weight:700;color:var(--color-accent);letter-spacing:.04em;margin-bottom:8px}
+  .hero h2{font-size:26px;margin-bottom:18px}
+  .hero-search-wrap{position:relative;max-width:640px;margin:0 auto}
+  .hero-search{
+    display:flex;align-items:center;gap:11px;background:var(--color-surface-raised);border:1.5px solid var(--color-border);
+    border-radius:14px;padding:15px 20px;box-shadow:var(--shadow-md);transition:border-color .15s var(--ease),box-shadow .15s var(--ease);
+  }
+  .hero-search:focus-within{border-color:var(--color-accent);box-shadow:0 0 0 4px var(--color-accent-tint)}
+  .hero-search .icon{width:19px;height:19px;color:var(--color-text-tertiary)}
+  .hero-search input{flex:1;border:0;outline:0;background:none;font-size:15px;color:var(--color-text)}
+  .hero-search input::placeholder{color:var(--color-text-tertiary)}
+  .hero-kbd{font-size:11px;font-weight:700;color:var(--color-text-tertiary);border:1px solid var(--color-border);border-radius:5px;padding:2px 6px}
+  .hero-results{
+    position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--color-surface-raised);border:1px solid var(--color-border);
+    border-radius:var(--radius-md);box-shadow:var(--shadow-lg);text-align:left;overflow:hidden;z-index:30;display:none;max-height:380px;overflow-y:auto;
+  }
+  .hero-results.show{display:block}
+  .hero-results-group-label{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--color-text-tertiary);padding:11px 16px 5px}
+  .hero-result-row{display:flex;align-items:center;gap:11px;padding:9px 16px;cursor:pointer;transition:background .12s var(--ease)}
+  .hero-result-row:hover,.hero-result-row.kb-active{background:var(--color-surface)}
+  .hero-result-main{display:flex;flex-direction:column;min-width:0}
+  .hero-result-main strong{font-size:13.5px;font-weight:600}
+  .hero-result-main span{font-size:12px;color:var(--color-text-secondary)}
+  .hero-empty{padding:24px 16px;text-align:center;font-size:13px;color:var(--color-text-secondary)}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .stat-tile{
+    padding:20px 20px;display:flex;flex-direction:column;gap:10px;transition:transform .18s var(--ease),box-shadow .18s var(--ease);
+  }
+  .stat-tile:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+  .stat-tile-top{display:flex;align-items:center;justify-content:space-between}
+  .stat-icon{width:34px;height:34px;border-radius:9px;background:var(--color-accent-tint);color:var(--color-accent);display:flex;align-items:center;justify-content:center}
+  .stat-icon .icon{width:17px;height:17px}
+  .stat-value{font-family:var(--font-display);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .stat-label{font-size:12.5px;color:var(--color-text-secondary);font-weight:500}
+
+  .qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .qa-card{
+    padding:20px;display:flex;flex-direction:column;gap:12px;text-align:left;transition:transform .18s var(--ease),box-shadow .18s var(--ease),border-color .18s var(--ease);
+  }
+  .qa-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--color-border-strong)}
+  .qa-icon{width:38px;height:38px;border-radius:10px;background:var(--color-surface);display:flex;align-items:center;justify-content:center;color:var(--color-accent)}
+  .qa-icon .icon{width:18px;height:18px}
+  .qa-card strong{font-size:14px}
+  .qa-card p{font-size:12.5px;color:var(--color-text-secondary)}
+
+  .bday-card{
+    min-width:168px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;flex-shrink:0;
+    transition:transform .18s var(--ease),box-shadow .18s var(--ease);cursor:pointer;
+  }
+  .bday-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+  .bday-card strong{font-size:13px}
+  .bday-card .bday-dept{font-size:11.5px;color:var(--color-text-secondary)}
+  .bday-date{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--color-accent-tint);color:var(--color-accent)}
+  .bday-date.today{background:var(--color-accent);color:#fff}
+
+  .split-row{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;align-items:start}
+  .list-card{padding:18px}
+  .mini-row{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--color-border)}
+  .mini-row:last-child{border-bottom:0}
+  .mini-row-main{display:flex;flex-direction:column;min-width:0;flex:1}
+  .mini-row-main strong{font-size:13px;font-weight:600}
+  .mini-row-main span{font-size:12px;color:var(--color-text-secondary)}
+  .mini-row .time{font-size:11.5px;color:var(--color-text-tertiary);white-space:nowrap}
+  .new-badge{font-size:10px;font-weight:700;color:var(--color-success);background:var(--color-success-tint);padding:2px 7px;border-radius:20px;letter-spacing:.02em}
+
+  .avatar-stack{display:flex}
+  .avatar-stack .avatar{margin-left:-8px;border:2.5px solid var(--color-surface-raised)}
+  .avatar-stack .avatar:first-child{margin-left:0}
+
+  .announce{padding:16px 18px;display:flex;gap:13px;align-items:flex-start}
+  .announce .icon-wrap{width:32px;height:32px;border-radius:9px;background:var(--color-accent-tint);color:var(--color-accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .announce .icon-wrap .icon{width:16px;height:16px}
+  .announce-body{flex:1;min-width:0}
+  .announce-body strong{font-size:13.5px;display:block;margin-bottom:2px}
+  .announce-body p{font-size:12.5px;color:var(--color-text-secondary)}
+  .announce-body time{font-size:11px;color:var(--color-text-tertiary)}
+  .announce-close{color:var(--color-text-tertiary);padding:4px;border-radius:6px;flex-shrink:0}
+  .announce-close:hover{background:var(--color-surface);color:var(--color-text)}
+
+  /* ================= DIRECTORY ================= */
+  .filter-bar{
+    position:sticky;top:60px;z-index:15;background:var(--color-bg);padding:14px 0 12px;display:flex;flex-direction:column;gap:12px;
+    border-bottom:1px solid var(--color-border);margin-bottom:4px;
+  }
+  .filter-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .filter-row .field{flex:1 1 240px;min-width:200px}
+  .filter-row .spacer{flex:1}
+  .view-toggle{display:flex;border:1px solid var(--color-border);border-radius:var(--radius-sm);overflow:hidden}
+  .view-toggle button{padding:8px 11px;color:var(--color-text-secondary);display:flex}
+  .view-toggle button.active{background:var(--color-accent-tint);color:var(--color-accent)}
+  .az-rail{display:flex;gap:3px;overflow-x:auto;padding:2px 0}
+  .az-rail button{
+    width:26px;height:26px;border-radius:7px;font-size:11.5px;font-weight:700;color:var(--color-text-tertiary);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s var(--ease),color .12s var(--ease);
+  }
+  .az-rail button:hover{background:var(--color-surface);color:var(--color-text)}
+  .az-rail button.active{background:var(--color-accent);color:#fff}
+  .az-rail button:disabled{opacity:.3;cursor:default}
+  .result-count{font-size:12px;color:var(--color-text-tertiary)}
+
+  .emp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .emp-card{
+    padding:20px;display:flex;flex-direction:column;gap:14px;transition:transform .2s var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease);
+  }
+  .emp-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--color-border-strong)}
+  .emp-card-top{display:flex;gap:12px;align-items:flex-start}
+  .emp-card-id{min-width:0;flex:1}
+  .emp-card-id strong{display:block;font-size:14.5px;font-weight:700}
+  .emp-card-id .desig{font-size:12.5px;color:var(--color-accent);font-weight:600;margin-top:1px}
+  .emp-card-id .dept{font-size:12px;color:var(--color-text-secondary);margin-top:3px}
+  .fav-btn{color:var(--color-text-tertiary);padding:5px;border-radius:8px;flex-shrink:0}
+  .fav-btn:hover{background:var(--color-surface)}
+  .fav-btn.is-fav{color:#F5B301}
+  .fav-btn.is-fav .icon{fill:#F5B301}
+  .emp-card-meta{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--color-text-secondary);border-top:1px solid var(--color-border);padding-top:12px}
+  .emp-card-meta div{display:flex;align-items:center;gap:8px;min-width:0}
+  .emp-card-meta .icon{width:14px;height:14px;flex-shrink:0;color:var(--color-text-tertiary)}
+  .emp-card-meta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .emp-card-actions{display:flex;gap:8px}
+  .emp-card-actions a,.emp-card-actions button{
+    flex:1;display:flex;align-items:center;justify-content:center;padding:8px;border-radius:8px;
+    background:var(--color-surface);color:var(--color-text-secondary);transition:background .15s var(--ease),color .15s var(--ease);
+  }
+  .emp-card-actions a:hover,.emp-card-actions button:hover{background:var(--color-accent-tint);color:var(--color-accent)}
+  .emp-card-actions .icon{width:16px;height:16px}
+  .emp-card-actions .btn-view{flex:1.6;background:var(--color-text);color:var(--color-bg);font-size:12.5px;font-weight:700}
+  .emp-card-actions .btn-view:hover{background:var(--color-accent);color:#fff}
+
+  /* list view */
+  .emp-grid.list-mode{grid-template-columns:1fr;gap:8px}
+  .emp-grid.list-mode .emp-card{flex-direction:row;align-items:center;padding:12px 16px;gap:16px}
+  .emp-grid.list-mode .emp-card-top{flex:1.4;min-width:0}
+  .emp-grid.list-mode .emp-card-meta{flex:2;flex-direction:row;flex-wrap:wrap;border-top:0;padding-top:0;gap:16px}
+  .emp-grid.list-mode .emp-card-actions{flex:0 0 auto;width:196px}
+  .emp-grid.list-mode:hover .emp-card{transform:none}
+
+  @media (max-width:1180px){ .emp-grid{grid-template-columns:repeat(2,1fr)} .stat-grid,.qa-grid{grid-template-columns:repeat(2,1fr)} .split-row{grid-template-columns:1fr} }
+  @media (max-width:640px){ .emp-grid{grid-template-columns:1fr} .emp-grid.list-mode .emp-card{flex-direction:column;align-items:stretch} .emp-grid.list-mode .emp-card-actions{width:100%} }
+
+  /* ================= COMPANIES / DEPARTMENTS ================= */
+  .co-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .co-card{padding:0;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+  .co-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+  .co-banner{height:64px;position:relative}
+  .co-logo{
+    width:52px;height:52px;border-radius:13px;position:absolute;left:20px;bottom:-20px;display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:700;font-size:16px;color:#fff;box-shadow:var(--shadow-md);border:3px solid var(--color-surface-raised);
+  }
+  .co-body{padding:30px 20px 20px;display:flex;flex-direction:column;gap:12px;flex:1}
+  .co-body h3{font-size:15.5px}
+  .co-count{font-size:12px;color:var(--color-text-secondary)}
+  .co-meta{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--color-text-secondary)}
+  .co-meta div{display:flex;gap:8px;align-items:flex-start}
+  .co-meta .icon{width:14px;height:14px;flex-shrink:0;margin-top:1px;color:var(--color-text-tertiary)}
+  .co-card .btn{margin-top:4px;justify-content:center}
+
+  .dept-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .dept-card{padding:20px;display:flex;flex-direction:column;gap:12px;transition:transform .18s var(--ease),box-shadow .18s var(--ease)}
+  .dept-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+  .dept-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .dept-card h3{font-size:15px}
+  .dept-co-chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;white-space:nowrap}
+  .dept-head-row{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--color-text-secondary)}
+  .dept-stats{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--color-border);padding-top:12px}
+  .dept-stats strong{font-family:var(--font-display);font-size:18px}
+
+  @media (max-width:1180px){ .co-grid,.dept-grid{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:640px){ .co-grid,.dept-grid{grid-template-columns:1fr} }
+
+  /* ================= PROFILE ================= */
+  .profile-cover{border-radius:var(--radius-lg);height:150px;position:relative;overflow:hidden}
+  .profile-head{display:flex;gap:22px;align-items:flex-end;margin-top:-52px;padding:0 8px}
+  .profile-head-info{flex:1;min-width:0;padding-bottom:6px;display:flex;flex-direction:column;gap:4px}
+  .profile-head-info h2{font-size:23px}
+  .profile-head-info .desig{color:var(--color-accent);font-weight:600;font-size:14px}
+  .profile-head-info .org-line{color:var(--color-text-secondary);font-size:13px}
+  .profile-actions{display:flex;gap:8px;padding-bottom:6px;flex-wrap:wrap}
+
+  .profile-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:20px;align-items:start}
+  .info-card{padding:22px}
+  .info-card h4{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-tertiary);margin-bottom:16px}
+  .info-list{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}
+  .info-item{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .info-item label{font-size:11.5px;color:var(--color-text-tertiary)}
+  .info-item div{font-size:13.5px;font-weight:500;overflow-wrap:anywhere}
+  .info-item a{color:var(--color-accent)}
+  .skills-wrap{display:flex;flex-wrap:wrap;gap:8px}
+  .about-text{font-size:13.5px;line-height:1.7;color:var(--color-text-secondary);max-width:62ch}
+
+  .side-card{padding:22px;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center}
+  .side-card h4{align-self:flex-start;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-tertiary)}
+  .qr-grid{display:grid;border-radius:8px;overflow:hidden;background:#fff;padding:10px}
+  .qr-cell{width:6px;height:6px}
+  .qr-caption{font-size:11.5px;color:var(--color-text-tertiary)}
+  .person-row{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:6px;border-radius:9px;transition:background .12s var(--ease)}
+  .person-row:hover{background:var(--color-surface)}
+  .person-row-info{display:flex;flex-direction:column;min-width:0}
+  .person-row-info strong{font-size:13px}
+  .person-row-info span{font-size:11.5px;color:var(--color-text-secondary)}
+  .team-list{display:flex;flex-direction:column;gap:2px;width:100%}
+
+  @media (max-width:980px){ .profile-grid{grid-template-columns:1fr} .profile-head{flex-direction:column;align-items:flex-start;gap:14px} .info-list{grid-template-columns:1fr} }
+
+  /* ================= DRAWER ================= */
+  .drawer-overlay{
+    position:fixed;inset:0;background:rgba(10,5,5,.45);display:flex;justify-content:flex-end;z-index:100;
+    opacity:0;pointer-events:none;transition:opacity .22s var(--ease);
+  }
+  .drawer-overlay.open{opacity:1;pointer-events:auto}
+  .drawer{
+    width:min(620px,100%);height:100%;background:var(--color-bg);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;
+    transform:translateX(24px);transition:transform .25s var(--ease);overflow:hidden;
+  }
+  .drawer-overlay.open .drawer{transform:none}
+  .drawer-banner{height:96px;position:relative;flex-shrink:0}
+  .drawer-banner .drawer-close{position:absolute;top:14px;right:14px;background:rgba(0,0,0,.28);color:#fff;border-radius:9px;padding:7px}
+  .drawer-logo{
+    width:64px;height:64px;border-radius:15px;position:absolute;left:24px;bottom:-24px;display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:700;font-size:19px;color:#fff;border:4px solid var(--color-bg);box-shadow:var(--shadow-md);
+  }
+  .drawer-title{padding:34px 24px 16px}
+  .drawer-title h3{font-size:19px}
+  .drawer-title p{font-size:12.5px;color:var(--color-text-secondary);margin-top:3px}
+  .drawer-tabs{display:flex;gap:4px;padding:0 24px;border-bottom:1px solid var(--color-border)}
+  .drawer-tab{padding:10px 4px;margin-right:18px;font-size:13px;font-weight:600;color:var(--color-text-secondary);border-bottom:2px solid transparent;position:relative;top:1px}
+  .drawer-tab.active{color:var(--color-accent);border-color:var(--color-accent)}
+  .drawer-body{padding:22px 24px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:16px}
+
+  .org-tree{display:flex;flex-direction:column;gap:0;padding-left:2px}
+  .org-node{position:relative;padding:9px 0 9px 26px;margin-left:6px;border-left:1.5px solid var(--color-border)}
+  .org-node:last-child{border-color:transparent}
+  .org-node::before{content:"";position:absolute;left:-1.5px;top:22px;width:20px;height:1.5px;background:var(--color-border)}
+  .org-node-inner{display:flex;align-items:center;gap:10px}
+  .org-node-info strong{font-size:13px}
+  .org-node-info span{font-size:11.5px;color:var(--color-text-secondary);display:block}
+  .org-children{margin-left:14px}
+
+  @media (max-width:640px){ .drawer{width:100%} }
+</style>
+
+<div class="app" id="app">
+  <div class="scrim" id="scrim"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">OC</div>
+      <div class="brand-text">
+        <strong>One Cherry</strong>
+        <span>Employee Directory</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="dashboard">
+        <svg class="icon"><use href="#i-grid"/></svg> Dashboard
+      </button>
+      <button class="nav-item" data-view="directory">
+        <svg class="icon"><use href="#i-users"/></svg> Employee Directory
+      </button>
+      <button class="nav-item" data-view="companies">
+        <svg class="icon"><use href="#i-building"/></svg> Companies
+      </button>
+      <button class="nav-item" data-view="departments">
+        <svg class="icon"><use href="#i-layers"/></svg> Departments
+      </button>
+      <div class="nav-sep"></div>
+      <button class="nav-item" data-view="favorites">
+        <svg class="icon"><use href="#i-star"/></svg> Favorites <span class="nav-count" id="favCount">0</span>
+      </button>
+      <button class="nav-item" data-view="profile" data-self="true">
+        <svg class="icon"><use href="#i-idcard"/></svg> My Profile
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle">
+        <svg class="icon" id="themeIcon"><use href="#i-sun"/></svg>
+        <span id="themeLabel">Light mode</span>
+      </button>
+      <p class="fontnote">Preview uses system fonts for Proxima Nova / Mint Sans. Production ships the licensed families self-hosted from <code>public/fonts</code>.</p>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn-inline" id="menuBtn" aria-label="Open navigation"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <h1 class="topbar-title" id="topbarTitle">Dashboard</h1>
+      <div class="topbar-spacer"></div>
+      <button class="icon-btn" aria-label="Notifications"><svg class="icon"><use href="#i-bell"/></svg></button>
+      <button class="avatar-btn" id="topAvatarBtn" data-view="profile" data-self="true" aria-label="My profile">
+        <span class="avatar avatar-sm" id="topAvatar"></span>
+      </button>
+    </header>
+
+    <main class="view-root" id="viewRoot">
+
+      <!-- ================= DASHBOARD ================= -->
+      <section class="view" id="view-dashboard">
+
+        <div class="hero">
+          <div class="hero-eyebrow">GOOD AFTERNOON, MIGUEL</div>
+          <h2>Who are you looking for?</h2>
+          <div class="hero-search-wrap">
+            <div class="hero-search">
+              <svg class="icon"><use href="#i-search"/></svg>
+              <input id="heroSearch" type="text" placeholder="Search by name, email, mobile, department or company…" autocomplete="off" />
+              <span class="hero-kbd">/</span>
+            </div>
+            <div class="hero-results" id="heroResults"></div>
+          </div>
+        </div>
+
+        <div class="stat-grid" id="statGrid"></div>
+
+        <div>
+          <div class="section-head"><span class="section-eyebrow">Quick access</span></div>
+          <div class="qa-grid" id="qaGrid"></div>
+        </div>
+
+        <div>
+          <div class="section-head">
+            <span class="section-title">🎂</span>
+            <span class="section-eyebrow" style="margin-left:-8px">Birthday celebrants</span>
+            <div class="spacer"></div>
+          </div>
+          <div class="scroll-row" id="bdayRow"></div>
+        </div>
+
+        <div class="split-row">
+          <div>
+            <div class="section-head">
+              <span class="section-eyebrow">New employees</span><div class="spacer"></div>
+              <a class="link-more" href="javascript:void(0)" data-view="directory">View directory <svg class="icon"><use href="#i-chevron-right"/></svg></a>
+            </div>
+            <div class="card list-card" id="newHiresCard"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:22px">
+            <div>
+              <div class="section-head"><span class="section-eyebrow">Recently viewed</span></div>
+              <div class="card list-card" id="recentCard"></div>
+            </div>
+            <div>
+              <div class="section-head"><span class="section-eyebrow">Favorites</span></div>
+              <div class="card list-card" id="favCard"></div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-head"><span class="section-eyebrow">Announcements</span></div>
+          <div style="display:flex;flex-direction:column;gap:10px" id="announceList"></div>
+        </div>
+
+      </section>
+
+      <!-- ================= DIRECTORY ================= -->
+      <section class="view" id="view-directory" hidden>
+        <div class="filter-bar">
+          <div class="filter-row">
+            <div class="field" style="flex:1 1 260px">
+              <svg class="icon"><use href="#i-search"/></svg>
+              <input id="dirSearch" type="text" placeholder="Search employees…" />
+            </div>
+            <select class="select" id="fCompany"><option value="">All Companies</option></select>
+            <select class="select" id="fDept"><option value="">All Departments</option></select>
+            <select class="select" id="fDesig"><option value="">All Designations</option></select>
+            <select class="select" id="fOffice"><option value="">All Offices</option></select>
+            <select class="select" id="fStatus">
+              <option value="">All Statuses</option>
+              <option value="active">Active Employee</option>
+              <option value="on_leave">On Leave</option>
+              <option value="resigned">Resigned</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="filter-row">
+            <div class="az-rail" id="azRail"></div>
+            <div class="spacer"></div>
+            <span class="result-count" id="dirCount"></span>
+            <select class="select" id="dirSort">
+              <option value="newest">Sort: Newest</option>
+              <option value="name">Sort: Name A–Z</option>
+              <option value="department">Sort: Department</option>
+              <option value="company">Sort: Company</option>
+            </select>
+            <button class="icon-btn" id="dirRefresh" title="Refresh"><svg class="icon"><use href="#i-refresh"/></svg></button>
+            <div class="view-toggle">
+              <button class="active" data-mode="grid" title="Grid view"><svg class="icon"><use href="#i-grid"/></svg></button>
+              <button data-mode="list" title="List view"><svg class="icon"><use href="#i-list"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="emp-grid" id="dirGrid"></div>
+      </section>
+
+      <!-- ================= FAVORITES (reuses directory grid styling) ================= -->
+      <section class="view" id="view-favorites" hidden>
+        <div class="section-head">
+          <span class="section-title">Favorites</span><div class="spacer"></div>
+          <span class="result-count" id="favViewCount"></span>
+        </div>
+        <div class="emp-grid" id="favGrid"></div>
+      </section>
+
+      <!-- ================= COMPANIES ================= -->
+      <section class="view" id="view-companies" hidden>
+        <div class="section-head">
+          <span class="section-title">One Cherry Group</span><div class="spacer"></div>
+          <span class="result-count" id="coCount"></span>
+        </div>
+        <div class="co-grid" id="coGrid"></div>
+      </section>
+
+      <!-- ================= DEPARTMENTS ================= -->
+      <section class="view" id="view-departments" hidden>
+        <div class="section-head">
+          <span class="section-title">Departments</span><div class="spacer"></div>
+          <span class="result-count" id="deptCount"></span>
+        </div>
+        <div class="dept-grid" id="deptGrid"></div>
+      </section>
+
+      <!-- ================= PROFILE ================= -->
+      <section class="view" id="view-profile" hidden>
+        <div class="profile-cover" id="profCover"></div>
+        <div class="profile-head">
+          <span class="avatar avatar-xl" id="profAvatar"></span>
+          <div class="profile-head-info">
+            <h2 id="profName"></h2>
+            <span class="desig" id="profDesig"></span>
+            <span class="org-line" id="profOrg"></span>
+            <span id="profStatus"></span>
+          </div>
+          <div class="profile-actions" id="profActions"></div>
+        </div>
+
+        <div class="profile-grid">
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <div class="card info-card">
+              <h4>Personal Information</h4>
+              <div class="info-list" id="profPersonal"></div>
+            </div>
+            <div class="card info-card">
+              <h4>Contact Information</h4>
+              <div class="info-list" id="profContact"></div>
+            </div>
+            <div class="card info-card">
+              <h4>Organization Information</h4>
+              <div class="info-list" id="profOrgInfo"></div>
+            </div>
+            <div class="card info-card">
+              <h4>Emergency Contact</h4>
+              <div class="info-list" id="profEmergency"></div>
+            </div>
+            <div class="card info-card">
+              <h4>Skills</h4>
+              <div class="skills-wrap" id="profSkills"></div>
+            </div>
+            <div class="card info-card">
+              <h4>About</h4>
+              <p class="about-text" id="profAbout"></p>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <div class="card side-card">
+              <h4>Digital Business Card</h4>
+              <div class="qr-grid" id="profQr"></div>
+              <span class="qr-caption">Scan to save contact instantly</span>
+            </div>
+            <div class="card side-card" style="align-items:stretch">
+              <h4>Reporting Manager</h4>
+              <div id="profManager"></div>
+            </div>
+            <div class="card side-card" style="align-items:stretch">
+              <h4>Team Members</h4>
+              <div class="team-list" id="profTeam"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<div class="drawer-overlay" id="drawerOverlay">
+  <div class="drawer" role="dialog" aria-modal="true" aria-label="Company details">
+    <div class="drawer-banner" id="drawerBanner">
+      <button class="drawer-close" id="drawerClose" aria-label="Close"><svg class="icon"><use href="#i-x"/></svg></button>
+      <div class="drawer-logo" id="drawerLogo"></div>
+    </div>
+    <div class="drawer-title">
+      <h3 id="drawerTitle"></h3>
+      <p id="drawerSubtitle"></p>
+    </div>
+    <div class="drawer-tabs" id="drawerTabs">
+      <button class="drawer-tab active" data-tab="overview">Overview</button>
+      <button class="drawer-tab" data-tab="departments">Departments</button>
+      <button class="drawer-tab" data-tab="employees">Employees</button>
+      <button class="drawer-tab" data-tab="orgchart">Org Chart</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </div>
+</div>
+
+<!-- Icon sprite -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.2c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/></symbol>
+  <symbol id="i-building" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></symbol>
+  <symbol id="i-idcard" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M8 18c0-2 2-3 4-3s4 1 4 3"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+</svg>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Data ---------------- */
+  var TODAY = new Date("2026-07-24T09:00:00");
+
+  var AVATAR_PALETTE = [
+    ["#D9E3DC","#3F5A4C"],["#DCE1EC","#3B4B6B"],["#EAD9E0","#6B3B54"],
+    ["#EFE1C7","#6B5427"],["#D9DDE3","#43505E"],["#DEE6D2","#445432"],
+    ["#E9D7DE","#6B3350"],["#E7D9CE","#6B4A33"]
+  ];
+
+  var COMPANIES = [
+    {id:"cdm",name:"Cherry Mobile Communications",short:"CMC",accent:"#790002",address:"21F Cherry Tower, Ayala Ave, Makati City",phone:"+63 2 8888 1000",email:"info@cherrymobile.onecherry.group",website:"cherrymobile.onecherry.group",desc:"Handles handset retail, telco partnerships and after-sales service for the Group across the Philippines."},
+    {id:"cds",name:"Cherry Digital Solutions",short:"CDS",accent:"#2F5D8A",address:"12F Cherry Tower, Ayala Ave, Makati City",phone:"+63 2 8888 1200",email:"hello@cherrydigital.onecherry.group",website:"cherrydigital.onecherry.group",desc:"Builds and maintains the technology platforms across One Cherry Group, from internal tools to customer-facing products."},
+    {id:"crd",name:"Cherry Realty & Development",short:"CRD",accent:"#6B7A3F",address:"8F Cherry Realty Center, BGC, Taguig",phone:"+63 2 8888 1300",email:"info@cherryrealty.onecherry.group",website:"cherryrealty.onecherry.group",desc:"Develops and manages commercial and residential properties under the Cherry brand."},
+    {id:"clf",name:"Cherry Logistics & Fulfillment",short:"CLF",accent:"#B8722A",address:"Cherry Logistics Hub, Sta. Rosa, Laguna",phone:"+63 49 511 2200",email:"ops@cherrylogistics.onecherry.group",website:"cherrylogistics.onecherry.group",desc:"Runs warehousing, fleet and last-mile fulfillment for every Group company."},
+    {id:"cfs",name:"Cherry Financial Services",short:"CFS",accent:"#4A4F6B",address:"30F Cherry Tower, Ayala Ave, Makati City",phone:"+63 2 8888 1400",email:"info@cherryfinancial.onecherry.group",website:"cherryfinancial.onecherry.group",desc:"Provides lending, insurance and treasury services to Group companies and their customers."},
+    {id:"crg",name:"Cherry Retail Group",short:"CRG",accent:"#8A4B6B",address:"Cherry Retail Plaza, Cebu Business Park, Cebu City",phone:"+63 32 888 1500",email:"info@cherryretail.onecherry.group",website:"cherryretail.onecherry.group",desc:"Operates the Group's retail storefronts and regional sales network."}
+  ];
+
+  var DEPARTMENTS = [
+    {id:"d1",name:"Product Design",companyId:"cds",head:"Christian Uy"},
+    {id:"d2",name:"Engineering",companyId:"cds",head:"Christian Uy"},
+    {id:"d3",name:"IT Support",companyId:"cds",head:"Miguel Torres"},
+    {id:"d4",name:"Human Resources",companyId:"cdm",head:"Patricia Lim"},
+    {id:"d5",name:"Finance & Accounting",companyId:"cfs",head:"Kristine Navarro"},
+    {id:"d6",name:"Sales & Business Development",companyId:"crg",head:"Julian Castillo"},
+    {id:"d7",name:"Marketing",companyId:"cdm",head:"Jasmine Cruz"},
+    {id:"d8",name:"Customer Experience",companyId:"cdm",head:"Isabel Ramos"},
+    {id:"d9",name:"Legal & Compliance",companyId:"crd",head:"Nathaniel Ong"},
+    {id:"d10",name:"Operations",companyId:"clf",head:"Diego Fernandez"},
+    {id:"d11",name:"Property Management",companyId:"crd",head:"Gabriel Rivera"}
+  ];
+
+  var OFFICES = {
+    ma:"Makati HQ", bgc:"BGC Tower", ceb:"Cebu Business Park", lag:"Sta. Rosa Hub", dav:"Davao Branch"
+  };
+
+  var EMPLOYEES = [
+    {id:"e01",first:"Andrea",middle:"Molina",last:"Reyes",nickname:"Andi",desig:"Senior UX Designer",dept:"d1",company:"cds",email:"andrea.reyes@cherrydigital.onecherry.group",personalEmail:"andi.reyes@gmail.com",mobile:"+63 917 214 5589",viber:"+63 917 214 5589",ext:"2231",office:"bgc",status:"active",hired:"2021-03-15",regularized:"2021-06-15",skills:["Figma","Design Systems","User Research","Prototyping","Accessibility"],about:"Leads product design for internal tools across the Group. Believes great software should feel invisible.",linkedin:"andrea-reyes",supervisorId:null,supervisorName:"Christian Uy · VP, Product & Technology",birthday:"07-24",avatarSeed:2,gender:"Female",emergency:{name:"Liza Reyes",rel:"Mother",phone:"+63 917 555 0110"}},
+    {id:"e02",first:"Miguel",middle:"Santos",last:"Torres",nickname:"",desig:"IT Support Specialist",dept:"d3",company:"cds",email:"miguel.torres@cherrydigital.onecherry.group",personalEmail:"miguel.torres.dev@gmail.com",mobile:"+63 918 322 7741",viber:"+63 918 322 7741",ext:"2105",office:"bgc",status:"active",hired:"2022-01-10",regularized:"2022-04-10",skills:["Network Administration","Hardware Troubleshooting","Google Workspace","Zendesk"],about:"Keeps the Group's hardware and helpdesk running smoothly, one ticket at a time.",linkedin:"miguel-torres-it",supervisorId:null,supervisorName:"Christian Uy · VP, Product & Technology",birthday:"11-02",avatarSeed:4,gender:"Male",emergency:{name:"Grace Torres",rel:"Spouse",phone:"+63 918 555 0199"}},
+    {id:"e03",first:"Jasmine",middle:"Uy",last:"Cruz",nickname:"",desig:"Marketing Manager",dept:"d7",company:"cdm",email:"jasmine.cruz@cherrymobile.onecherry.group",personalEmail:"jas.cruz@gmail.com",mobile:"+63 919 442 8810",viber:"+63 919 442 8810",ext:"1140",office:"ma",status:"active",hired:"2019-08-01",regularized:"2019-11-01",skills:["Brand Strategy","Campaign Management","Content Marketing"],about:"Runs brand and campaign strategy for Cherry Mobile across the archipelago.",linkedin:"jasmine-cruz",supervisorId:null,supervisorName:"Ramon Sy · Chief Marketing Officer",birthday:"08-02",avatarSeed:0,gender:"Female",emergency:{name:"Noel Cruz",rel:"Father",phone:"+63 919 555 0220"}},
+    {id:"e04",first:"Rafael",middle:"Ong",last:"Bautista",nickname:"Raf",desig:"Software Engineer",dept:"d2",company:"cds",email:"rafael.bautista@cherrydigital.onecherry.group",personalEmail:"raf.bautista@gmail.com",mobile:"+63 917 553 2290",viber:"+63 917 553 2290",ext:"2244",office:"bgc",status:"active",hired:"2020-11-20",regularized:"2021-02-20",skills:["Laravel","Vue.js","MySQL","Docker"],about:"Full-stack engineer focused on internal platforms and API infrastructure.",linkedin:"rafael-bautista",supervisorId:null,supervisorName:"Christian Uy · VP, Product & Technology",birthday:"03-14",avatarSeed:1,gender:"Male",emergency:{name:"Carmen Bautista",rel:"Mother",phone:"+63 917 555 0330"}},
+    {id:"e05",first:"Patricia",middle:"Yu",last:"Lim",nickname:"Trish",desig:"HR Business Partner",dept:"d4",company:"cdm",email:"patricia.lim@cherrymobile.onecherry.group",personalEmail:"trish.lim@gmail.com",mobile:"+63 917 220 6631",viber:"+63 917 220 6631",ext:"1105",office:"ma",status:"active",hired:"2018-05-06",regularized:"2018-08-06",skills:["Employee Relations","Talent Acquisition","HRIS"],about:"Partners with department heads across Cherry Mobile on hiring and people programs.",linkedin:"patricia-lim-hr",supervisorId:null,supervisorName:"Ramon Sy · Chief People Officer",birthday:"09-19",avatarSeed:3,gender:"Female",emergency:{name:"Bryan Lim",rel:"Spouse",phone:"+63 917 555 0440"}},
+    {id:"e06",first:"Enzo",middle:"Ramirez",last:"Villanueva",nickname:"",desig:"Sales Executive",dept:"d6",company:"crg",email:"enzo.villanueva@cherryretail.onecherry.group",personalEmail:"enzo.v@gmail.com",mobile:"+63 920 114 7723",viber:"+63 920 114 7723",ext:"5510",office:"ceb",status:"on_leave",hired:"2022-06-13",regularized:"2022-09-13",skills:["B2B Sales","Negotiation","CRM"],about:"Covers key accounts across the Visayas region.",linkedin:"",supervisorId:"e14",supervisorName:"Julian Castillo",birthday:"12-05",avatarSeed:5,gender:"Male",emergency:{name:"Rosa Villanueva",rel:"Mother",phone:"+63 920 555 0550"}},
+    {id:"e07",first:"Camille",middle:"Torres",last:"Santos",nickname:"",desig:"Financial Analyst",dept:"d5",company:"cfs",email:"camille.santos@cherryfinancial.onecherry.group",personalEmail:"cam.santos@gmail.com",mobile:"+63 917 774 3321",viber:"+63 917 774 3321",ext:"3312",office:"ma",status:"active",hired:"2021-09-01",regularized:"2021-12-01",skills:["Financial Modeling","Excel","SAP"],about:"Supports budgeting and forecasting for Cherry Financial Services.",linkedin:"camille-santos-fin",supervisorId:"e15",supervisorName:"Kristine Navarro",birthday:"01-27",avatarSeed:6,gender:"Female",emergency:{name:"Paolo Santos",rel:"Spouse",phone:"+63 917 555 0660"}},
+    {id:"e08",first:"Diego",middle:"Marasigan",last:"Fernandez",nickname:"",desig:"Operations Supervisor",dept:"d10",company:"clf",email:"diego.fernandez@cherrylogistics.onecherry.group",personalEmail:"diego.fdz@gmail.com",mobile:"+63 918 552 9087",viber:"+63 918 552 9087",ext:"6602",office:"lag",status:"active",hired:"2017-02-14",regularized:"2017-05-14",skills:["Supply Chain","Warehouse Management","Fleet Ops"],about:"Oversees day-to-day fulfillment operations at the Sta. Rosa hub.",linkedin:"diego-fernandez-ops",supervisorId:null,supervisorName:"Ramon Sy · COO",birthday:"07-26",avatarSeed:7,gender:"Male",emergency:{name:"Elena Fernandez",rel:"Spouse",phone:"+63 918 555 0770"}},
+    {id:"e09",first:"Isabel",middle:"Cortez",last:"Ramos",nickname:"Bel",desig:"Customer Experience Lead",dept:"d8",company:"cdm",email:"isabel.ramos@cherrymobile.onecherry.group",personalEmail:"bel.ramos@gmail.com",mobile:"+63 917 663 4471",viber:"+63 917 663 4471",ext:"1188",office:"ma",status:"active",hired:"2019-03-22",regularized:"2019-06-22",skills:["Customer Support","Zendesk","Process Design"],about:"Designs support workflows so customers always reach the right person fast.",linkedin:"isabel-ramos-cx",supervisorId:null,supervisorName:"Ramon Sy · Chief Marketing Officer",birthday:"07-28",avatarSeed:0,gender:"Female",emergency:{name:"Mario Ramos",rel:"Father",phone:"+63 917 555 0880"}},
+    {id:"e10",first:"Nathaniel",middle:"Bermudez",last:"Ong",nickname:"Nate",desig:"Legal Counsel",dept:"d9",company:"crd",email:"nathaniel.ong@cherryrealty.onecherry.group",personalEmail:"nate.ong@gmail.com",mobile:"+63 917 900 2245",viber:"+63 917 900 2245",ext:"4401",office:"bgc",status:"active",hired:"2020-01-06",regularized:"2020-04-06",skills:["Corporate Law","Contracts","Compliance"],about:"Reviews contracts and compliance matters for Cherry Realty developments.",linkedin:"nathaniel-ong-law",supervisorId:null,supervisorName:"Ramon Sy · General Counsel",birthday:"05-30",avatarSeed:1,gender:"Male",emergency:{name:"Michelle Ong",rel:"Spouse",phone:"+63 917 555 0990"}},
+    {id:"e11",first:"Bianca",middle:"Domingo",last:"Aquino",nickname:"",desig:"Product Designer",dept:"d1",company:"cds",email:"bianca.aquino@cherrydigital.onecherry.group",personalEmail:"bianca.aquino@gmail.com",mobile:"+63 919 337 1102",viber:"+63 919 337 1102",ext:"2233",office:"bgc",status:"active",hired:"2023-02-27",regularized:"2023-05-27",skills:["Figma","Illustration","Motion Design"],about:"Designs the visual language for Group-wide internal tools.",linkedin:"bianca-aquino",supervisorId:"e01",supervisorName:"Andrea Reyes",birthday:"10-11",avatarSeed:2,gender:"Female",emergency:{name:"Ruth Aquino",rel:"Mother",phone:"+63 919 555 1010"}},
+    {id:"e12",first:"Marco",middle:"Villaruel",last:"Dela Peña",nickname:"",desig:"Backend Engineer",dept:"d2",company:"cds",email:"marco.delapena@cherrydigital.onecherry.group",personalEmail:"marco.dp@gmail.com",mobile:"+63 917 664 5591",viber:"+63 917 664 5591",ext:"2245",office:"bgc",status:"active",hired:"2021-07-19",regularized:"2021-10-19",skills:["PHP","Laravel","Redis","AWS"],about:"Owns the sync services that keep every Group system talking to each other.",linkedin:"marco-delapena",supervisorId:null,supervisorName:"Christian Uy · VP, Product & Technology",birthday:"02-08",avatarSeed:4,gender:"Male",emergency:{name:"Teresa Dela Peña",rel:"Mother",phone:"+63 917 555 1120"}},
+    {id:"e13",first:"Sofia",middle:"Reyes",last:"Mendoza",nickname:"",desig:"Recruitment Specialist",dept:"d4",company:"cdm",email:"sofia.mendoza@cherrymobile.onecherry.group",personalEmail:"sofia.mendoza@gmail.com",mobile:"+63 918 226 7734",viber:"+63 918 226 7734",ext:"1106",office:"ma",status:"active",hired:"2022-10-03",regularized:"2023-01-03",skills:["Sourcing","Interviewing","Employer Branding"],about:"Sources and screens talent for corporate roles across the Group.",linkedin:"sofia-mendoza-hr",supervisorId:"e05",supervisorName:"Patricia Lim",birthday:"04-17",avatarSeed:5,gender:"Female",emergency:{name:"Carlo Mendoza",rel:"Spouse",phone:"+63 918 555 1230"}},
+    {id:"e14",first:"Julian",middle:"Torres",last:"Castillo",nickname:"",desig:"Regional Sales Manager",dept:"d6",company:"crg",email:"julian.castillo@cherryretail.onecherry.group",personalEmail:"julian.castillo@gmail.com",mobile:"+63 917 552 8834",viber:"+63 917 552 8834",ext:"5501",office:"ceb",status:"active",hired:"2016-11-11",regularized:"2017-02-11",skills:["Channel Management","Forecasting","Leadership"],about:"Leads the Visayas–Mindanao retail sales team.",linkedin:"julian-castillo-sales",supervisorId:null,supervisorName:"Ramon Sy · Chief Revenue Officer",birthday:"06-25",avatarSeed:6,gender:"Male",emergency:{name:"Anna Castillo",rel:"Spouse",phone:"+63 917 555 1340"}},
+    {id:"e15",first:"Kristine",middle:"Alvarez",last:"Navarro",nickname:"",desig:"Accounting Supervisor",dept:"d5",company:"cfs",email:"kristine.navarro@cherryfinancial.onecherry.group",personalEmail:"kristine.navarro@gmail.com",mobile:"+63 917 330 9982",viber:"+63 917 330 9982",ext:"3301",office:"ma",status:"active",hired:"2019-01-15",regularized:"2019-04-15",skills:["GAAP","Tax Compliance","QuickBooks"],about:"Manages the books for Cherry Financial Services and its lending arm.",linkedin:"kristine-navarro-cpa",supervisorId:null,supervisorName:"Ramon Sy · CFO",birthday:"12-19",avatarSeed:3,gender:"Female",emergency:{name:"Oscar Navarro",rel:"Father",phone:"+63 917 555 1450"}},
+    {id:"e16",first:"Adrian",middle:"Cruz",last:"Gomez",nickname:"",desig:"Warehouse Manager",dept:"d10",company:"clf",email:"adrian.gomez@cherrylogistics.onecherry.group",personalEmail:"adrian.gomez@gmail.com",mobile:"+63 918 774 2210",viber:"+63 918 774 2210",ext:"6610",office:"lag",status:"on_leave",hired:"2018-08-20",regularized:"2018-11-20",skills:["Inventory Control","Logistics","Team Leadership"],about:"Runs inbound and outbound operations at the Sta. Rosa warehouse.",linkedin:"",supervisorId:"e08",supervisorName:"Diego Fernandez",birthday:"03-03",avatarSeed:7,gender:"Male",emergency:{name:"Nina Gomez",rel:"Spouse",phone:"+63 918 555 1560"}},
+    {id:"e17",first:"Ella",middle:"Marquez",last:"Tan",nickname:"",desig:"Brand Marketing Specialist",dept:"d7",company:"cdm",email:"ella.tan@cherrymobile.onecherry.group",personalEmail:"ella.tan@gmail.com",mobile:"+63 919 221 3345",viber:"+63 919 221 3345",ext:"1141",office:"ma",status:"active",hired:"2023-05-08",regularized:"2023-08-08",skills:["Social Media","Copywriting","Adobe CC"],about:"Handles social content and brand campaigns for Cherry Mobile.",linkedin:"ella-tan",supervisorId:"e03",supervisorName:"Jasmine Cruz",birthday:"09-09",avatarSeed:2,gender:"Female",emergency:{name:"Ella's mother",rel:"Mother",phone:"+63 919 555 1670"}},
+    {id:"e18",first:"Gabriel",middle:"Serrano",last:"Rivera",nickname:"",desig:"Property Manager",dept:"d11",company:"crd",email:"gabriel.rivera@cherryrealty.onecherry.group",personalEmail:"gabriel.rivera@gmail.com",mobile:"+63 917 663 8820",viber:"+63 917 663 8820",ext:"4410",office:"bgc",status:"active",hired:"2020-09-14",regularized:"2020-12-14",skills:["Facilities Management","Vendor Relations","Leasing"],about:"Manages tenant relations and facilities across Cherry Realty properties.",linkedin:"gabriel-rivera-cre",supervisorId:null,supervisorName:"Ramon Sy · COO",birthday:"08-15",avatarSeed:4,gender:"Male",emergency:{name:"Diane Rivera",rel:"Spouse",phone:"+63 917 555 1780"}},
+    {id:"e19",first:"Renz",middle:"Aba",last:"Aguilar",nickname:"",desig:"Junior Developer",dept:"d2",company:"cds",email:"renz.aguilar@cherrydigital.onecherry.group",personalEmail:"renz.aguilar@gmail.com",mobile:"+63 920 445 1189",viber:"+63 920 445 1189",ext:"2250",office:"bgc",status:"active",hired:"2026-07-06",regularized:"",skills:["JavaScript","Laravel","Git"],about:"Recently joined the platform team, ramping up on the Group's internal tools.",linkedin:"",supervisorId:"e01",supervisorName:"Andrea Reyes",birthday:"01-30",avatarSeed:5,gender:"Male",emergency:{name:"Rina Aguilar",rel:"Mother",phone:"+63 920 555 1890"}},
+    {id:"e20",first:"Faith",middle:"Olivar",last:"Delgado",nickname:"",desig:"Customer Support Associate",dept:"d8",company:"cdm",email:"faith.delgado@cherrymobile.onecherry.group",personalEmail:"faith.delgado@gmail.com",mobile:"+63 918 221 7765",viber:"+63 918 221 7765",ext:"1189",office:"ma",status:"active",hired:"2026-07-15",regularized:"",skills:["Customer Support","Communication"],about:"New addition to the CX floor team, handling frontline inquiries.",linkedin:"",supervisorId:"e09",supervisorName:"Isabel Ramos",birthday:"11-22",avatarSeed:0,gender:"Female",emergency:{name:"Josie Delgado",rel:"Mother",phone:"+63 918 555 1990"}},
+    {id:"e21",first:"Karlo",middle:"Fajardo",last:"Manalo",nickname:"",desig:"Warehouse Associate",dept:"d10",company:"clf",email:"karlo.manalo@cherrylogistics.onecherry.group",personalEmail:"karlo.manalo@gmail.com",mobile:"+63 919 664 2210",viber:"+63 919 664 2210",ext:"6615",office:"lag",status:"active",hired:"2026-06-28",regularized:"",skills:["Inventory","Forklift Operation"],about:"Supports receiving and dispatch at the Sta. Rosa hub.",linkedin:"",supervisorId:"e08",supervisorName:"Diego Fernandez",birthday:"05-05",avatarSeed:6,gender:"Male",emergency:{name:"Bea Manalo",rel:"Spouse",phone:"+63 919 555 2010"}}
+  ];
+
+  var STATE = {
+    theme: null,
+    currentView: "dashboard",
+    favorites: new Set(["e01","e05"]),
+    recentlyViewed: ["e03","e09","e14"],
+    profileEmployeeId: "e01",
+    dir: { search:"", company:"", dept:"", desig:"", office:"", status:"", letter:"", sort:"newest", mode:"grid" }
+  };
+
+  var byId = {}; EMPLOYEES.forEach(function(e){ byId[e.id]=e; });
+  var companyById = {}; COMPANIES.forEach(function(c){ companyById[c.id]=c; });
+  var deptById = {}; DEPARTMENTS.forEach(function(d){ deptById[d.id]=d; });
+
+  /* ---------------- Helpers ---------------- */
+  function fullName(e){ return e.first + " " + e.last; }
+  function initials(e){ return (e.first[0] + e.last[0]).toUpperCase(); }
+  function avatarColors(seed){ return AVATAR_PALETTE[seed % AVATAR_PALETTE.length]; }
+  function avatarHTML(e, size){
+    var c = avatarColors(e.avatarSeed);
+    return '<span class="avatar avatar-'+size+'" style="background:'+c[0]+';color:'+c[1]+'">'+initials(e)+'</span>';
+  }
+  function statusLabel(s){ return {active:"Active Employee",on_leave:"On Leave",resigned:"Resigned",inactive:"Inactive"}[s] || s; }
+  function statusBadgeClass(s){ return {active:"badge-active",on_leave:"badge-leave",resigned:"badge-resigned",inactive:"badge-inactive"}[s] || ""; }
+  function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function daysAgo(iso){ var d=new Date(iso+"T09:00:00"); return Math.round((TODAY-d)/86400000); }
+  function relativeJoined(iso){
+    var n = daysAgo(iso);
+    if(n<=0) return "Joined today";
+    if(n===1) return "Joined yesterday";
+    if(n<7) return "Joined "+n+" days ago";
+    if(n<14) return "Joined 1 week ago";
+    if(n<30) return "Joined "+Math.floor(n/7)+" weeks ago";
+    return "Joined "+Math.floor(n/30)+" month(s) ago";
+  }
+  function fmtDate(iso){
+    if(!iso) return "—";
+    var d=new Date(iso+"T09:00:00");
+    return d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+  }
+  function nextBirthdayDelta(mmdd){
+    var parts = mmdd.split("-").map(Number);
+    var y = TODAY.getFullYear();
+    var bd = new Date(y, parts[0]-1, parts[1]);
+    var t0 = new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate());
+    if(bd < t0) bd = new Date(y+1, parts[0]-1, parts[1]);
+    return { delta: Math.round((bd-t0)/86400000), date: bd };
+  }
+  function fmtBdayLabel(mmdd){
+    var info = nextBirthdayDelta(mmdd);
+    if(info.delta===0) return "Today";
+    if(info.delta===1) return "Tomorrow";
+    return info.date.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+  }
+  function toast(msg, ok){
+    var stack = document.getElementById("toastStack");
+    var el = document.createElement("div");
+    el.className = "toast";
+    el.innerHTML = '<svg class="icon"><use href="#'+(ok?'i-check':'i-star')+'"/></svg><span>'+esc(msg)+'</span>';
+    stack.appendChild(el);
+    setTimeout(function(){ el.style.transition="opacity .2s ease,transform .2s ease"; el.style.opacity="0"; el.style.transform="translateY(6px)"; setTimeout(function(){ el.remove(); }, 220); }, 2200);
+  }
+
+  /* ---------------- Theme ---------------- */
+  var themeToggle = document.getElementById("themeToggle");
+  var themeIcon = document.getElementById("themeIcon");
+  var themeLabel = document.getElementById("themeLabel");
+  function applyThemeUI(){
+    var isDark = document.documentElement.getAttribute("data-theme")==="dark" ||
+      (!document.documentElement.getAttribute("data-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    themeIcon.innerHTML = '<use href="#'+(isDark?'i-moon':'i-sun')+'"/>';
+    themeLabel.textContent = isDark ? "Dark mode" : "Light mode";
+  }
+  themeToggle.addEventListener("click", function(){
+    var cur = document.documentElement.getAttribute("data-theme");
+    var isDark = cur==="dark" || (!cur && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.setAttribute("data-theme", isDark ? "light" : "dark");
+    applyThemeUI();
+  });
+  applyThemeUI();
+
+  /* ---------------- Sidebar / mobile nav ---------------- */
+  var sidebar = document.getElementById("sidebar");
+  var scrim = document.getElementById("scrim");
+  function openSidebar(){ sidebar.classList.add("open"); scrim.classList.add("show"); }
+  function closeSidebar(){ sidebar.classList.remove("open"); scrim.classList.remove("show"); }
+  document.getElementById("menuBtn").addEventListener("click", openSidebar);
+  scrim.addEventListener("click", closeSidebar);
+
+  /* ---------------- View router ---------------- */
+  var VIEW_TITLES = { dashboard:"Dashboard", directory:"Employee Directory", companies:"Companies", departments:"Departments", favorites:"Favorites", profile:"Employee Profile" };
+  function showView(name, opts){
+    opts = opts || {};
+    document.querySelectorAll(".view").forEach(function(v){ v.hidden = true; });
+    var target = document.getElementById("view-"+name);
+    if(target) target.hidden = false;
+    document.getElementById("topbarTitle").textContent = VIEW_TITLES[name] || name;
+    document.querySelectorAll(".nav-item[data-view]").forEach(function(b){
+      b.classList.toggle("active", b.getAttribute("data-view")===name);
+    });
+    STATE.currentView = name;
+    closeSidebar();
+    window.scrollTo({top:0,behavior:"instant" in window ? "instant" : "auto"});
+
+    if(name==="profile"){
+      var empId = opts.self ? STATE.selfId : (opts.employeeId || STATE.profileEmployeeId);
+      renderProfile(empId);
+    }
+    if(name==="directory" && opts.dept){ STATE.dir.dept = opts.dept; syncFilterInputs(); renderDirectory(); }
+    if(name==="directory" && opts.company){ STATE.dir.company = opts.company; syncFilterInputs(); renderDirectory(); }
+    if(name==="favorites"){ renderFavoritesView(); }
+  }
+  document.addEventListener("click", function(e){
+    var el = e.target.closest("[data-view]");
+    if(!el) return;
+    e.preventDefault();
+    var view = el.getAttribute("data-view");
+    var opts = {};
+    if(el.getAttribute("data-self")==="true") opts.self = true;
+    if(el.dataset.employeeId) opts.employeeId = el.dataset.employeeId;
+    if(el.dataset.dept) opts.dept = el.dataset.dept;
+    if(el.dataset.company) opts.company = el.dataset.company;
+    showView(view, opts);
+  });
+
+  STATE.selfId = "e02"; // Miguel Torres — the signed-in demo user
+
+  /* ---------------- Icons for stats / quick access ---------------- */
+  var STATS = [
+    { icon:"i-users", value:"1,284", label:"Total Employees" },
+    { icon:"i-building", value:"6", label:"Companies" },
+    { icon:"i-layers", value:"42", label:"Departments" },
+    { icon:"i-pin", value:"11", label:"Office Locations" }
+  ];
+  function renderStats(){
+    document.getElementById("statGrid").innerHTML = STATS.map(function(s){
+      return '<div class="card stat-tile"><div class="stat-tile-top"><div class="stat-icon"><svg class="icon"><use href="#'+s.icon+'"/></svg></div></div>' +
+        '<div class="stat-value">'+s.value+'</div><div class="stat-label">'+s.label+'</div></div>';
+    }).join("");
+  }
+
+  var QUICK_ACCESS = [
+    { view:"directory", icon:"i-users", title:"Employee Directory", desc:"Browse and filter everyone in the Group." },
+    { view:"companies", icon:"i-building", title:"Company Directory", desc:"See every company under One Cherry Group." },
+    { view:"departments", icon:"i-layers", title:"Departments", desc:"Find teams and department heads." },
+    { view:"profile", icon:"i-idcard", title:"My Profile", desc:"View and share your own contact card.", self:true }
+  ];
+  function renderQuickAccess(){
+    document.getElementById("qaGrid").innerHTML = QUICK_ACCESS.map(function(q){
+      return '<button class="card qa-card" data-view="'+q.view+'"'+(q.self?' data-self="true"':'')+'>' +
+        '<div class="qa-icon"><svg class="icon"><use href="#'+q.icon+'"/></svg></div>' +
+        '<strong>'+q.title+'</strong><p>'+q.desc+'</p></button>';
+    }).join("");
+  }
+
+  function renderBirthdays(){
+    var withDelta = EMPLOYEES.map(function(e){ return {e:e, info:nextBirthdayDelta(e.birthday)}; })
+      .sort(function(a,b){ return a.info.delta-b.info.delta; }).slice(0,6);
+    document.getElementById("bdayRow").innerHTML = withDelta.map(function(x){
+      var e=x.e, today = x.info.delta===0;
+      return '<div class="card bday-card" data-view="profile" data-employee-id="'+e.id+'">' +
+        avatarHTML(e,"lg") +
+        '<div><strong>'+esc(fullName(e))+'</strong><div class="bday-dept">'+esc(deptById[e.dept].name)+'</div></div>' +
+        '<span class="bday-date'+(today?' today':'')+'">'+(today?'🎉 Today':fmtBdayLabel(e.birthday))+'</span></div>';
+    }).join("");
+  }
+
+  function renderNewHires(){
+    var recent = EMPLOYEES.filter(function(e){ return daysAgo(e.hired) <= 30; })
+      .sort(function(a,b){ return daysAgo(a.hired)-daysAgo(b.hired); });
+    var html = recent.map(function(e){
+      return '<div class="mini-row" style="cursor:pointer" data-view="profile" data-employee-id="'+e.id+'">' +
+        avatarHTML(e,"sm") +
+        '<div class="mini-row-main"><strong>'+esc(fullName(e))+' <span class="new-badge">NEW</span></strong><span>'+esc(e.desig)+' · '+esc(companyById[e.company].short)+'</span></div>' +
+        '<span class="time">'+relativeJoined(e.hired)+'</span></div>';
+    }).join("");
+    document.getElementById("newHiresCard").innerHTML = html || emptyRowHTML("No new employees in the last 30 days.");
+  }
+
+  function emptyRowHTML(msg){ return '<div style="padding:20px 4px;font-size:13px;color:var(--color-text-secondary)">'+esc(msg)+'</div>'; }
+
+  function renderRecentAndFavorites(){
+    var recentHtml = STATE.recentlyViewed.map(function(id){
+      var e = byId[id];
+      return '<div class="mini-row" style="cursor:pointer" data-view="profile" data-employee-id="'+e.id+'">' +
+        avatarHTML(e,"sm") +
+        '<div class="mini-row-main"><strong>'+esc(fullName(e))+'</strong><span>'+esc(e.desig)+'</span></div></div>';
+    }).join("");
+    document.getElementById("recentCard").innerHTML = recentHtml || emptyRowHTML("Employees you view will show up here.");
+
+    var favIds = Array.from(STATE.favorites);
+    var favHtml = favIds.map(function(id){
+      var e = byId[id];
+      return '<div class="mini-row" style="cursor:pointer" data-view="profile" data-employee-id="'+e.id+'">' +
+        avatarHTML(e,"sm") +
+        '<div class="mini-row-main"><strong>'+esc(fullName(e))+'</strong><span>'+esc(e.desig)+'</span></div></div>';
+    }).join("");
+    document.getElementById("favCard").innerHTML = favHtml || emptyRowHTML("Tap the star on any profile to pin it here.");
+    document.getElementById("favCount").textContent = String(favIds.length);
+  }
+
+  var ANNOUNCEMENTS = [
+    { icon:"i-bell", title:"Company Directory now shows Viber shortcuts", body:"Tap the chat icon on any employee card to message them directly.", date:"Jul 20, 2026" },
+    { icon:"i-calendar", title:"Founders' Day — Aug 8, Cherry Tower Atrium", body:"All Group companies invited. RSVP through your department head.", date:"Jul 18, 2026" }
+  ];
+  function renderAnnouncements(){
+    var list = document.getElementById("announceList");
+    list.innerHTML = ANNOUNCEMENTS.map(function(a,i){
+      return '<div class="card announce" data-idx="'+i+'"><div class="icon-wrap"><svg class="icon"><use href="#'+a.icon+'"/></svg></div>' +
+        '<div class="announce-body"><strong>'+esc(a.title)+'</strong><p>'+esc(a.body)+'</p><time>'+esc(a.date)+'</time></div>' +
+        '<button class="announce-close" aria-label="Dismiss"><svg class="icon"><use href="#i-x"/></svg></button></div>';
+    }).join("");
+    list.querySelectorAll(".announce-close").forEach(function(btn){
+      btn.addEventListener("click", function(e){ e.stopPropagation(); btn.closest(".announce").remove(); });
+    });
+  }
+
+  /* ---------------- Hero search ---------------- */
+  var heroInput = document.getElementById("heroSearch");
+  var heroResults = document.getElementById("heroResults");
+  function searchAll(q){
+    q = q.trim().toLowerCase();
+    if(!q) return null;
+    var people = EMPLOYEES.filter(function(e){
+      return fullName(e).toLowerCase().indexOf(q)>-1 || e.email.toLowerCase().indexOf(q)>-1 ||
+        e.mobile.replace(/\s/g,"").indexOf(q.replace(/\s/g,""))>-1 || deptById[e.dept].name.toLowerCase().indexOf(q)>-1 ||
+        companyById[e.company].name.toLowerCase().indexOf(q)>-1 || e.desig.toLowerCase().indexOf(q)>-1;
+    }).slice(0,5);
+    var companies = COMPANIES.filter(function(c){ return c.name.toLowerCase().indexOf(q)>-1; }).slice(0,3);
+    var depts = DEPARTMENTS.filter(function(d){ return d.name.toLowerCase().indexOf(q)>-1; }).slice(0,3);
+    return { people:people, companies:companies, depts:depts };
+  }
+  function renderHeroResults(){
+    var res = searchAll(heroInput.value);
+    if(!res){ heroResults.classList.remove("show"); heroResults.innerHTML=""; return; }
+    var total = res.people.length + res.companies.length + res.depts.length;
+    if(total===0){
+      heroResults.innerHTML = '<div class="hero-empty">No matches. Try a name, email, mobile number, department or company.</div>';
+      heroResults.classList.add("show");
+      return;
+    }
+    var html = "";
+    if(res.people.length){
+      html += '<div class="hero-results-group-label">People</div>' + res.people.map(function(e){
+        return '<div class="hero-result-row" data-view="profile" data-employee-id="'+e.id+'">' + avatarHTML(e,"sm") +
+          '<div class="hero-result-main"><strong>'+esc(fullName(e))+'</strong><span>'+esc(e.desig)+' · '+esc(companyById[e.company].short)+'</span></div></div>';
+      }).join("");
+    }
+    if(res.companies.length){
+      html += '<div class="hero-results-group-label">Companies</div>' + res.companies.map(function(c){
+        return '<div class="hero-result-row" data-view="companies"><div class="avatar avatar-sm" style="background:'+c.accent+'">'+esc(c.short)+'</div>' +
+          '<div class="hero-result-main"><strong>'+esc(c.name)+'</strong><span>Company</span></div></div>';
+      }).join("");
+    }
+    if(res.depts.length){
+      html += '<div class="hero-results-group-label">Departments</div>' + res.depts.map(function(d){
+        return '<div class="hero-result-row" data-view="directory" data-dept="'+d.id+'"><div class="avatar avatar-sm" style="background:var(--color-surface);color:var(--color-text-secondary)"><svg class="icon" style="width:15px;height:15px"><use href="#i-layers"/></svg></div>' +
+          '<div class="hero-result-main"><strong>'+esc(d.name)+'</strong><span>'+esc(companyById[d.companyId].short)+' · Department</span></div></div>';
+      }).join("");
+    }
+    heroResults.innerHTML = html;
+    heroResults.classList.add("show");
+  }
+  heroInput.addEventListener("input", renderHeroResults);
+  heroInput.addEventListener("focus", renderHeroResults);
+  document.addEventListener("click", function(e){
+    if(!e.target.closest(".hero-search-wrap")){ heroResults.classList.remove("show"); }
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key==="/" && document.activeElement!==heroInput && !e.target.closest("input")){ e.preventDefault(); heroInput.focus(); }
+  });
+
+  /* ---------------- Directory ---------------- */
+  var dirGrid = document.getElementById("dirGrid");
+  function uniqueSorted(arr){ return Array.from(new Set(arr)).sort(); }
+
+  function populateFilterSelects(){
+    var fCompany = document.getElementById("fCompany");
+    COMPANIES.forEach(function(c){ fCompany.insertAdjacentHTML("beforeend",'<option value="'+c.id+'">'+esc(c.name)+'</option>'); });
+    var fDept = document.getElementById("fDept");
+    DEPARTMENTS.forEach(function(d){ fDept.insertAdjacentHTML("beforeend",'<option value="'+d.id+'">'+esc(d.name)+'</option>'); });
+    var fDesig = document.getElementById("fDesig");
+    uniqueSorted(EMPLOYEES.map(function(e){return e.desig;})).forEach(function(d){ fDesig.insertAdjacentHTML("beforeend",'<option value="'+esc(d)+'">'+esc(d)+'</option>'); });
+    var fOffice = document.getElementById("fOffice");
+    Object.keys(OFFICES).forEach(function(k){ fOffice.insertAdjacentHTML("beforeend",'<option value="'+k+'">'+esc(OFFICES[k])+'</option>'); });
+  }
+
+  var LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  function renderAzRail(){
+    var present = new Set(EMPLOYEES.map(function(e){ return e.last[0].toUpperCase(); }));
+    document.getElementById("azRail").innerHTML = LETTERS.map(function(l){
+      var has = present.has(l);
+      return '<button data-letter="'+l+'" '+(has?'':'disabled')+' class="'+(STATE.dir.letter===l?'active':'')+'">'+l+'</button>';
+    }).join("");
+  }
+
+  function filteredEmployees(){
+    var d = STATE.dir;
+    var list = EMPLOYEES.filter(function(e){
+      if(e.status==="resigned" || e.status==="inactive") return false;
+      if(d.search){
+        var q = d.search.toLowerCase();
+        var hay = (fullName(e)+" "+e.email+" "+e.mobile+" "+deptById[e.dept].name+" "+companyById[e.company].name+" "+e.desig).toLowerCase();
+        if(hay.indexOf(q)===-1) return false;
+      }
+      if(d.company && e.company!==d.company) return false;
+      if(d.dept && e.dept!==d.dept) return false;
+      if(d.desig && e.desig!==d.desig) return false;
+      if(d.office && e.office!==d.office) return false;
+      if(d.status && e.status!==d.status) return false;
+      if(d.letter && e.last[0].toUpperCase()!==d.letter) return false;
+      return true;
+    });
+    if(d.sort==="newest") list.sort(function(a,b){ return new Date(b.hired)-new Date(a.hired); });
+    if(d.sort==="name") list.sort(function(a,b){ return a.last.localeCompare(b.last) || a.first.localeCompare(b.first); });
+    if(d.sort==="department") list.sort(function(a,b){ return deptById[a.dept].name.localeCompare(deptById[b.dept].name); });
+    if(d.sort==="company") list.sort(function(a,b){ return companyById[a.company].name.localeCompare(companyById[b.company].name); });
+    return list;
+  }
+
+  function empCardHTML(e){
+    var badgeCls = statusBadgeClass(e.status);
+    return '<div class="card emp-card">' +
+      '<div class="emp-card-top">' + avatarHTML(e,"md") +
+        '<div class="emp-card-id"><strong>'+esc(fullName(e))+'</strong><div class="desig">'+esc(e.desig)+'</div>' +
+        '<div class="dept">'+esc(deptById[e.dept].name)+' · '+esc(companyById[e.company].short)+'</div></div>' +
+        '<button class="fav-btn'+(STATE.favorites.has(e.id)?' is-fav':'')+'" data-fav="'+e.id+'" aria-label="Toggle favorite"><svg class="icon"><use href="#i-star"/></svg></button>' +
+      '</div>' +
+      '<div class="emp-card-meta">' +
+        '<div><svg class="icon"><use href="#i-mail"/></svg><span>'+esc(e.email)+'</span></div>' +
+        '<div><svg class="icon"><use href="#i-phone"/></svg><span>'+esc(e.mobile)+' · ext. '+esc(e.ext)+'</span></div>' +
+        '<div><svg class="icon"><use href="#i-pin"/></svg><span>'+esc(OFFICES[e.office])+'</span></div>' +
+      '</div>' +
+      '<div class="emp-card-actions">' +
+        '<button class="btn-view" data-view="profile" data-employee-id="'+e.id+'">View Profile</button>' +
+        '<a href="tel:'+esc(e.mobile.replace(/\s/g,""))+'" title="Call" onclick="event.stopPropagation()"><svg class="icon"><use href="#i-phone"/></svg></a>' +
+        '<a href="mailto:'+esc(e.email)+'" title="Email" onclick="event.stopPropagation()"><svg class="icon"><use href="#i-mail"/></svg></a>' +
+        '<a href="viber://chat?number='+esc(e.viber.replace(/\s/g,""))+'" title="Chat via Viber" onclick="event.stopPropagation()"><svg class="icon"><use href="#i-chat"/></svg></a>' +
+      '</div></div>';
+  }
+
+  function syncFilterInputs(){
+    document.getElementById("fCompany").value = STATE.dir.company;
+    document.getElementById("fDept").value = STATE.dir.dept;
+    document.getElementById("fDesig").value = STATE.dir.desig;
+    document.getElementById("fOffice").value = STATE.dir.office;
+    document.getElementById("fStatus").value = STATE.dir.status;
+    document.getElementById("dirSearch").value = STATE.dir.search;
+  }
+
+  function renderDirectory(skipSkeleton){
+    var list = filteredEmployees();
+    renderAzRail();
+    document.getElementById("dirCount").textContent = "Showing " + list.length + " of 1,284";
+    var container = dirGrid;
+    container.classList.toggle("list-mode", STATE.dir.mode==="list");
+
+    function paint(){
+      if(list.length===0){
+        container.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon-wrap"><svg class="icon"><use href="#i-search"/></svg></div>' +
+          '<h3>No employees match this view</h3><p>Try a different letter, or clear your filters to see everyone.</p>' +
+          '<button class="btn btn-secondary btn-sm" id="clearFiltersBtn">Clear filters</button></div>';
+        var cf = document.getElementById("clearFiltersBtn");
+        if(cf) cf.addEventListener("click", function(){ resetDirFilters(); });
+        return;
+      }
+      container.innerHTML = list.map(empCardHTML).join("");
+    }
+
+    if(skipSkeleton){ paint(); return; }
+    var n = Math.min(list.length||6, 6);
+    container.classList.remove("list-mode");
+    if(STATE.dir.mode==="list") container.classList.add("list-mode");
+    container.innerHTML = new Array(n).fill(0).map(function(){
+      return '<div class="card emp-card"><div class="emp-card-top"><span class="skeleton" style="width:46px;height:46px;border-radius:50%"></span>' +
+        '<div class="emp-card-id" style="flex:1"><span class="skeleton" style="display:block;width:70%;height:14px;margin-bottom:8px"></span><span class="skeleton" style="display:block;width:50%;height:11px"></span></div></div>' +
+        '<div class="emp-card-meta"><span class="skeleton" style="height:12px;width:90%"></span><span class="skeleton" style="height:12px;width:70%"></span></div></div>';
+    }).join("");
+    setTimeout(paint, 380);
+  }
+
+  function resetDirFilters(){
+    STATE.dir = { search:"", company:"", dept:"", desig:"", office:"", status:"", letter:"", sort:STATE.dir.sort, mode:STATE.dir.mode };
+    syncFilterInputs();
+    renderDirectory();
+  }
+
+  document.getElementById("dirSearch").addEventListener("input", function(e){ STATE.dir.search = e.target.value; renderDirectory(true); });
+  ["fCompany","fDept","fDesig","fOffice","fStatus"].forEach(function(id){
+    document.getElementById(id).addEventListener("change", function(e){
+      var map = { fCompany:"company", fDept:"dept", fDesig:"desig", fOffice:"office", fStatus:"status" };
+      STATE.dir[map[id]] = e.target.value;
+      renderDirectory();
+    });
+  });
+  document.getElementById("dirSort").addEventListener("change", function(e){ STATE.dir.sort = e.target.value; renderDirectory(true); });
+  document.getElementById("dirRefresh").addEventListener("click", function(){ renderDirectory(); toast("Directory refreshed", true); });
+  document.getElementById("azRail").addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-letter]");
+    if(!btn || btn.disabled) return;
+    var l = btn.getAttribute("data-letter");
+    STATE.dir.letter = STATE.dir.letter===l ? "" : l;
+    renderDirectory();
+  });
+  document.querySelectorAll(".view-toggle button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      document.querySelectorAll(".view-toggle button").forEach(function(b){ b.classList.remove("active"); });
+      btn.classList.add("active");
+      STATE.dir.mode = btn.getAttribute("data-mode");
+      renderDirectory(true);
+    });
+  });
+  document.addEventListener("click", function(e){
+    var favBtn = e.target.closest("[data-fav]");
+    if(!favBtn) return;
+    var id = favBtn.getAttribute("data-fav");
+    var wasFav = STATE.favorites.has(id);
+    if(wasFav){ STATE.favorites.delete(id); } else { STATE.favorites.add(id); }
+    favBtn.classList.toggle("is-fav", !wasFav);
+    document.getElementById("favCount").textContent = String(STATE.favorites.size);
+    toast(wasFav ? "Removed from Favorites" : (fullName(byId[id]) + " added to Favorites"), true);
+    if(STATE.currentView==="favorites") renderFavoritesView();
+    if(STATE.currentView==="dashboard") renderRecentAndFavorites();
+  });
+
+  function renderFavoritesView(){
+    var favIds = Array.from(STATE.favorites);
+    var list = favIds.map(function(id){ return byId[id]; });
+    document.getElementById("favViewCount").textContent = list.length + " pinned";
+    var grid = document.getElementById("favGrid");
+    grid.innerHTML = list.length ? list.map(empCardHTML).join("") :
+      '<div class="empty-state" style="grid-column:1/-1"><div class="icon-wrap"><svg class="icon"><use href="#i-star"/></svg></div>' +
+      '<h3>No favorites yet</h3><p>Tap the star on any employee card or profile to pin them here for quick access.</p>' +
+      '<button class="btn btn-secondary btn-sm" data-view="directory">Browse Directory</button></div>';
+  }
+
+  /* ---------------- Companies ---------------- */
+  function renderCompanies(){
+    document.getElementById("coCount").textContent = COMPANIES.length + " companies";
+    document.getElementById("coGrid").innerHTML = COMPANIES.map(function(c){
+      var count = EMPLOYEES.filter(function(e){ return e.company===c.id; }).length;
+      return '<div class="card co-card">' +
+        '<div class="co-banner" style="background:linear-gradient(135deg,'+c.accent+',color-mix(in srgb,'+c.accent+' 60%, black))"><div class="co-logo" style="background:'+c.accent+'">'+esc(c.short)+'</div></div>' +
+        '<div class="co-body"><h3>'+esc(c.name)+'</h3><div class="co-count">'+count+' employees</div>' +
+        '<div class="co-meta">' +
+          '<div><svg class="icon"><use href="#i-pin"/></svg><span>'+esc(c.address)+'</span></div>' +
+          '<div><svg class="icon"><use href="#i-phone"/></svg><span>'+esc(c.phone)+'</span></div>' +
+          '<div><svg class="icon"><use href="#i-mail"/></svg><span>'+esc(c.email)+'</span></div>' +
+        '</div>' +
+        '<button class="btn btn-secondary btn-sm" data-open-company="'+c.id+'">View Company</button></div></div>';
+    }).join("");
+  }
+
+  /* ---------------- Departments ---------------- */
+  function renderDepartments(){
+    document.getElementById("deptCount").textContent = DEPARTMENTS.length + " departments";
+    document.getElementById("deptGrid").innerHTML = DEPARTMENTS.map(function(d){
+      var co = companyById[d.companyId];
+      var count = EMPLOYEES.filter(function(e){ return e.dept===d.id; }).length;
+      return '<div class="card dept-card">' +
+        '<div class="dept-card-top"><h3>'+esc(d.name)+'</h3><span class="dept-co-chip" style="background:'+co.accent+'">'+esc(co.short)+'</span></div>' +
+        '<div class="dept-head-row"><svg class="icon" style="width:14px;height:14px;color:var(--color-text-tertiary)"><use href="#i-idcard"/></svg>Head: '+esc(d.head)+'</div>' +
+        '<div class="dept-stats"><strong>'+count+'</strong><button class="btn btn-ghost btn-sm" data-view="directory" data-dept="'+d.id+'">View Members <svg class="icon"><use href="#i-chevron-right"/></svg></button></div>' +
+        '</div>';
+    }).join("");
+  }
+
+  /* ---------------- Profile ---------------- */
+  function qrGridHTML(seedStr, accent){
+    var seed = 0; for(var i=0;i<seedStr.length;i++) seed = (seed*31 + seedStr.charCodeAt(i)) >>> 0;
+    function rnd(){ seed = (seed*1103515245 + 12345) >>> 0; return (seed>>>16) % 100; }
+    var n = 14, cells = [];
+    for(var r=0;r<n;r++){
+      for(var c=0;c<n;c++){
+        var isFinder = (r<3 && c<3) || (r<3 && c>n-4) || (r>n-4 && c<3);
+        var on = isFinder ? (r===0||r===2||c===0||c===2||(r===1&&c===1)) : rnd()<46;
+        cells.push(on);
+      }
+    }
+    var html = '<div style="display:grid;grid-template-columns:repeat('+n+',6px)">';
+    cells.forEach(function(on){ html += '<div class="qr-cell" style="background:'+(on?(accent||"#1C1C1E"):"transparent")+'"></div>'; });
+    return html + '</div>';
+  }
+
+  function downloadVCard(e){
+    var lines = [
+      "BEGIN:VCARD","VERSION:3.0",
+      "N:"+e.last+";"+e.first+";"+(e.middle||"")+";;",
+      "FN:"+fullName(e),
+      "TITLE:"+e.desig,
+      "ORG:"+companyById[e.company].name+";"+deptById[e.dept].name,
+      "EMAIL;TYPE=WORK:"+e.email,
+      "TEL;TYPE=CELL:"+e.mobile,
+      "TEL;TYPE=WORK,VOICE:ext."+e.ext,
+      "END:VCARD"
+    ];
+    var blob = new Blob([lines.join("\n")], {type:"text/vcard"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = e.first+"-"+e.last+".vcf";
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    toast("vCard downloaded", true);
+  }
+
+  function renderProfile(id){
+    var e = byId[id] || byId[STATE.profileEmployeeId];
+    STATE.profileEmployeeId = e.id;
+    if(STATE.recentlyViewed[0]!==e.id){
+      STATE.recentlyViewed = [e.id].concat(STATE.recentlyViewed.filter(function(x){return x!==e.id;})).slice(0,5);
+    }
+    var co = companyById[e.company], dep = deptById[e.dept];
+
+    document.getElementById("profCover").style.background = "linear-gradient(135deg,"+co.accent+",color-mix(in srgb,"+co.accent+" 45%, black))";
+    document.getElementById("profAvatar").outerHTML = avatarHTML(e,"xl").replace('class="avatar avatar-xl"','id="profAvatar" class="avatar avatar-xl"');
+    document.getElementById("profName").textContent = fullName(e) + (e.nickname ? ' "'+e.nickname+'"' : "");
+    document.getElementById("profDesig").textContent = e.desig;
+    document.getElementById("profOrg").textContent = dep.name + " · " + co.name;
+    document.getElementById("profStatus").innerHTML = '<span class="badge '+statusBadgeClass(e.status)+'">'+statusLabel(e.status)+'</span>';
+
+    var isFav = STATE.favorites.has(e.id);
+    document.getElementById("profActions").innerHTML =
+      '<a class="btn btn-secondary" href="tel:'+esc(e.mobile.replace(/\s/g,""))+'"><svg class="icon"><use href="#i-phone"/></svg>Call</a>' +
+      '<a class="btn btn-secondary" href="mailto:'+esc(e.email)+'"><svg class="icon"><use href="#i-mail"/></svg>Email</a>' +
+      '<a class="btn btn-secondary" href="viber://chat?number='+esc(e.viber.replace(/\s/g,""))+'"><svg class="icon"><use href="#i-chat"/></svg>Viber</a>' +
+      '<button class="btn btn-secondary" id="profFavBtn"><svg class="icon" style="'+(isFav?'fill:#F5B301;stroke:#F5B301':'')+'"><use href="#i-star"/></svg>'+(isFav?'Favorited':'Favorite')+'</button>' +
+      '<button class="btn btn-primary" id="profVcardBtn"><svg class="icon"><use href="#i-download"/></svg>Download vCard</button>';
+    document.getElementById("profFavBtn").addEventListener("click", function(){
+      var wasFav = STATE.favorites.has(e.id);
+      if(wasFav) STATE.favorites.delete(e.id); else STATE.favorites.add(e.id);
+      renderProfile(e.id);
+      document.getElementById("favCount").textContent = String(STATE.favorites.size);
+      toast(wasFav ? "Removed from Favorites" : "Added to Favorites", true);
+    });
+    document.getElementById("profVcardBtn").addEventListener("click", function(){ downloadVCard(e); });
+
+    document.getElementById("profPersonal").innerHTML = [
+      ["First Name", e.first], ["Middle Name", e.middle||"—"], ["Last Name", e.last],
+      ["Nickname", e.nickname||"—"], ["Gender", e.gender], ["Birthday", fmtBdayLabel(e.birthday)+" ("+e.birthday.split("-").reverse().join("/")+")"]
+    ].map(infoItem).join("");
+
+    document.getElementById("profContact").innerHTML = [
+      ["Corporate Email", '<a href="mailto:'+esc(e.email)+'">'+esc(e.email)+'</a>'],
+      ["Personal Email", esc(e.personalEmail||"—")],
+      ["Mobile", esc(e.mobile)], ["Viber", esc(e.viber)],
+      ["Local Extension", esc(e.ext)], ["Office", esc(OFFICES[e.office])]
+    ].map(infoItemRaw).join("");
+
+    document.getElementById("profOrgInfo").innerHTML = [
+      ["Employee ID", "OC-"+e.id.replace("e","").padStart(5,"0")],
+      ["Company", esc(co.name)], ["Department", esc(dep.name)], ["Designation", esc(e.desig)],
+      ["Date Hired", fmtDate(e.hired)], ["Date Regularized", e.regularized?fmtDate(e.regularized):"—"]
+    ].map(infoItemRaw).join("");
+
+    document.getElementById("profEmergency").innerHTML = [
+      ["Contact Name", e.emergency.name], ["Relationship", e.emergency.rel], ["Phone", e.emergency.phone]
+    ].map(infoItem).join("");
+
+    document.getElementById("profSkills").innerHTML = e.skills.map(function(s){ return '<span class="chip">'+esc(s)+'</span>'; }).join("") || '<span class="chip">No skills listed</span>';
+    document.getElementById("profAbout").textContent = e.about;
+
+    document.getElementById("profQr").innerHTML = qrGridHTML(e.id+e.email, co.accent);
+
+    var mgrHtml;
+    if(e.supervisorId && byId[e.supervisorId]){
+      var m = byId[e.supervisorId];
+      mgrHtml = '<button class="person-row" data-view="profile" data-employee-id="'+m.id+'">' + avatarHTML(m,"sm") +
+        '<div class="person-row-info"><strong>'+esc(fullName(m))+'</strong><span>'+esc(m.desig)+'</span></div></button>';
+    } else {
+      mgrHtml = '<div class="person-row"><span class="avatar avatar-sm" style="background:var(--color-surface);color:var(--color-text-secondary)">—</span>' +
+        '<div class="person-row-info"><strong>'+esc(e.supervisorName)+'</strong><span>Outside directory scope</span></div></div>';
+    }
+    document.getElementById("profManager").innerHTML = mgrHtml;
+
+    var team = EMPLOYEES.filter(function(x){ return x.supervisorId===e.id; });
+    document.getElementById("profTeam").innerHTML = team.length ? team.map(function(t){
+      return '<button class="person-row" data-view="profile" data-employee-id="'+t.id+'">' + avatarHTML(t,"sm") +
+        '<div class="person-row-info"><strong>'+esc(fullName(t))+'</strong><span>'+esc(t.desig)+'</span></div></button>';
+    }).join("") : '<p style="font-size:12.5px;color:var(--color-text-secondary);padding:6px">No direct reports.</p>';
+
+    document.getElementById("topAvatar").outerHTML = avatarHTML(byId[STATE.selfId],"sm").replace('class="avatar avatar-sm"','id="topAvatar" class="avatar avatar-sm"');
+  }
+  function infoItem(pair){ return '<div class="info-item"><label>'+esc(pair[0])+'</label><div>'+esc(pair[1])+'</div></div>'; }
+  function infoItemRaw(pair){ return '<div class="info-item"><label>'+esc(pair[0])+'</label><div>'+pair[1]+'</div></div>'; }
+
+  /* ---------------- Company drawer ---------------- */
+  var drawerOverlay = document.getElementById("drawerOverlay");
+  var currentDrawerCompany = null, currentDrawerTab = "overview";
+
+  function openCompanyDrawer(companyId){
+    currentDrawerCompany = companyId;
+    currentDrawerTab = "overview";
+    var c = companyById[companyId];
+    document.getElementById("drawerBanner").style.background = "linear-gradient(135deg,"+c.accent+",color-mix(in srgb,"+c.accent+" 45%, black))";
+    document.getElementById("drawerLogo").style.background = c.accent;
+    document.getElementById("drawerLogo").textContent = c.short;
+    document.getElementById("drawerTitle").textContent = c.name;
+    document.getElementById("drawerSubtitle").textContent = c.website;
+    document.querySelectorAll(".drawer-tab").forEach(function(t){ t.classList.toggle("active", t.dataset.tab==="overview"); });
+    renderDrawerBody();
+    drawerOverlay.classList.add("open");
+  }
+  function closeDrawer(){ drawerOverlay.classList.remove("open"); }
+  document.getElementById("drawerClose").addEventListener("click", closeDrawer);
+  drawerOverlay.addEventListener("click", function(e){ if(e.target===drawerOverlay) closeDrawer(); });
+  document.getElementById("drawerTabs").addEventListener("click", function(e){
+    var tab = e.target.closest(".drawer-tab");
+    if(!tab) return;
+    currentDrawerTab = tab.dataset.tab;
+    document.querySelectorAll(".drawer-tab").forEach(function(t){ t.classList.toggle("active", t===tab); });
+    renderDrawerBody();
+  });
+  document.addEventListener("click", function(e){
+    var el = e.target.closest("[data-open-company]");
+    if(el) openCompanyDrawer(el.getAttribute("data-open-company"));
+  });
+
+  function renderDrawerBody(){
+    var c = companyById[currentDrawerCompany];
+    var body = document.getElementById("drawerBody");
+    var companyEmployees = EMPLOYEES.filter(function(e){ return e.company===c.id; });
+    var companyDepts = DEPARTMENTS.filter(function(d){ return d.companyId===c.id; });
+
+    if(currentDrawerTab==="overview"){
+      body.innerHTML =
+        '<p class="about-text">'+esc(c.desc)+'</p>' +
+        '<div class="info-list" style="margin-top:6px">' +
+          infoItemRaw(["Headquarters", esc(c.address)]) +
+          infoItemRaw(["Phone", esc(c.phone)]) +
+          infoItemRaw(["Email", '<a href="mailto:'+esc(c.email)+'">'+esc(c.email)+'</a>']) +
+          infoItemRaw(["Website", esc(c.website)]) +
+          infoItemRaw(["Employees", companyEmployees.length]) +
+          infoItemRaw(["Departments", companyDepts.length]) +
+        '</div>';
+    }
+    if(currentDrawerTab==="departments"){
+      body.innerHTML = companyDepts.map(function(d){
+        var count = EMPLOYEES.filter(function(e){ return e.dept===d.id; }).length;
+        return '<div class="mini-row"><div class="mini-row-main"><strong>'+esc(d.name)+'</strong><span>Head: '+esc(d.head)+'</span></div><span class="time">'+count+' members</span></div>';
+      }).join("") || emptyRowHTML("No departments on file.");
+    }
+    if(currentDrawerTab==="employees"){
+      body.innerHTML = companyEmployees.map(function(e){
+        return '<button class="person-row" data-view="profile" data-employee-id="'+e.id+'" style="padding:8px 4px">' + avatarHTML(e,"sm") +
+          '<div class="person-row-info" style="flex:1"><strong>'+esc(fullName(e))+'</strong><span>'+esc(e.desig)+' · '+esc(deptById[e.dept].name)+'</span></div>' +
+          '<span class="badge '+statusBadgeClass(e.status)+'">'+statusLabel(e.status)+'</span></button>';
+      }).join("");
+    }
+    if(currentDrawerTab==="orgchart"){
+      var leadsByDept = {};
+      companyDepts.forEach(function(d){ leadsByDept[d.id] = companyEmployees.filter(function(e){ return e.dept===d.id && !e.supervisorId; }); });
+      var html = '<div class="org-tree">';
+      companyDepts.forEach(function(d){
+        var leads = leadsByDept[d.id];
+        if(!leads.length) return;
+        leads.forEach(function(lead){
+          var reports = EMPLOYEES.filter(function(e){ return e.supervisorId===lead.id; });
+          html += '<div class="org-node"><div class="org-node-inner">' + avatarHTML(lead,"sm") +
+            '<div class="org-node-info"><strong>'+esc(fullName(lead))+'</strong><span>'+esc(lead.desig)+' · '+esc(d.name)+'</span></div></div>';
+          if(reports.length){
+            html += '<div class="org-children">' + reports.map(function(r){
+              return '<div class="org-node"><div class="org-node-inner">' + avatarHTML(r,"sm") +
+                '<div class="org-node-info"><strong>'+esc(fullName(r))+'</strong><span>'+esc(r.desig)+'</span></div></div></div>';
+            }).join("") + '</div>';
+          }
+          html += '</div>';
+        });
+      });
+      html += '</div>';
+      body.innerHTML = html || emptyRowHTML("Org chart data not available for this company yet.");
+    }
+  }
+
+  /* ---------------- Init ---------------- */
+  renderStats();
+  renderQuickAccess();
+  renderBirthdays();
+  renderNewHires();
+  renderRecentAndFavorites();
+  renderAnnouncements();
+  populateFilterSelects();
+  renderDirectory(true);
+  renderCompanies();
+  renderDepartments();
+  document.getElementById("topAvatar").outerHTML = avatarHTML(byId[STATE.selfId],"sm").replace('class="avatar avatar-sm"','id="topAvatar" class="avatar avatar-sm"');
+
+})();
+</script>
