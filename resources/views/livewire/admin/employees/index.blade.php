@@ -41,9 +41,7 @@
                     <tr class="border-b border-line last:border-b-0 hover:bg-surface">
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-2.5">
-                                <span class="flex h-8.5 w-8.5 flex-shrink-0 items-center justify-center rounded-full bg-brand-tint text-xs font-bold text-brand">
-                                    {{ collect(explode(' ', $employee->full_name))->map(fn ($p) => $p[0] ?? '')->take(2)->implode('') }}
-                                </span>
+                                <x-avatar :employee="$employee" size="h-8.5 w-8.5" textSize="text-xs" conversion="thumb" />
                                 <div>
                                     <p class="font-semibold">{{ $employee->full_name }}</p>
                                     <p class="text-xs text-ink-tertiary">{{ $employee->employee_id }}</p>
@@ -90,6 +88,32 @@
             </div>
 
             @if ($activeTab === 'personal')
+                <div class="mb-5 flex items-center gap-4 border-b border-line pb-5">
+                    <div class="h-20 w-20 flex-shrink-0">
+                        @if ($photo)
+                            <img src="{{ $photo->temporaryUrl() }}" class="h-20 w-20 rounded-full border border-line object-cover" alt="Photo preview">
+                        @elseif ($editingEmployee?->getFirstMediaUrl('photo', 'thumb'))
+                            <img src="{{ $editingEmployee->getFirstMediaUrl('photo', 'thumb') }}" class="h-20 w-20 rounded-full border border-line object-cover" alt="Current photo">
+                        @else
+                            <span class="flex h-20 w-20 items-center justify-center rounded-full bg-brand-tint font-display text-xl font-bold text-brand">
+                                {{ collect(explode(' ', trim(($form['first_name'] ?? '').' '.($form['last_name'] ?? ''))))->map(fn ($p) => $p[0] ?? '')->take(2)->implode('') }}
+                            </span>
+                        @endif
+                    </div>
+                    <div class="flex flex-col items-start gap-1.5">
+                        <label class="btn-secondary w-fit cursor-pointer !py-1.5 text-xs">
+                            <i class="fa-solid fa-camera"></i>{{ $editingEmployee?->hasMedia('photo') || $photo ? 'Change Photo' : 'Upload Photo' }}
+                            <input type="file" wire:model="photo" accept="image/*" class="hidden">
+                        </label>
+                        @if ($editingEmployee?->hasMedia('photo'))
+                            <button type="button" wire:click="removePhoto" class="text-xs text-ink-tertiary hover:text-red-600 hover:underline">Remove photo</button>
+                        @endif
+                        <div wire:loading wire:target="photo" class="text-xs text-ink-tertiary">Uploading…</div>
+                        @error('photo') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
+                        <p class="text-[11px] text-ink-tertiary">JPG or PNG, up to 5MB.</p>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <x-admin.field label="Employee ID" :locked="true">
                         <input type="text" value="{{ $editingId ? $form['employee_id'] : 'Auto-generated on save' }}" disabled class="input">

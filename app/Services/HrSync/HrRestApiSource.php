@@ -32,9 +32,13 @@ use Throwable;
  *       first/last (see splitName()) — multi-word first names, suffixes, or
  *       "Last, First" formats will not split correctly. Revisit if HR's
  *       naming convention makes this a real problem in practice.
- *     - `company` / `designation` are resolved display names, not IDs —
- *       HrSyncService now matches Company/Designation by name rather than
- *       by a numeric hr_ref_id for records coming through this source.
+ *     - `company` / `designation` are resolved display names. HR can also send
+ *       `company_id` / `designation_id` — their own stable numeric FK values —
+ *       alongside the names; when present, HrSyncService matches on those IDs
+ *       (via companies.hr_ref_id / designations.hr_ref_id) instead of by name,
+ *       so a rename on either side no longer produces a duplicate. Both fields
+ *       are optional here so this keeps working against an HR response that
+ *       hasn't added them yet — falls back to name-matching in that case.
  *     - No department, dates, job level, or supervisor are exposed by this
  *       endpoint at all — those fields are Admin-managed in OCED instead of
  *       HR-synced. See architecture-plan.md §2.4 for the full rationale.
@@ -98,7 +102,9 @@ class HrRestApiSource implements HrSourceInterface
             lastName: $lastName,
             email: (string) $email,
             companyName: (string) $company,
+            companyId: isset($record['company_id']) ? (int) $record['company_id'] : null,
             designationName: $record['designation'] ?? null,
+            designationId: isset($record['designation_id']) ? (int) $record['designation_id'] : null,
             employmentStatusCode: (string) ($record['status'] ?? 'active'),
         );
     }

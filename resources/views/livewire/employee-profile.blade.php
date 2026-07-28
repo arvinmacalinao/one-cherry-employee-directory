@@ -1,31 +1,32 @@
 <div class="flex flex-col gap-5">
     <div class="h-32 rounded-panel" style="background: linear-gradient(135deg, {{ $employee->company->color_theme ?? '#790002' }}, #1c1c1e)"></div>
 
-    <div class="-mt-14 flex flex-wrap items-end gap-4 px-1">
-        <span class="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-full border-4 border-bg bg-brand-tint font-display text-2xl font-bold text-brand">
-            {{ collect(explode(' ', $employee->full_name))->map(fn ($p) => $p[0] ?? '')->take(2)->implode('') }}
-        </span>
-        <div class="flex flex-1 flex-col gap-1 pb-1.5">
-            <h2 class="font-display text-xl">{{ $employee->full_name }}{{ $employee->profile?->nickname ? ' "'.$employee->profile->nickname.'"' : '' }}</h2>
-            <p class="text-sm font-semibold text-brand">{{ $employee->designation->name }}</p>
-            <p class="text-sm text-ink-secondary">{{ $employee->department->name }} · {{ $employee->company->name }}</p>
-            <span class="badge badge-{{ $employee->employment_status->value === 'on_leave' ? 'leave' : $employee->employment_status->value }} w-fit">
-                {{ $employee->employment_status->label() }}
-            </span>
-        </div>
-        <div class="flex flex-wrap gap-2 pb-1.5">
-            @if ($employee->profile?->mobile_number)
-                <a href="tel:{{ $employee->profile->mobile_number }}" class="btn-secondary"><i class="fa-solid fa-phone"></i>Call</a>
-            @endif
-            <a href="mailto:{{ $employee->email }}" class="btn-secondary"><i class="fa-solid fa-envelope"></i>Email</a>
-            @if ($employee->profile?->viber_number)
-                <a href="viber://chat?number={{ $employee->profile->viber_number }}" class="btn-secondary"><i class="fa-brands fa-viber"></i>Viber</a>
-            @endif
-            <button wire:click="toggleFavorite" class="btn-secondary">
-                <i class="fa-{{ $isFavorited ? 'solid' : 'regular' }} fa-star {{ $isFavorited ? 'text-amber-400' : '' }}"></i>
-                {{ $isFavorited ? 'Favorited' : 'Favorite' }}
-            </button>
-            <button wire:click="downloadVCard" class="btn-primary"><i class="fa-solid fa-download"></i>Download vCard</button>
+    <div class="-mt-14 flex flex-col gap-3 px-1">
+        <x-avatar :employee="$employee" size="h-32 w-32" textSize="text-4xl" conversion="profile" class="border-4 border-bg" />
+
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="flex flex-1 flex-col gap-1">
+                <h2 class="font-display text-xl">{{ $employee->full_name }}{{ $employee->profile?->nickname ? ' "'.$employee->profile->nickname.'"' : '' }}</h2>
+                <p class="text-sm font-semibold text-brand">{{ $employee->designation->name }}</p>
+                <p class="text-sm text-ink-secondary">{{ $employee->department->name }} · {{ $employee->company->name }}</p>
+                <span class="badge badge-{{ $employee->employment_status->value === 'on_leave' ? 'leave' : $employee->employment_status->value }} w-fit">
+                    {{ $employee->employment_status->label() }}
+                </span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                @if ($employee->profile?->mobile_number)
+                    <a href="tel:{{ $employee->profile->mobile_number }}" class="btn-secondary"><i class="fa-solid fa-phone"></i>Call</a>
+                @endif
+                <a href="mailto:{{ $employee->email }}" class="btn-secondary"><i class="fa-solid fa-envelope"></i>Email</a>
+                @if ($employee->profile?->viber_number)
+                    <a href="viber://chat?number={{ $employee->profile->viber_number }}" class="btn-secondary"><i class="fa-brands fa-viber"></i>Viber</a>
+                @endif
+                <button wire:click="toggleFavorite" class="btn-secondary">
+                    <i class="fa-{{ $isFavorited ? 'solid' : 'regular' }} fa-star {{ $isFavorited ? 'text-amber-400' : '' }}"></i>
+                    {{ $isFavorited ? 'Favorited' : 'Favorite' }}
+                </button>
+                <button wire:click="downloadVCard" class="btn-primary"><i class="fa-solid fa-download"></i>Download vCard</button>
+            </div>
         </div>
     </div>
 
@@ -95,9 +96,7 @@
                 <div class="card p-5">
                     <h4 class="mb-3 text-xs font-bold tracking-wide text-ink-tertiary uppercase">Reporting Manager</h4>
                     <a href="{{ route('directory.show', $employee->supervisor) }}" wire:navigate class="flex items-center gap-3 rounded-lg p-1.5 hover:bg-surface">
-                        <span class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-tint font-display text-xs font-bold text-brand">
-                            {{ collect(explode(' ', $employee->supervisor->full_name))->map(fn ($p) => $p[0] ?? '')->take(2)->implode('') }}
-                        </span>
+                        <x-avatar :employee="$employee->supervisor" size="h-9 w-9" textSize="text-xs" conversion="thumb" />
                         <div class="min-w-0">
                             <p class="truncate text-sm font-semibold">{{ $employee->supervisor->full_name }}</p>
                             <p class="truncate text-xs text-ink-secondary">{{ $employee->supervisor->designation->name }}</p>
@@ -112,9 +111,7 @@
                     <div class="flex flex-col gap-1">
                         @foreach ($employee->reports as $report)
                             <a href="{{ route('directory.show', $report) }}" wire:navigate class="flex items-center gap-3 rounded-lg p-1.5 hover:bg-surface">
-                                <span class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-tint font-display text-xs font-bold text-brand">
-                                    {{ collect(explode(' ', $report->full_name))->map(fn ($p) => $p[0] ?? '')->take(2)->implode('') }}
-                                </span>
+                                <x-avatar :employee="$report" size="h-9 w-9" textSize="text-xs" conversion="thumb" />
                                 <div class="min-w-0">
                                     <p class="truncate text-sm font-semibold">{{ $report->full_name }}</p>
                                     <p class="truncate text-xs text-ink-secondary">{{ $report->designation->name }}</p>

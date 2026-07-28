@@ -40,9 +40,7 @@
         @forelse ($employees as $employee)
             <div class="card flex flex-col gap-3.5 p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-raised">
                 <div class="flex items-start gap-3">
-                    <span class="flex h-11.5 w-11.5 flex-shrink-0 items-center justify-center rounded-full bg-brand-tint font-display text-sm font-bold text-brand">
-                        {{ collect(explode(' ', $employee->full_name))->map(fn ($p) => $p[0] ?? '')->take(2)->implode('') }}
-                    </span>
+                    <x-avatar :employee="$employee" size="h-16 w-16" textSize="text-lg" conversion="thumb" />
                     <div class="min-w-0 flex-1">
                         <p class="truncate font-display text-sm font-bold">{{ $employee->full_name }}</p>
                         <p class="truncate text-xs font-semibold text-brand">{{ $employee->designation->name }}</p>

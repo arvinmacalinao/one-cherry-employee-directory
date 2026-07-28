@@ -30,7 +30,9 @@ use Throwable;
  * HR only actually provides: employee_id, name, email, company, designation, status
  * (see HrEmployeeData). Department, dates, job level, and supervisor are NOT synced —
  * they're Admin-managed fields on the same `employees` row. Company/Designation are
- * matched by name here (not a numeric hr_ref_id) since that's what the real API sends.
+ * matched by HR's numeric company_id/designation_id when the API sends them
+ * (companies.hr_ref_id / designations.hr_ref_id), falling back to a case-insensitive
+ * name match when it doesn't — see resolveCompany()/resolveDesignation().
  */
 class HrSyncService
 {
@@ -99,8 +101,8 @@ class HrSyncService
      */
     protected function upsertEmployee(HrEmployeeData $data, array &$errors): string
     {
-        $company = $this->resolveCompany($data->companyName, $errors);
-        $designation = $this->resolveDesignation($data->designationName, $company, $errors);
+        $company = $this->resolveCompany($data->companyId, $data->companyName, $errors);
+        $designation = $this->resolveDesignation($data->designationId, $data->designationName, $company, $errors);
         $status = $this->resolveStatus($data->employmentStatusCode, $errors);
 
         // Department, dates, job level, supervisor, middle name are deliberately absent
@@ -172,35 +174,69 @@ class HrSyncService
     }
 
     /**
-     * Companies are matched by name (case-insensitive) — the HR API returns a
-     * resolved display name, not an ID. A name HR sends that doesn't exist yet
-     * in OCED is auto-created (with no branding/address yet) and flagged for
-     * an Admin to fill in — sync never blocks on it.
+     * Companies are matched by HR's numeric company_id (via hr_ref_id) when the
+     * API sends one — stable across renames on either side. Falls back to a
+     * case-insensitive name match when no ID is given (older HR response shape),
+     * or when the ID doesn't match anything yet — that fallback also opportunistically
+     * backfills hr_ref_id onto the matched row so the *next* sync for this company
+     * can go straight through the ID path. A company HR sends that doesn't exist
+     * yet in OCED under either identity is auto-created (with no branding/address
+     * yet) and flagged for an Admin to fill in — sync never blocks on it.
      */
-    protected function resolveCompany(string $name, array &$errors): Company
+    protected function resolveCompany(?int $hrRefId, string $name, array &$errors): Company
     {
+        if ($hrRefId) {
+            $company = Company::where('hr_ref_id', $hrRefId)->first();
+
+            if ($company) {
+                return $company;
+            }
+        }
+
         $company = Company::whereRaw('LOWER(name) = ?', [strtolower($name)])->first();
 
-        if (! $company) {
-            $company = Company::create([
-                'name' => $name,
-                'slug' => Str::slug($name).'-'.Str::random(4),
-                'is_active' => true,
-                'needs_review' => true,
-            ]);
-            $errors[] = "Auto-created new Company \"{$name}\" from HR — needs Admin review (logo, address, etc.).";
+        if ($company) {
+            if ($hrRefId && ! $company->hr_ref_id) {
+                $company->update(['hr_ref_id' => $hrRefId]);
+            }
+
+            return $company;
         }
+
+        $company = Company::create([
+            'hr_ref_id' => $hrRefId,
+            'name' => $name,
+            'slug' => Str::slug($name).'-'.Str::random(4),
+            'is_active' => true,
+            'needs_review' => true,
+        ]);
+        $errors[] = "Auto-created new Company \"{$name}\" from HR — needs Admin review (logo, address, etc.).";
 
         return $company;
     }
 
     /**
-     * Designations are matched by name within the employee's company (same
-     * uniqueness scope as the designations table itself). Null when HR sends
-     * no designation for this record — the caller decides how to handle that.
+     * Same ID-first, name-fallback matching as resolveCompany(), scoped to the
+     * employee's company (same uniqueness scope as the designations table
+     * itself). Null when HR sends no designation for this record — the caller
+     * decides how to handle that.
      */
-    protected function resolveDesignation(?string $name, Company $company, array &$errors): ?Designation
+    protected function resolveDesignation(?int $hrRefId, ?string $name, Company $company, array &$errors): ?Designation
     {
+        if (! $name && ! $hrRefId) {
+            return null;
+        }
+
+        if ($hrRefId) {
+            $designation = Designation::where('company_id', $company->id)
+                ->where('hr_ref_id', $hrRefId)
+                ->first();
+
+            if ($designation) {
+                return $designation;
+            }
+        }
+
         if (! $name) {
             return null;
         }
@@ -209,16 +245,23 @@ class HrSyncService
             ->whereRaw('LOWER(name) = ?', [strtolower($name)])
             ->first();
 
-        if (! $designation) {
-            $designation = Designation::create([
-                'company_id' => $company->id,
-                'name' => $name,
-                'hierarchy_level' => 1,
-                'is_active' => true,
-                'needs_review' => true,
-            ]);
-            $errors[] = "Auto-created new Designation \"{$name}\" at {$company->name} — needs Admin review (hierarchy level, description).";
+        if ($designation) {
+            if ($hrRefId && ! $designation->hr_ref_id) {
+                $designation->update(['hr_ref_id' => $hrRefId]);
+            }
+
+            return $designation;
         }
+
+        $designation = Designation::create([
+            'company_id' => $company->id,
+            'hr_ref_id' => $hrRefId,
+            'name' => $name,
+            'hierarchy_level' => 1,
+            'is_active' => true,
+            'needs_review' => true,
+        ]);
+        $errors[] = "Auto-created new Designation \"{$name}\" at {$company->name} — needs Admin review (hierarchy level, description).";
 
         return $designation;
     }

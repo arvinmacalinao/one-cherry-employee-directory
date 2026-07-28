@@ -119,5 +119,6 @@ class Employee extends Model implements Auditable, HasMedia
     public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('thumb')->width(160)->height(160);
+        $this->addMediaConversion('profile')->width(400)->height(400);
     }
 }

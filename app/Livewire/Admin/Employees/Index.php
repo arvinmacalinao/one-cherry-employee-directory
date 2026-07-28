@@ -13,11 +13,12 @@ use App\Repositories\Contracts\EmployeeRepositoryInterface;
 use App\Services\EmployeeProfileService;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 class Index extends Component
 {
-    use WithPagination;
+    use WithFileUploads, WithPagination;
 
     public string $search = '';
 
@@ -31,9 +32,13 @@ class Index extends Component
 
     public ?int $editingId = null;
 
+    public ?Employee $editingEmployee = null;
+
     public bool $isSynced = false;
 
     public array $form = [];
+
+    public $photo = null;
 
     public ?string $flash = null;
 
@@ -58,6 +63,7 @@ class Index extends Component
         // every employee regardless of source — the real HR API doesn't expose them
         // at all (see architecture-plan.md §2.4), so they're never HR-locked.
         $rules = [
+            'photo' => ['nullable', 'image', 'max:5120'],
             'form.middle_name' => ['nullable', 'string', 'max:255'],
             'form.department_id' => ['nullable', 'exists:departments,id'],
             'form.immediate_supervisor_id' => ['nullable', 'exists:employees,id'],
@@ -130,6 +136,7 @@ class Index extends Component
         $profile = $employee->profile;
 
         $this->editingId = $employee->id;
+        $this->editingEmployee = $employee;
         $this->isSynced = $employee->source === EmployeeSource::HrSync;
         $this->activeTab = 'personal';
 
@@ -173,6 +180,12 @@ class Index extends Component
     {
         $this->showForm = false;
         $this->resetForm();
+    }
+
+    public function removePhoto(): void
+    {
+        $this->editingEmployee?->clearMediaCollection('photo');
+        $this->photo = null;
     }
 
     public function save(EmployeeRepositoryInterface $employees, EmployeeProfileService $profileService): void
@@ -219,6 +232,13 @@ class Index extends Component
             $this->flash = 'Employee created';
         }
 
+        if ($this->photo) {
+            $employee->addMedia($this->photo->getRealPath())
+                ->usingName($this->photo->getClientOriginalName())
+                ->usingFileName($this->photo->getClientOriginalName())
+                ->toMediaCollection('photo');
+        }
+
         $profileService->updateProfile($employee, $profileFields);
         $profileService->syncSkills($employee, array_filter(array_map('trim', explode(',', $validated['skills'] ?? ''))));
 
@@ -228,9 +248,11 @@ class Index extends Component
     protected function resetForm(): void
     {
         $this->editingId = null;
+        $this->editingEmployee = null;
         $this->isSynced = false;
         $this->activeTab = 'personal';
         $this->form = $this->defaultForm();
+        $this->photo = null;
         $this->resetErrorBag();
     }
 

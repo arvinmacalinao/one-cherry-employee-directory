@@ -15,6 +15,8 @@ use Database\Seeders\EmployeeSeeder;
 use Database\Seeders\OfficeLocationSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -126,5 +128,28 @@ class AdminEmployeesTest extends TestCase
             ->call('save');
 
         $this->assertSame($otherDept->id, $employee->fresh()->department_id);
+    }
+
+    public function test_admin_can_upload_and_remove_an_employee_photo(): void
+    {
+        Storage::fake('public');
+        $this->actingAs($this->admin);
+        $employee = Employee::where('employee_id', 'EMP-00021')->firstOrFail();
+
+        Livewire::test(AdminEmployees::class)
+            ->call('openEdit', $employee->id)
+            ->set('photo', UploadedFile::fake()->image('headshot.jpg'))
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $employee->refresh();
+        $this->assertTrue($employee->hasMedia('photo'));
+        $this->assertNotEmpty($employee->getFirstMediaUrl('photo', 'thumb'));
+
+        Livewire::test(AdminEmployees::class)
+            ->call('openEdit', $employee->id)
+            ->call('removePhoto');
+
+        $this->assertFalse($employee->fresh()->hasMedia('photo'));
     }
 }

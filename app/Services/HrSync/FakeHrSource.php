@@ -21,8 +21,11 @@ use Illuminate\Support\Str;
  * of status, so a "Sync Now" in local dev never surprises you by deactivating
  * your on_leave demo data.
  *
- * Matches the confirmed real contract: company/designation by name, no department,
- * dates, job level, or supervisor — see HrEmployeeData.
+ * Matches the confirmed real contract: company/designation by name (plus the
+ * proposed company_id/designation_id fields — see HrEmployeeData), no department,
+ * dates, job level, or supervisor. echoBack() sends OCED's own company/designation
+ * IDs as if they were HR's, exercising the ID-match path; the synthetic new hire
+ * omits them to keep the name-fallback path exercised too.
  */
 class FakeHrSource implements HrSourceInterface
 {
@@ -52,7 +55,9 @@ class FakeHrSource implements HrSourceInterface
             lastName: $employee->last_name,
             email: $employee->email,
             companyName: $employee->company?->name ?? 'Unknown Company',
+            companyId: $employee->company_id,
             designationName: $designationName,
+            designationId: $employee->designation_id,
             employmentStatusCode: $employee->employment_status->value,
         );
     }
@@ -67,7 +72,9 @@ class FakeHrSource implements HrSourceInterface
             lastName: 'Hire',
             email: "new.hire.{$suffix}@onecherry.group",
             companyName: 'Cherry Digital Solutions',
+            companyId: null,
             designationName: 'Junior Developer',
+            designationId: null,
             employmentStatusCode: 'active',
         );
     }
