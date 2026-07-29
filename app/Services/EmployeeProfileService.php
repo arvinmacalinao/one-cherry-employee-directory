@@ -13,7 +13,7 @@ class EmployeeProfileService
      * in the incoming array. See architecture-plan.md §2.5, §7 for the ownership split.
      */
     protected const EDITABLE_FIELDS = [
-        'birthday', 'viber_number', 'office_location_id', 'about_me',
+        'birthday', 'viber_number', 'telephone', 'local_extension', 'office_location_id', 'about_me',
     ];
 
     public function show(int $employeeId): ?Employee

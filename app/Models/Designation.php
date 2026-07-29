@@ -4,27 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Shared, organization-wide master data — not scoped to a company, same
+ * reasoning as Department. See architecture-plan.md §2.5.
+ */
 class Designation extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'hr_ref_id', 'company_id', 'name', 'is_active', 'needs_review',
+        'hr_ref_id', 'name', 'is_active', 'needs_review',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'needs_review' => 'boolean',
     ];
-
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class);
-    }
 
     public function employees(): HasMany
     {
@@ -37,9 +35,8 @@ class Designation extends Model
     }
 
     /**
-     * Auto-created by HrSyncService when HR sends a designation name OCED hasn't
-     * seen before at that company — flagged until an Admin opens and saves the
-     * record (see Admin\Designations\Index).
+     * Auto-created by HrSyncService when HR sends a designation name/id OCED
+     * hasn't seen before — flagged until an Admin opens and saves the record.
      */
     public function scopeNeedsReview($query)
     {

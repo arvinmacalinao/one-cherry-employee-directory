@@ -10,7 +10,7 @@ class EloquentDepartmentRepository implements DepartmentRepositoryInterface
 {
     public function find(int $id): ?Department
     {
-        return Department::with('company')->find($id);
+        return Department::find($id);
     }
 
     public function findByHrRefId(int $hrRefId): ?Department
@@ -21,15 +21,24 @@ class EloquentDepartmentRepository implements DepartmentRepositoryInterface
     public function allActiveWithCounts(): Collection
     {
         return Department::active()
-            ->with('company')
             ->withCount(['employees' => fn ($q) => $q->visibleInDirectory()])
             ->orderBy('name')
             ->get();
     }
 
+    /**
+     * Department is org-wide, not company-owned — "for a company" means
+     * "has at least one visible employee at that company", and the count is
+     * scoped to that company's headcount specifically (not the department's
+     * org-wide total), for use on a Company's detail page.
+     */
     public function forCompany(int $companyId): Collection
     {
-        return Department::active()->where('company_id', $companyId)->orderBy('name')->get();
+        return Department::active()
+            ->whereHas('employees', fn ($q) => $q->where('company_id', $companyId)->visibleInDirectory())
+            ->withCount(['employees' => fn ($q) => $q->where('company_id', $companyId)->visibleInDirectory()])
+            ->orderBy('name')
+            ->get();
     }
 
     public function count(): int

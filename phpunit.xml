@@ -30,6 +30,9 @@
         <env name="DB_USERNAME" value="oced_app"/>
         <env name="DB_PASSWORD" value="oced_local_dev"/>
         <env name="DB_URL" value=""/>
+        <!-- Tests must never depend on local .env pointing at a real external HR
+             system — pin the fake source regardless of HR_SYNC_SOURCE in .env. -->
+        <env name="HR_SYNC_SOURCE" value="fake"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

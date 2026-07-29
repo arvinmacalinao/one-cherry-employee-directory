@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Admin\Designations;
 
-use App\Models\Company;
 use App\Repositories\Contracts\DesignationRepositoryInterface;
 use Livewire\Component;
 
+/**
+ * Designation is org-wide master data, not scoped to a company — see
+ * architecture-plan.md §2.5. This form has no Company field.
+ */
 class Index extends Component
 {
     public string $search = '';
@@ -15,7 +18,7 @@ class Index extends Component
     public ?int $editingId = null;
 
     public array $form = [
-        'name' => '', 'company_id' => '', 'is_active' => true,
+        'name' => '', 'is_active' => true,
     ];
 
     public ?int $lockedHrRef = null;
@@ -26,7 +29,6 @@ class Index extends Component
     {
         return [
             'form.name' => ['required', 'string', 'max:255'],
-            'form.company_id' => ['required', 'exists:companies,id'],
         ];
     }
 
@@ -45,7 +47,6 @@ class Index extends Component
         $this->lockedHrRef = $designation->hr_ref_id;
         $this->form = [
             'name' => $designation->name,
-            'company_id' => (string) $designation->company_id,
             'is_active' => $designation->is_active,
         ];
         $this->showForm = true;
@@ -84,7 +85,7 @@ class Index extends Component
         $this->editingId = null;
         $this->lockedHrRef = null;
         $this->form = [
-            'name' => '', 'company_id' => '', 'is_active' => true,
+            'name' => '', 'is_active' => true,
         ];
         $this->resetErrorBag();
     }
@@ -93,15 +94,13 @@ class Index extends Component
     {
         $term = strtolower(trim($this->search));
 
-        $designations = \App\Models\Designation::with('company')
-            ->withCount(['employees' => fn ($q) => $q->visibleInDirectory()])
+        $designations = \App\Models\Designation::withCount(['employees' => fn ($q) => $q->visibleInDirectory()])
             ->when($term !== '', fn ($q) => $q->where('name', 'like', "%{$term}%"))
             ->orderBy('name')
             ->get();
 
         return view('livewire.admin.designations.index', [
             'designations' => $designations,
-            'companyOptions' => Company::active()->orderBy('name')->get(),
         ])->layout('layouts.admin', ['header' => 'Designations']);
     }
 }

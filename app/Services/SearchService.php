@@ -29,7 +29,7 @@ class SearchService
         return [
             'people' => $this->employees->search($term, $limitPerGroup),
             'companies' => Company::active()->where('name', 'like', "%{$term}%")->limit($limitPerGroup)->get(),
-            'departments' => Department::active()->with('company')->where('name', 'like', "%{$term}%")->limit($limitPerGroup)->get(),
+            'departments' => Department::active()->where('name', 'like', "%{$term}%")->limit($limitPerGroup)->get(),
         ];
     }
 }

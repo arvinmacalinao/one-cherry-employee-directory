@@ -53,7 +53,7 @@
                             @foreach ($searchResults['departments'] as $department)
                                 <a href="{{ route('directory.index') }}?department={{ $department->id }}" wire:navigate class="flex items-center gap-3 px-4 py-2 hover:bg-surface">
                                     <span class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-surface text-ink-tertiary"><i class="fa-solid fa-sitemap text-xs"></i></span>
-                                    <span class="truncate text-sm font-semibold">{{ $department->name }} <span class="font-normal text-ink-secondary">· {{ $department->company->name }}</span></span>
+                                    <span class="truncate text-sm font-semibold">{{ $department->name }}</span>
                                 </a>
                             @endforeach
                         @endif

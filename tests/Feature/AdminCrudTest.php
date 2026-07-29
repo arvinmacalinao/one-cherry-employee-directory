@@ -103,17 +103,15 @@ class AdminCrudTest extends TestCase
     {
         $this->actingAs($this->admin);
         $this->get('/admin/departments')->assertOk();
-        $company = Company::whereNotNull('hr_ref_id')->firstOrFail();
 
         Livewire::test(AdminDepartments::class)
             ->call('openCreate')
             ->set('form.name', 'Data & Analytics')
-            ->set('form.company_id', (string) $company->id)
             ->call('save')
             ->assertHasNoErrors();
 
         $department = Department::where('name', 'Data & Analytics')->firstOrFail();
-        $this->assertSame($company->id, $department->company_id);
+        $this->assertTrue($department->is_active);
     }
 
     public function test_hr_synced_department_name_cannot_be_changed_via_form(): void
@@ -134,17 +132,15 @@ class AdminCrudTest extends TestCase
     {
         $this->actingAs($this->admin);
         $this->get('/admin/designations')->assertOk();
-        $company = Company::whereNotNull('hr_ref_id')->firstOrFail();
 
         Livewire::test(AdminDesignations::class)
             ->call('openCreate')
             ->set('form.name', 'Data Analyst')
-            ->set('form.company_id', (string) $company->id)
             ->call('save')
             ->assertHasNoErrors();
 
         $designation = Designation::where('name', 'Data Analyst')->firstOrFail();
-        $this->assertSame($company->id, $designation->company_id);
+        $this->assertTrue($designation->is_active);
     }
 
     public function test_admin_can_create_and_edit_an_office_location(): void

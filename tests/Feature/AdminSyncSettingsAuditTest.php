@@ -93,16 +93,14 @@ class AdminSyncSettingsAuditTest extends TestCase
     public function test_sync_flags_new_designation_names_and_admin_can_merge_a_duplicate(): void
     {
         // Simulate what HrSyncService creates when it sees a designation identity it hasn't seen before.
-        $company = Company::where('hr_ref_id', 102)->firstOrFail();
         $duplicate = Designation::create([
-            'company_id' => $company->id,
             'name' => 'Sr. Software Engineer', // near-duplicate of a real seeded name, needs merging
             'is_active' => true,
             'needs_review' => true,
         ]);
         $employee = Employee::where('employee_id', 'EMP-00021')->firstOrFail();
         $employee->update(['designation_id' => $duplicate->id]);
-        $target = Designation::where('company_id', $company->id)->where('id', '!=', $duplicate->id)->firstOrFail();
+        $target = Designation::where('id', '!=', $duplicate->id)->firstOrFail();
 
         $this->actingAs($this->admin);
 
@@ -132,6 +130,40 @@ class AdminSyncSettingsAuditTest extends TestCase
             ->assertSet('flash', 'Company marked as reviewed.');
 
         $this->assertFalse($company->fresh()->needs_review);
+    }
+
+    public function test_admin_can_bulk_mark_all_flagged_records_of_one_type_as_reviewed(): void
+    {
+        foreach (range(1, 3) as $i) {
+            Company::create(['name' => "New Company {$i}", 'slug' => "new-company-{$i}", 'is_active' => true, 'needs_review' => true]);
+        }
+        Designation::create(['name' => 'Should Stay Flagged', 'is_active' => true, 'needs_review' => true]);
+
+        $this->actingAs($this->admin);
+
+        Livewire::test(AdminSync::class)
+            ->call('markAllReviewed', 'company')
+            ->assertSet('flash', 'Marked 3 records as reviewed.');
+
+        $this->assertSame(0, Company::needsReview()->count());
+        $this->assertSame(1, Designation::needsReview()->count(), 'bulk-marking one type must not touch another');
+    }
+
+    public function test_admin_can_bulk_mark_every_flagged_record_as_reviewed_regardless_of_type(): void
+    {
+        foreach (range(1, 2) as $i) {
+            Company::create(['name' => "Another Company {$i}", 'slug' => "another-company-{$i}", 'is_active' => true, 'needs_review' => true]);
+        }
+        Designation::create(['name' => 'New Designation', 'is_active' => true, 'needs_review' => true]);
+
+        $this->actingAs($this->admin);
+
+        Livewire::test(AdminSync::class)
+            ->call('markAllReviewed')
+            ->assertSet('flash', 'Marked 3 records as reviewed.');
+
+        $this->assertSame(0, Company::needsReview()->count());
+        $this->assertSame(0, Designation::needsReview()->count());
     }
 
     public function test_admin_can_save_settings_and_it_affects_the_scheduler_source(): void

@@ -60,6 +60,8 @@ class AdminEmployeesTest extends TestCase
         Livewire::test(AdminEmployees::class)
             ->call('openEdit', $employee->id)
             ->set('form.viber_number', '+63 917 000 1111')
+            ->set('form.telephone', '(02) 8888 1200')
+            ->set('form.local_extension', '2231')
             ->set('form.about_me', 'Updated bio via admin.')
             ->set('form.birthday', '1990-05-12')
             ->call('save')
@@ -70,8 +72,49 @@ class AdminEmployeesTest extends TestCase
         $this->assertSame($originalCompanyId, $employee->company_id, 'HR-owned company must be untouched by the admin form');
         $this->assertSame($originalDepartmentId, $employee->department_id, 'HR-owned department must be untouched by the admin form');
         $this->assertSame('+63 917 000 1111', $employee->profile->viber_number);
+        $this->assertSame('(02) 8888 1200', $employee->profile->telephone);
+        $this->assertSame('2231', $employee->profile->local_extension);
         $this->assertSame('Updated bio via admin.', $employee->profile->about_me);
         $this->assertSame('1990-05-12', $employee->profile->birthday->format('Y-m-d'));
+
+        // Directory-owned fields an Admin sets here must actually show up on the
+        // public profile — that's the whole point of editing them.
+        $this->get("/directory/{$employee->id}")
+            ->assertOk()
+            ->assertSeeText('May 12')
+            ->assertSeeText('(02) 8888 1200')
+            ->assertSeeText('2231');
+    }
+
+    public function test_admin_can_fill_in_a_missing_corporate_email(): void
+    {
+        $this->actingAs($this->admin);
+
+        $employee = Employee::where('employee_id', 'EMP-00021')->firstOrFail();
+        $employee->update(['email' => null]); // simulate HR not having sent one
+
+        Livewire::test(AdminEmployees::class)
+            ->call('openEdit', $employee->id)
+            ->assertSet('form.email', null)
+            ->set('form.email', 'andrea.reyes@onecherry.group')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame('andrea.reyes@onecherry.group', $employee->fresh()->email);
+    }
+
+    public function test_admin_entered_email_must_still_be_unique(): void
+    {
+        $this->actingAs($this->admin);
+
+        $taken = Employee::where('employee_id', 'EMP-00034')->firstOrFail();
+        $employee = Employee::where('employee_id', 'EMP-00021')->firstOrFail();
+
+        Livewire::test(AdminEmployees::class)
+            ->call('openEdit', $employee->id)
+            ->set('form.email', $taken->email)
+            ->call('save')
+            ->assertHasErrors(['form.email' => 'unique']);
     }
 
     public function test_admin_form_has_no_way_to_create_a_new_employee(): void

@@ -61,9 +61,40 @@ class Sync extends Component
      */
     public function markReviewed(string $type, int $id): void
     {
-        $model = $type === 'company' ? Company::class : ($type === 'department' ? Department::class : Designation::class);
+        $model = $this->modelFor($type);
         $model::whereKey($id)->update(['needs_review' => false]);
         $this->flash = ucfirst($type).' marked as reviewed.';
+    }
+
+    /**
+     * Clears needs_review in bulk for every flagged record of a given type (or
+     * every type when $type is null) — for when a backlog builds up (e.g. right
+     * after the department/designation company-scoping fix) and reviewing each
+     * one individually isn't practical.
+     */
+    public function markAllReviewed(?string $type = null): void
+    {
+        $types = $type ? [$type] : ['company', 'department', 'designation'];
+        $count = 0;
+
+        foreach ($types as $t) {
+            $model = $this->modelFor($t);
+            $count += $model::needsReview()->count();
+            $model::needsReview()->update(['needs_review' => false]);
+        }
+
+        $this->flash = $count === 0
+            ? 'Nothing to review.'
+            : "Marked {$count} record".($count === 1 ? '' : 's').' as reviewed.';
+    }
+
+    protected function modelFor(string $type): string
+    {
+        return match ($type) {
+            'company' => Company::class,
+            'department' => Department::class,
+            'designation' => Designation::class,
+        };
     }
 
     /**
@@ -85,15 +116,6 @@ class Sync extends Component
 
         $stub = $model::findOrFail($stubId);
 
-        // A stub company can still have child departments/designations pointing at it —
-        // resolve those first so deleting the stub never cascades into real data.
-        if ($type === 'company' && (Department::where('company_id', $stubId)->exists() || Designation::where('company_id', $stubId)->exists())) {
-            $this->flash = null;
-            $this->addError('merge', 'This company still has departments or designations attached — resolve those first.');
-
-            return;
-        }
-
         Employee::where($column, $stubId)->update([$column => $targetId]);
         $stub->delete();
         $this->flash = ucfirst($type).' merged and duplicate record removed.';
@@ -107,8 +129,8 @@ class Sync extends Component
             'firstSyncCompleted' => Setting::get('hr_first_sync_completed_at') !== null,
             'lastSync' => $lastSync,
             'needsReviewCompanies' => Company::needsReview()->withCount('employees')->get(),
-            'needsReviewDepartments' => Department::needsReview()->with('company')->withCount('employees')->get(),
-            'needsReviewDesignations' => Designation::needsReview()->with('company')->withCount('employees')->get(),
+            'needsReviewDepartments' => Department::needsReview()->withCount('employees')->get(),
+            'needsReviewDesignations' => Designation::needsReview()->withCount('employees')->get(),
             'companyOptions' => Company::active()->orderBy('name')->get(),
             'departmentOptions' => Department::active()->orderBy('name')->get(),
             'designationOptions' => Designation::active()->orderBy('name')->get(),

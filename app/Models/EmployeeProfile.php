@@ -11,7 +11,7 @@ class EmployeeProfile extends Model
     use HasFactory;
 
     protected $fillable = [
-        'employee_id', 'birthday', 'viber_number', 'office_location_id', 'about_me',
+        'employee_id', 'birthday', 'viber_number', 'telephone', 'local_extension', 'office_location_id', 'about_me',
     ];
 
     protected $casts = [

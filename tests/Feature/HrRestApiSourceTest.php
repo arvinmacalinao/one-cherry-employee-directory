@@ -138,6 +138,23 @@ class HrRestApiSourceTest extends TestCase
         $this->assertSame('EMP-100', $results->first()->employeeCode);
     }
 
+    public function test_a_null_email_does_not_skip_the_record(): void
+    {
+        // Real HR data frequently has no email on file for an employee — that's
+        // a data-quality gap on HR's side, not a reason to drop the whole record.
+        // Only employee_id/first_name/last_name are hard-required. See §2.5.
+        Http::fake([
+            'hr.example.test/api/employees' => Http::response([
+                $this->record(['employee_id' => 'EMP-200', 'email' => null]),
+            ]),
+        ]);
+
+        $results = $this->source()->fetchEmployees();
+
+        $this->assertCount(1, $results);
+        $this->assertNull($results->first()->email);
+    }
+
     public function test_throws_on_http_error(): void
     {
         Http::fake([
@@ -154,8 +171,8 @@ class HrRestApiSourceTest extends TestCase
         $this->seed([CompanySeeder::class, DesignationSeeder::class, DepartmentSeeder::class]);
 
         $company = Company::where('name', 'Cherry Digital Solutions')->firstOrFail();
-        $department = Department::where('name', 'Engineering')->where('company_id', $company->id)->firstOrFail();
-        $designation = Designation::where('name', 'Software Engineer')->where('company_id', $company->id)->firstOrFail();
+        $department = Department::where('name', 'Engineering')->firstOrFail();
+        $designation = Designation::where('name', 'Software Engineer')->firstOrFail();
 
         Http::fake([
             'hr.example.test/api/employees' => Http::response([$this->record(['employee_id' => 'EMP-900'])]),
@@ -174,6 +191,67 @@ class HrRestApiSourceTest extends TestCase
         $this->assertSame($designation->id, $employee->designation_id);
         $this->assertTrue($employee->is_active);
         $this->assertNotNull($employee->employee_status_id);
+    }
+
+    public function test_sync_imports_an_employee_with_no_email_on_file(): void
+    {
+        $this->seed([CompanySeeder::class, DesignationSeeder::class, DepartmentSeeder::class]);
+
+        Http::fake([
+            'hr.example.test/api/employees' => Http::response([$this->record(['employee_id' => 'EMP-950', 'email' => null])]),
+        ]);
+        $this->app->bind(HrSourceInterface::class, fn () => $this->source());
+
+        $log = app(HrSyncService::class)->sync(SyncType::Manual);
+
+        $this->assertSame('success', $log->status->value);
+        $this->assertSame(1, $log->records_imported);
+
+        $employee = Employee::where('employee_id', 'EMP-950')->firstOrFail();
+        $this->assertNull($employee->email);
+        $this->assertTrue($employee->is_active);
+    }
+
+    public function test_a_later_null_email_does_not_clobber_an_admin_entered_email(): void
+    {
+        // Email is HR-owned only when HR actually sends one — an Admin filling
+        // the gap in via /admin/employees must survive subsequent syncs that
+        // keep sending null for this employee. See HrSyncService::upsertEmployee().
+        $this->seed([CompanySeeder::class, DesignationSeeder::class, DepartmentSeeder::class]);
+
+        Http::fake([
+            'hr.example.test/api/employees' => Http::response([$this->record(['employee_id' => 'EMP-970', 'email' => null])]),
+        ]);
+        $this->app->bind(HrSourceInterface::class, fn () => $this->source());
+        app(HrSyncService::class)->sync(SyncType::Manual);
+
+        $employee = Employee::where('employee_id', 'EMP-970')->firstOrFail();
+        $employee->update(['email' => 'admin.entered@onecherry.group']);
+
+        app(HrSyncService::class)->sync(SyncType::Manual);
+
+        $this->assertSame('admin.entered@onecherry.group', $employee->fresh()->email);
+    }
+
+    public function test_hr_providing_a_real_email_later_overrides_the_admin_entered_one(): void
+    {
+        // HR's data still wins the moment it actually has a value — the Admin
+        // entry was only ever a fallback for the gap, not a permanent override.
+        $this->seed([CompanySeeder::class, DesignationSeeder::class, DepartmentSeeder::class]);
+
+        Http::fakeSequence('hr.example.test/api/employees')
+            ->push([$this->record(['employee_id' => 'EMP-971', 'email' => null])])
+            ->push([$this->record(['employee_id' => 'EMP-971', 'email' => 'real.hr.email@onecherry.group'])]);
+
+        $this->app->bind(HrSourceInterface::class, fn () => $this->source());
+        app(HrSyncService::class)->sync(SyncType::Manual);
+
+        $employee = Employee::where('employee_id', 'EMP-971')->firstOrFail();
+        $employee->update(['email' => 'admin.entered@onecherry.group']);
+
+        app(HrSyncService::class)->sync(SyncType::Manual);
+
+        $this->assertSame('real.hr.email@onecherry.group', $employee->fresh()->email);
     }
 
     public function test_new_company_department_designation_names_are_auto_created_and_flagged_for_review(): void
@@ -196,18 +274,65 @@ class HrRestApiSourceTest extends TestCase
         $company = Company::where('name', 'Cherry Ventures')->firstOrFail();
         $this->assertTrue($company->needs_review);
 
-        $department = Department::where('name', 'Growth')->where('company_id', $company->id)->firstOrFail();
+        $department = Department::where('name', 'Growth')->firstOrFail();
         $this->assertTrue($department->needs_review);
 
-        $designation = Designation::where('name', 'Growth Lead')->where('company_id', $company->id)->firstOrFail();
+        $designation = Designation::where('name', 'Growth Lead')->firstOrFail();
         $this->assertTrue($designation->needs_review);
+    }
+
+    public function test_hr_reusing_a_department_id_across_companies_resolves_to_one_shared_department(): void
+    {
+        // Department/Designation are org-wide master data, not per-company —
+        // confirmed by the client: "there should only be one Sales, one IT,
+        // one HR, regardless of company." HR reuses ug_id=39 across many
+        // companies precisely because it's the same department, not a
+        // per-company duplicate. Two employees at two different companies
+        // both in ug_id=39 must resolve to the *same* Department row.
+        $this->seed([CompanySeeder::class, DesignationSeeder::class, DepartmentSeeder::class]);
+
+        Http::fake([
+            'hr.example.test/api/employees' => Http::response([
+                $this->record([
+                    'employee_id' => 'EMP-960',
+                    'email' => 'alpha.rep@onecherry.group',
+                    'company' => ['id' => null, 'name' => 'Company Alpha'],
+                    'department' => ['id' => 39, 'name' => 'Sales'],
+                    'designation' => ['id' => null, 'name' => 'Sales Rep'],
+                ]),
+                $this->record([
+                    'employee_id' => 'EMP-961',
+                    'email' => 'beta.rep@onecherry.group',
+                    'company' => ['id' => null, 'name' => 'Company Beta'],
+                    'department' => ['id' => 39, 'name' => 'Sales'],
+                    'designation' => ['id' => null, 'name' => 'Sales Rep'],
+                ]),
+            ]),
+        ]);
+
+        $this->app->bind(HrSourceInterface::class, fn () => $this->source());
+
+        $log = app(HrSyncService::class)->sync(SyncType::Manual);
+
+        $this->assertSame('success', $log->status->value);
+        $this->assertSame(2, $log->records_imported);
+        $this->assertEmpty($log->errors);
+
+        $this->assertSame(1, Department::where('hr_ref_id', 39)->count(), 'ug_id=39 must resolve to a single shared department row, not one per company');
+        $this->assertSame(1, Designation::where('name', 'Sales Rep')->count());
+
+        $alphaEmployee = Employee::where('employee_id', 'EMP-960')->firstOrFail();
+        $betaEmployee = Employee::where('employee_id', 'EMP-961')->firstOrFail();
+
+        $this->assertSame($alphaEmployee->department_id, $betaEmployee->department_id, 'both employees share the same Sales department despite being at different companies');
+        $this->assertNotSame($alphaEmployee->company_id, $betaEmployee->company_id, 'their companies must still differ — company comes from the employee, not the department');
     }
 
     public function test_matches_by_hr_ref_id_even_when_the_name_was_renamed_locally(): void
     {
         $company = Company::create(['hr_ref_id' => 501, 'name' => 'Cherry Digital Solutions', 'is_active' => true]);
-        $department = Department::create(['hr_ref_id' => 601, 'company_id' => $company->id, 'name' => 'Engineering', 'is_active' => true]);
-        $designation = Designation::create(['hr_ref_id' => 701, 'company_id' => $company->id, 'name' => 'Software Engineer', 'is_active' => true]);
+        $department = Department::create(['hr_ref_id' => 601, 'name' => 'Engineering', 'is_active' => true]);
+        $designation = Designation::create(['hr_ref_id' => 701, 'name' => 'Software Engineer', 'is_active' => true]);
 
         // An Admin has since renamed all three in OCED — HR still sends the old names.
         $company->update(['name' => 'Cherry Digital Solutions (Renamed)']);
@@ -241,7 +366,7 @@ class HrRestApiSourceTest extends TestCase
     public function test_backfills_hr_ref_id_onto_an_existing_name_matched_record(): void
     {
         $company = Company::create(['hr_ref_id' => null, 'name' => 'Cherry Digital Solutions', 'is_active' => true]);
-        $designation = Designation::create(['hr_ref_id' => null, 'company_id' => $company->id, 'name' => 'Software Engineer', 'is_active' => true]);
+        $designation = Designation::create(['hr_ref_id' => null, 'name' => 'Software Engineer', 'is_active' => true]);
 
         Http::fake([
             'hr.example.test/api/employees' => Http::response([$this->record([

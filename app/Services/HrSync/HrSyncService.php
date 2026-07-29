@@ -31,6 +31,9 @@ use Throwable;
  * Company, Department, Designation, and Employment Status are all resolved the same
  * ID-first, name-fallback way via resolveNamedLookup() / resolveEmployeeStatus() —
  * every one of them is a synced lookup table now, not a hardcoded translation.
+ * All four are org-wide (Department/Designation are shared master data, not
+ * scoped to a company — HR reuses their numeric IDs across companies precisely
+ * because it's the same department/designation, not a per-company duplicate).
  */
 class HrSyncService
 {
@@ -129,9 +132,9 @@ class HrSyncService
             $seenCodes[] = $data->employeeCode;
             $name = trim("{$data->firstName} {$data->lastName}");
 
-            $company = $this->resolveNamedLookup(Company::class, $data->companyId, $data->companyName, null, false, $warnings);
-            $department = $this->resolveNamedLookup(Department::class, $data->departmentId, $data->departmentName, $company['id'], false, $warnings);
-            $designation = $this->resolveNamedLookup(Designation::class, $data->designationId, $data->designationName, $company['id'], false, $warnings);
+            $company = $this->resolveNamedLookup(Company::class, $data->companyId, $data->companyName, false, $warnings);
+            $department = $this->resolveNamedLookup(Department::class, $data->departmentId, $data->departmentName, false, $warnings);
+            $designation = $this->resolveNamedLookup(Designation::class, $data->designationId, $data->designationName, false, $warnings);
             $status = $this->resolveEmployeeStatus($data->employmentStatusId, $data->employmentStatusName, false, $warnings);
 
             $existing = Employee::with(['company', 'department', 'designation', 'status', 'supervisor'])
@@ -206,9 +209,9 @@ class HrSyncService
      */
     protected function upsertEmployee(HrEmployeeData $data, array &$warnings): string
     {
-        $company = $this->resolveNamedLookup(Company::class, $data->companyId, $data->companyName, null, true, $warnings);
-        $department = $this->resolveNamedLookup(Department::class, $data->departmentId, $data->departmentName, $company['id'], true, $warnings);
-        $designation = $this->resolveNamedLookup(Designation::class, $data->designationId, $data->designationName, $company['id'], true, $warnings);
+        $company = $this->resolveNamedLookup(Company::class, $data->companyId, $data->companyName, true, $warnings);
+        $department = $this->resolveNamedLookup(Department::class, $data->departmentId, $data->departmentName, true, $warnings);
+        $designation = $this->resolveNamedLookup(Designation::class, $data->designationId, $data->designationName, true, $warnings);
         $status = $this->resolveEmployeeStatus($data->employmentStatusId, $data->employmentStatusName, true, $warnings);
 
         $attributes = [
@@ -216,7 +219,6 @@ class HrSyncService
             'middle_name' => $data->middleName,
             'last_name' => $data->lastName,
             'username' => $data->username,
-            'email' => $data->email,
             'company_id' => $company['id'],
             'department_id' => $department['id'],
             'designation_id' => $designation['id'],
@@ -229,6 +231,16 @@ class HrSyncService
 
         if ($status['id']) {
             $attributes['employee_status_id'] = $status['id'];
+        }
+
+        // Email is HR-owned *when HR actually provides one* — but HR frequently
+        // sends null, and an Admin can fill the gap in from /admin/employees.
+        // Only ever overwrite it here when HR sends a real value, so a sync never
+        // clobbers an Admin-entered email back to blank. If HR later does provide
+        // one, HR's value wins again on the next sync — this is a fallback, not
+        // a permanent hand-off of ownership.
+        if ($data->email !== null) {
+            $attributes['email'] = $data->email;
         }
 
         $existing = Employee::withTrashed()->where('employee_id', $data->employeeCode)->first();
@@ -306,7 +318,9 @@ class HrSyncService
     /**
      * ID-first, name-fallback resolution shared by Company/Department/Designation —
      * all three are synced lookup tables with the same shape (hr_ref_id, name,
-     * is_active, needs_review), scoped to a company for Department/Designation.
+     * is_active, needs_review), and all three are org-wide, not scoped to a
+     * company: there is one "Sales" department across the whole Group, not one
+     * per company — an employee's company comes solely from Employee::company_id.
      * A name match opportunistically backfills hr_ref_id so the *next* sync for
      * this record goes straight through the ID path. When $persist is false
      * (Sync Preview), nothing is written — an unresolved identity is reported
@@ -315,18 +329,14 @@ class HrSyncService
      * @param  class-string<Company|Department|Designation>  $modelClass
      * @return array{id: ?int, name: ?string, is_new: bool}
      */
-    protected function resolveNamedLookup(string $modelClass, ?int $hrRefId, ?string $name, ?int $companyId, bool $persist, array &$warnings): array
+    protected function resolveNamedLookup(string $modelClass, ?int $hrRefId, ?string $name, bool $persist, array &$warnings): array
     {
         if (! $hrRefId && ! $name) {
             return ['id' => null, 'name' => null, 'is_new' => false];
         }
 
-        $scoped = fn () => $modelClass === Company::class
-            ? $modelClass::query()
-            : $modelClass::query()->where('company_id', $companyId);
-
         if ($hrRefId) {
-            $match = $scoped()->where('hr_ref_id', $hrRefId)->first();
+            $match = $modelClass::where('hr_ref_id', $hrRefId)->first();
 
             if ($match) {
                 return ['id' => $match->id, 'name' => $match->name, 'is_new' => false];
@@ -334,7 +344,7 @@ class HrSyncService
         }
 
         if ($name) {
-            $match = $scoped()->whereRaw('LOWER(name) = ?', [strtolower($name)])->first();
+            $match = $modelClass::whereRaw('LOWER(name) = ?', [strtolower($name)])->first();
 
             if ($match) {
                 if ($persist && $hrRefId && ! $match->hr_ref_id) {
@@ -352,7 +362,6 @@ class HrSyncService
         $attributes = [
             'hr_ref_id' => $hrRefId,
             'name' => $name,
-            'company_id' => $companyId,
             'is_active' => true,
             'needs_review' => true,
         ];

@@ -11,11 +11,10 @@
     </div>
 
     <div class="table-wrap overflow-x-auto rounded-card border border-line bg-surface-raised">
-        <table class="w-full min-w-[640px] border-collapse text-sm">
+        <table class="w-full min-w-[560px] border-collapse text-sm">
             <thead>
                 <tr class="border-b border-line bg-surface text-left text-[10.5px] font-bold tracking-wide text-ink-tertiary uppercase">
                     <th class="px-4 py-3">Department</th>
-                    <th class="px-4 py-3">Company</th>
                     <th class="px-4 py-3">Employees</th>
                     <th class="px-4 py-3">Status</th>
                     <th class="px-4 py-3"></th>
@@ -28,7 +27,6 @@
                             <p class="font-semibold">{{ $department->name }}</p>
                             <p class="text-xs text-ink-tertiary">{{ $department->hr_ref_id ? "ug_id: {$department->hr_ref_id}" : 'Directory-managed' }}</p>
                         </td>
-                        <td class="px-4 py-3 text-ink-secondary">{{ $department->company->name }}</td>
                         <td class="px-4 py-3">{{ $department->employees_count }}</td>
                         <td class="px-4 py-3"><span class="badge {{ $department->is_active ? 'badge-active' : 'badge-inactive' }}">{{ $department->is_active ? 'Active' : 'Inactive' }}</span></td>
                         <td class="px-4 py-3 text-right">
@@ -36,7 +34,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="px-4 py-10 text-center text-ink-secondary">No departments match.</td></tr>
+                    <tr><td colspan="4" class="px-4 py-10 text-center text-ink-secondary">No departments match.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -54,14 +52,6 @@
             <div class="grid grid-cols-1 gap-4">
                 <x-admin.field label="Department Name" :locked="(bool) $lockedHrRef">
                     <input type="text" wire:model="form.name" @disabled($lockedHrRef) class="input">
-                </x-admin.field>
-                <x-admin.field label="Company" :error="$errors->first('form.company_id')">
-                    <select wire:model.live="form.company_id" class="input">
-                        <option value="">— Select —</option>
-                        @foreach ($companyOptions as $company)
-                            <option value="{{ $company->id }}">{{ $company->name }}</option>
-                        @endforeach
-                    </select>
                 </x-admin.field>
                 <x-admin.field label="Active">
                     <label class="flex items-center gap-2.5">

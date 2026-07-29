@@ -32,7 +32,9 @@ class Login extends Component
         request()->session()->regenerate();
         Auth::user()->update(['last_login_at' => now()]);
 
-        $this->redirectRoute('dashboard', navigate: true);
+        // Only Administrators authenticate — land them in the admin area, not
+        // the public directory. See architecture-plan.md §2.4.
+        $this->redirectRoute('admin.dashboard', navigate: true);
     }
 
     public function render()

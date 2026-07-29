@@ -32,16 +32,6 @@ class Company extends Model implements HasMedia
         });
     }
 
-    public function departments(): HasMany
-    {
-        return $this->hasMany(Department::class);
-    }
-
-    public function designations(): HasMany
-    {
-        return $this->hasMany(Designation::class);
-    }
-
     public function officeLocations(): HasMany
     {
         return $this->hasMany(OfficeLocation::class);

@@ -113,9 +113,21 @@
 
     @php $totalNeedsReview = $needsReviewCompanies->count() + $needsReviewDepartments->count() + $needsReviewDesignations->count(); @endphp
     <div>
-        <div class="mb-3 flex items-center justify-between">
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
             <p class="text-xs font-bold tracking-wide text-ink-tertiary uppercase">Needs review</p>
-            <span class="text-xs text-ink-tertiary">Auto-created from a new HR company/department/designation so sync never blocks</span>
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-ink-tertiary">Auto-created from a new HR company/department/designation so sync never blocks</span>
+                @if ($totalNeedsReview > 0)
+                    <button
+                        type="button"
+                        wire:click="markAllReviewed"
+                        wire:confirm="Mark all {{ $totalNeedsReview }} flagged records as reviewed? This only clears the flag — it doesn't merge anything, so use it once you're confident none of these are actually duplicates."
+                        class="btn-secondary text-xs"
+                    >
+                        <i class="fa-solid fa-check-double"></i>Mark All Reviewed ({{ $totalNeedsReview }})
+                    </button>
+                @endif
+            </div>
         </div>
 
         @if ($totalNeedsReview === 0)
@@ -126,6 +138,12 @@
             </div>
         @else
             <div class="flex flex-col gap-2.5">
+                @if ($needsReviewCompanies->isNotEmpty())
+                    <div class="flex items-center justify-between">
+                        <p class="text-[11px] font-bold tracking-wide text-ink-tertiary uppercase">Companies ({{ $needsReviewCompanies->count() }})</p>
+                        <button type="button" wire:click="markAllReviewed('company')" wire:confirm="Mark all {{ $needsReviewCompanies->count() }} companies as reviewed?" class="text-xs font-semibold text-brand hover:underline">Mark all reviewed</button>
+                    </div>
+                @endif
                 @foreach ($needsReviewCompanies as $stub)
                     <div class="flex flex-wrap items-center gap-3.5 rounded-card bg-warning-tint p-4" wire:key="uc-{{ $stub->id }}">
                         <div class="flex h-8.5 w-8.5 flex-shrink-0 items-center justify-center rounded-lg bg-bg text-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
@@ -147,17 +165,23 @@
                     </div>
                 @endforeach
 
+                @if ($needsReviewDepartments->isNotEmpty())
+                    <div class="mt-2 flex items-center justify-between">
+                        <p class="text-[11px] font-bold tracking-wide text-ink-tertiary uppercase">Departments ({{ $needsReviewDepartments->count() }})</p>
+                        <button type="button" wire:click="markAllReviewed('department')" wire:confirm="Mark all {{ $needsReviewDepartments->count() }} departments as reviewed?" class="text-xs font-semibold text-brand hover:underline">Mark all reviewed</button>
+                    </div>
+                @endif
                 @foreach ($needsReviewDepartments as $stub)
                     <div class="flex flex-wrap items-center gap-3.5 rounded-card bg-warning-tint p-4" wire:key="ud-{{ $stub->id }}">
                         <div class="flex h-8.5 w-8.5 flex-shrink-0 items-center justify-center rounded-lg bg-bg text-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
                         <div class="min-w-[200px] flex-1">
                             <p class="text-sm font-semibold">New Department: "{{ $stub->name }}"</p>
-                            <p class="text-xs text-ink-secondary">{{ $stub->employees_count }} employee(s) at {{ $stub->company->name }} · HR sent this identity for the first time</p>
+                            <p class="text-xs text-ink-secondary">{{ $stub->employees_count }} employee(s) · HR sent this identity for the first time</p>
                         </div>
                         <div class="flex items-center gap-2" x-data="{ target: '' }">
                             <select x-model="target" class="input max-w-[200px]">
                                 <option value="">Merge into…</option>
-                                @foreach ($departmentOptions->where('company_id', $stub->company_id)->reject(fn ($d) => $d->id === $stub->id) as $option)
+                                @foreach ($departmentOptions->reject(fn ($d) => $d->id === $stub->id) as $option)
                                     <option value="{{ $option->id }}">{{ $option->name }}</option>
                                 @endforeach
                             </select>
@@ -168,17 +192,23 @@
                     </div>
                 @endforeach
 
+                @if ($needsReviewDesignations->isNotEmpty())
+                    <div class="mt-2 flex items-center justify-between">
+                        <p class="text-[11px] font-bold tracking-wide text-ink-tertiary uppercase">Designations ({{ $needsReviewDesignations->count() }})</p>
+                        <button type="button" wire:click="markAllReviewed('designation')" wire:confirm="Mark all {{ $needsReviewDesignations->count() }} designations as reviewed?" class="text-xs font-semibold text-brand hover:underline">Mark all reviewed</button>
+                    </div>
+                @endif
                 @foreach ($needsReviewDesignations as $stub)
                     <div class="flex flex-wrap items-center gap-3.5 rounded-card bg-warning-tint p-4" wire:key="ug-{{ $stub->id }}">
                         <div class="flex h-8.5 w-8.5 flex-shrink-0 items-center justify-center rounded-lg bg-bg text-warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
                         <div class="min-w-[200px] flex-1">
                             <p class="text-sm font-semibold">New Designation: "{{ $stub->name }}"</p>
-                            <p class="text-xs text-ink-secondary">{{ $stub->employees_count }} employee(s) at {{ $stub->company->name }}</p>
+                            <p class="text-xs text-ink-secondary">{{ $stub->employees_count }} employee(s) · HR sent this identity for the first time</p>
                         </div>
                         <div class="flex items-center gap-2" x-data="{ target: '' }">
                             <select x-model="target" class="input max-w-[200px]">
                                 <option value="">Merge into…</option>
-                                @foreach ($designationOptions->where('company_id', $stub->company_id)->reject(fn ($d) => $d->id === $stub->id) as $option)
+                                @foreach ($designationOptions->reject(fn ($d) => $d->id === $stub->id) as $option)
                                     <option value="{{ $option->id }}">{{ $option->name }}</option>
                                 @endforeach
                             </select>

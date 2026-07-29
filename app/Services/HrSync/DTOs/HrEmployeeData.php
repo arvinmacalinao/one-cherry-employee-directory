@@ -15,7 +15,7 @@ final class HrEmployeeData
         public readonly ?string $middleName,
         public readonly string $lastName,
         public readonly ?string $username,
-        public readonly string $email,
+        public readonly ?string $email,
         public readonly ?int $companyId,
         public readonly ?string $companyName,
         public readonly ?int $departmentId,

@@ -11,7 +11,7 @@
 1. **HR is the only source of truth, and sync is not a feature — it's the core of the system.** OCED holds no employment truth of its own. Every field HR's API exposes (identity, org placement, employment status, reporting line, employment dates) is read-only inside OCED and is overwritten by every sync run, without exception. OCED never calculates, infers, or overrides employment status or org structure independently of HR.
 2. **This is a directory, not a platform.** OCED runs on the internal company network only. It has one job: help someone find a colleague and their basic contact/org info in under two clicks. Every feature earns its place by directly serving that job — search, browse, view. Nothing else.
 3. **No employee accounts, ever.** Only Administrators authenticate. Internal users reach the directory by being on the company network — there is no login wall, no personal dashboard, no self-service, nothing to remember. This removes an entire category of product surface (auth, sessions, password resets, personalization) that a pure directory doesn't need.
-4. **Two kinds of data, two owners, one hard boundary.** HR-owned fields (identity, org placement, employment status/dates, supervisor) are always read-only in OCED. Directory-owned fields (photo, about, Viber, office location, birthday) are the only things an Administrator can ever edit — and sync must never touch them. This boundary is enforced at the schema and service level, not by convention.
+4. **Two kinds of data, two owners, one hard boundary.** HR-owned fields (identity, org placement, employment status/dates, supervisor) are always read-only in OCED. Directory-owned fields (photo, about, Viber, telephone/extension, office location, birthday) are the only things an Administrator can ever edit — and sync must never touch them. This boundary is enforced at the schema and service level, not by convention.
 5. **One database, many companies.** Still not multi-tenant SaaS — one org (One Cherry Group), `companies` as a dimension, not a tenant/security boundary.
 6. **Quiet, fast UI.** Same visual register as before (generous whitespace, restrained brand-red accent, soft shadows) — but the bar for whether a screen exists at all is now "does this help someone find a person," not "would this look good on a dashboard."
 
@@ -108,7 +108,7 @@ Replaces the old Employee/Administrator role matrix entirely.
 | Authenticates? | No — never. There is no employee account, login screen, password, or session for internal users. | Yes — Laravel session auth, `/login`. |
 | How they access OCED | By being on the company network and opening the app in a browser. No credential of any kind. | Username/password (local auth). AD/SSO login is a future `IdentitySourceInterface` adapter, not built now. |
 | Can view | Home, Employee Directory, Company Directory, Departments, individual Employee Profiles | Everything Internal Users see, plus the entire `/admin` area |
-| Can edit | Nothing. Internal Users are directory *viewers only*. | Directory-owned employee fields (photo, about, Viber, office, birthday) and all directory-owned master data (Office Locations; branding fields on Companies/Departments/Designations). Never HR-owned fields (§2.6). |
+| Can edit | Nothing. Internal Users are directory *viewers only*. | Directory-owned employee fields (photo, about, Viber, telephone/extension, office, birthday) and all directory-owned master data (Office Locations; branding fields on Companies/Departments/Designations). Never HR-owned fields (§2.6). |
 | Personalization | None — no favorites, no recently viewed, no "my profile" | None either — an Administrator's job here is managing the directory, not using it as themselves |
 
 This is a hard simplification from the original plan, which modeled Employee as an authenticated role with self-service capabilities (login, edit own profile, favorites, recently viewed). **All of that surface is deleted, not hidden behind a flag.** If a genuine need for employee self-service ever resurfaces, it should be scoped as a new feature against this document, not resurrected from old code.
@@ -164,6 +164,8 @@ User::with(['company', 'department', 'designation', 'status', 'supervisor'])
 - An employee on leave, with a real `employment_status.name` of "On Leave," can still appear in the feed (account active) — this is what finally makes `on_leave` a genuinely HR-driven status, closing the gap the original plan flagged as unresolvable.
 - An employee HR has fully off-boarded (account deactivated, `u_active = 0`) disappears from the feed **entirely** — for this case, OCED still needs the "absent from feed → mark `inactive`" fallback from the original design; it is not superseded, just demoted to a fallback for the one case per-record status can't cover (the record isn't in the payload to read a status *from*).
 
+**Email is HR-owned only when HR actually sends one — in practice it rarely does.** Most real employee records come through with `email: null` (confirmed against production data, not a hypothetical). Rather than treat this as a permanent gap, `employees.email` is fallback-editable: an Admin can fill it in from `/admin/employees`, and `HrSyncService` only ever overwrites it when HR's payload has a non-null value — a null from HR never clobbers whatever's already on the row, whether that's a prior HR value or an Admin's manual entry. The moment HR does provide a real email for that employee, it wins again on the next sync; the Admin entry was always a bridge, not a hand-off of ownership.
+
 **No status_map — employment status is a synced lookup table, not a hardcoded translation (per your correction).** The earlier draft of this section invented a `config('hr_sync.status_map')` guessing which `es_id` values meant what. That's exactly the kind of "OCED maintains its own status logic" you told me to remove. Instead, `employment_status` is treated as a fourth ID-first synced lookup table, structurally identical to Company/Department/Designation:
 
 - A new `employee_statuses` table (`id`, `hr_ref_id` UK = HR's `es_id`, `name`) is populated **entirely from what the API sends** — `{id, name}` on every employee record, e.g. `{"id": 1, "name": "Regular"}`.
@@ -171,7 +173,9 @@ User::with(['company', 'department', 'designation', 'status', 'supervisor'])
 - This means the status badge on an Employee Profile shows HR's actual label — "Regular," "Probationary," "On Leave," "Resigned," whatever HR's `employee_statuses` table contains — not a translated OCED value. Presentation-layer color-coding for the badge (e.g. green-ish for statuses that sound "working," gray for ones that sound "departed") is allowed as a purely cosmetic, best-effort lookup with a neutral fallback color for anything unrecognized — but it must never affect directory visibility or any business logic, only pixel color. Directory visibility is governed by a completely separate mechanism (`employees.is_active`, below), not by interpreting the status name.
 - **Directory visibility no longer derives from employment status at all.** Since OCED can't (and per your instruction, shouldn't) know which of HR's arbitrary status labels mean "still here" vs. "gone," visibility is driven purely by **presence in the HR feed**: `employees.is_active` (boolean) is set `true` for every employee present in a sync run and `false` for every employee who was previously `active`/`on_leave`-visible but is absent from the current run. This was already documented as the sync's safety-net fallback in the original plan (§2.4 there) — it's now promoted to the *sole* visibility mechanism, since it's the one signal that doesn't require OCED to interpret HR's status taxonomy.
 
-**Company / Department / Designation / Employment Status resolution — ID-first, uniformly, for all four (Department is no longer the exception it was in the original plan, and Employment Status now follows the identical pattern):**
+**Department and Designation are organization-wide master data, not per-company records.** Confirmed explicitly: "there should only be one Sales, one IT, one HR, regardless of company." An employee's company comes solely from `employees.company_id`; it was never a property of the department or designation itself. HR reuses department/designation numeric IDs (`ug_id`/`d_id`) across companies precisely *because* it's the same department, not because of an ID-collision quirk to work around — a company Alpha "Sales" employee and a company Beta "Sales" employee both resolve to the same `departments` row. `departments`/`designations` have no `company_id` column at all; `hr_ref_id` and `name` are each globally unique.
+
+**Company / Department / Designation / Employment Status resolution — ID-first, uniformly, for all four, all org-wide (none of the four are scoped to a company):**
 
 1. If HR sends a non-null `id`, match against `companies.hr_ref_id` / `departments.hr_ref_id` / `designations.hr_ref_id` / `employee_statuses.hr_ref_id`.
 2. If no ID match (first time this identity is seen, or `hr_ref_id` not yet backfilled), fall back to case-insensitive name match and opportunistically backfill `hr_ref_id` on that match. (Employment Status skips this fallback — HR always sends an `id` for it, so name-matching isn't needed there.)
@@ -239,8 +243,6 @@ Once that flag is set, the gate is permanently open: the scheduler runs normally
 
 ```mermaid
 erDiagram
-    COMPANIES ||--o{ DEPARTMENTS : has
-    COMPANIES ||--o{ DESIGNATIONS : has
     COMPANIES ||--o{ OFFICE_LOCATIONS : has
     COMPANIES ||--o{ EMPLOYEES : employs
     DEPARTMENTS ||--o{ EMPLOYEES : contains
@@ -269,18 +271,16 @@ erDiagram
     }
     DEPARTMENTS {
         bigint id PK
-        int hr_ref_id UK "nullable — HR's ug_id, primary match key"
-        bigint company_id FK
-        string name "HR-owned, synced — no longer Admin-assigned"
+        int hr_ref_id UK "HR's ug_id, primary match key — global, not per-company"
+        string name UK "HR-owned, synced — org-wide master data, no company_id (§2.5)"
         boolean is_active "directory-owned"
         boolean needs_review "true when sync auto-created this from an unseen identity"
         timestamp deleted_at
     }
     DESIGNATIONS {
         bigint id PK
-        int hr_ref_id UK "nullable — HR's d_id, primary match key"
-        bigint company_id FK
-        string name "HR-owned, synced"
+        int hr_ref_id UK "HR's d_id, primary match key — global, not per-company"
+        string name UK "HR-owned, synced — org-wide master data, no company_id (§2.5)"
         boolean is_active "directory-owned"
         boolean needs_review "true when sync auto-created this from an unseen identity"
         timestamp deleted_at
@@ -306,7 +306,7 @@ erDiagram
         string middle_name "HR-owned, nullable"
         string last_name "HR-owned"
         string username "HR-owned, nullable — captured for a future SSO adapter, unused in UI"
-        string email UK "corporate email, HR-owned"
+        string email UK "nullable — HR-owned when HR sends one, Admin-editable fallback otherwise (§2.5)"
         bigint company_id FK "HR-owned, ID-first match (§2.5)"
         bigint department_id FK "HR-owned, ID-first match — no longer Admin-assigned"
         bigint designation_id FK "HR-owned, ID-first match"
@@ -323,8 +323,10 @@ erDiagram
         bigint id PK
         bigint employee_id FK UK
         string photo_path "directory-owned"
-        date birthday "directory-owned — required by Birthday Celebrants (§6); see note in §3.2"
+        date birthday "directory-owned — shown on the profile and drives Birthday Celebrants (§6)"
         string viber_number "directory-owned, nullable"
+        string telephone "directory-owned, nullable"
+        string local_extension "directory-owned, nullable"
         bigint office_location_id FK "directory-owned"
         text about_me "directory-owned"
     }
@@ -479,7 +481,7 @@ flowchart TB
 | Search/browse employees, companies, departments | ✅ | ✅ |
 | View employee profile | ✅ (read-only) | ✅ (read-only for HR fields) |
 | Call / Email / Viber handoff | ✅ | ✅ |
-| Edit directory-owned employee fields (photo, about, Viber, office, birthday) | ❌ | ✅ |
+| Edit directory-owned employee fields (photo, about, Viber, telephone/extension, office, birthday) | ❌ | ✅ |
 | Edit HR-owned employee fields (identity, org, status, dates) | ❌ | ❌ — nobody can; only sync writes these |
 | Manage Office Locations (full CRUD, entirely directory-owned) | ❌ | ✅ |
 | Manage Company Announcements | ❌ | ✅ |
@@ -495,10 +497,11 @@ flowchart TB
 
 - **Home:** large global search with autocomplete (People / Companies / Departments, grouped), Company Directory quick-access, Department Directory quick-access, Birthday Celebrants (horizontal scroll), Newly Added Employees (last 30 days, by `date_hired`), Company Announcements (confirmed in scope, admin-authored, time-windowed via `published_at`/`expires_at`). No stat cards, no charts.
 - **Employee Directory:** sticky filter bar (search, company, department, designation, office, employment status), A–Z rail, grid/list toggle, sort, employee cards with Call/Email/Viber quick actions, skeleton loaders, empty state.
-- **Employee Profile:** photo, Name, Designation, Department, Company, corporate Email, Viber (if set), Office Location, Employment Status badge (HR's actual status label, §2.5), About. No cover banner, no QR code, no vCard download, no mobile number, no social links.
+- **Employee Profile:** photo, Name, Designation, Department, Company, corporate Email, Viber (if set), Telephone/Local Extension (if set), Office Location, Employment Status badge (HR's actual status label, §2.5), Birthday, About. No cover banner, no QR code, no vCard download, no mobile number, no social links.
 - **Company Directory & Detail:** company cards (logo, name, headcount, address/phone/email/website), detail tabs (Overview / Departments / Employees). Org Chart tab removed.
 - **Departments:** list with headcount, member drill-down. No department-head concept.
-- **Admin Panel:** Dashboard, Employee Management (directory-owned fields + HR-field read-only view), Companies/Departments/Designations (branding + review queue), Office Locations (full CRUD), Announcements (full CRUD), HR Synchronization (Sync Preview, manual trigger, history, warnings/errors, needs-review queue), Settings, Audit Logs.
+- **Admin Panel:** Dashboard, Employee Management (directory-owned fields + email fallback + HR-field read-only view, plus CSV export/import for bulk-editing — see below), Companies/Departments/Designations (branding + review queue), Office Locations (full CRUD), Announcements (full CRUD), HR Synchronization (Sync Preview, manual trigger, history, warnings/errors, needs-review queue), Settings, Audit Logs.
+- **Employee CSV export/import (`EmployeeCsvService`):** the same round-trip pattern as any spreadsheet-based bulk editor — Export CSV gives every employee as a row (HR-owned columns included for reference only), an Admin fills in blanks offline (most commonly email and telephone/extension, since HR frequently sends no email at all — §2.5), Import CSV reads it back. Rows are matched by `employee_id` — it can only update an existing employee, never create one. Only the same fields the single-employee form allows are ever written (email as fallback, plus the directory-owned profile fields); HR-owned columns in the file are always ignored, even if edited. A blank cell means "leave unchanged," not "clear it." Invalid/duplicate emails, unparseable dates, and unmatched office-location names are skipped per-row with a warning rather than failing the whole import.
 - **HR Sync module:** the core feature (§2.5) — import / update / promotion-detection / status-change-detection / auto-inactive, manual + scheduled execution, structured logging with warnings surfaced prominently (not buried), plus a dry-run Sync Preview that's mandatory before the first live sync and available on demand thereafter.
 - **Cross-cutting:** RBAC (single Administrator role today, extensible), toast notifications, skeleton loaders, empty states, persistent theme (fixed per §8), responsive layout, REST API v1.
 
@@ -565,7 +568,7 @@ No stat cards, no charts, no KPIs — deleted, not just hidden, per your dashboa
 │              Department · Company        [● Status badge]    │
 │              [Call][Email][Viber]                             │
 ├───────────────────────────────────────────────────────────┤
-│ Office Location                                               │
+│ Office Location · Telephone/Extension · Birthday              │
 │ About                                                          │
 └───────────────────────────────────────────────────────────┘
 ```
@@ -609,12 +612,12 @@ Company Detail:
 
 Full algorithm and field-ownership detail lives in §2.5 (moved there since sync is the application's core feature, not a peripheral integration section). This section restates ownership plainly for quick reference.
 
-| | HR-owned (sync writes, Admin can never edit) | Directory-owned (Admin writes, sync never touches) |
-|---|---|---|
-| Employee | employee_id, first/middle/last name, username, email, company, department, designation, supervisor, employee_status_id, is_active, date_hired, date_regularized, date_separated | photo, about, Viber, office location, birthday |
-| Company / Department / Designation | name (identity) | logo/address/contact/branding fields, is_active, needs_review resolution |
-| Employee Status | id + name (identity, synced verbatim, §2.5) | — nothing; OCED never edits or translates a status label |
-| Office Location | — (HR doesn't have this concept) | everything |
+| | HR-owned (sync writes, Admin can never edit) | Fallback-editable (Admin can set; HR overwrites the moment it sends a value) | Directory-owned (Admin writes, sync never touches) |
+|---|---|---|---|
+| Employee | employee_id, first/middle/last name, username, company, department, designation, supervisor, employee_status_id, is_active, date_hired, date_regularized, date_separated | email (HR usually sends null — see §2.5) | photo, about, Viber, telephone/extension, office location, birthday |
+| Company / Department / Designation | name (identity) | — | logo/address/contact/branding fields, is_active, needs_review resolution |
+| Employee Status | id + name (identity, synced verbatim, §2.5) | — | — nothing; OCED never edits or translates a status label |
+| Office Location | — (HR doesn't have this concept) | — | everything |
 | Announcements | — (HR doesn't have this concept) | everything |
 
 Synchronization **always** overwrites HR-owned fields on every run. Synchronization **never** overwrites directory-owned fields, ever, under any circumstance — this is enforced by `HrSyncService` only ever writing to the `employees` table's HR-owned columns, never to `employee_profiles`.
