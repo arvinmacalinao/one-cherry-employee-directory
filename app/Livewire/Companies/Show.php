@@ -3,6 +3,7 @@
 namespace App\Livewire\Companies;
 
 use App\Models\Company;
+use App\Models\Employee;
 use App\Repositories\Contracts\DepartmentRepositoryInterface;
 use App\Repositories\Contracts\EmployeeRepositoryInterface;
 use Livewire\Component;
@@ -29,25 +30,13 @@ class Show extends Component
 
     public function render(DepartmentRepositoryInterface $departments, EmployeeRepositoryInterface $employees)
     {
-        $companyEmployees = $this->tab === 'orgchart'
-            ? \App\Models\Employee::visibleInDirectory()
-                ->where('company_id', $this->company->id)
-                ->with(['designation', 'department'])
-                ->get()
-                ->keyBy('id')
-            : collect();
-
         return view('livewire.companies.show', [
             'departments' => $this->tab === 'departments' ? $departments->forCompany($this->company->id) : collect(),
             'employees' => $this->tab === 'employees'
                 ? $employees->paginateForDirectory(['company_id' => $this->company->id], 'name', 12)
                 : null,
-            'orgRoots' => $companyEmployees->filter(
-                fn ($e) => ! $e->immediate_supervisor_id || ! $companyEmployees->has($e->immediate_supervisor_id)
-            )->values(),
-            'reportsMap' => $companyEmployees->groupBy('immediate_supervisor_id'),
             'departmentCount' => $departments->forCompany($this->company->id)->count(),
-            'employeeCount' => \App\Models\Employee::visibleInDirectory()->where('company_id', $this->company->id)->count(),
+            'employeeCount' => Employee::visibleInDirectory()->where('company_id', $this->company->id)->count(),
         ])->layout('layouts.app', ['header' => $this->company->name]);
     }
 }

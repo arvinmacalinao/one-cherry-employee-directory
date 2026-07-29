@@ -14,7 +14,7 @@ interface EmployeeRepositoryInterface
 
     /**
      * @param  array{search?: string, company_id?: int, department_id?: int, designation_id?: int,
-     *               office_location_id?: int, employment_status?: string, letter?: string}  $filters
+     *               office_location_id?: int, employee_status_id?: int, letter?: string}  $filters
      */
     public function paginateForDirectory(array $filters, string $sort, int $perPage = 24): LengthAwarePaginator;
 

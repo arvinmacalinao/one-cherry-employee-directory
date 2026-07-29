@@ -15,8 +15,7 @@ class Index extends Component
     public ?int $editingId = null;
 
     public array $form = [
-        'name' => '', 'address' => '', 'city' => '', 'country' => 'Philippines',
-        'phone' => '', 'company_id' => '', 'is_active' => true,
+        'name' => '', 'address' => '', 'company_id' => '', 'is_active' => true,
     ];
 
     public ?string $flash = null;
@@ -26,9 +25,6 @@ class Index extends Component
         return [
             'form.name' => ['required', 'string', 'max:255'],
             'form.address' => ['nullable', 'string', 'max:255'],
-            'form.city' => ['nullable', 'string', 'max:255'],
-            'form.country' => ['nullable', 'string', 'max:255'],
-            'form.phone' => ['nullable', 'string', 'max:30'],
             'form.company_id' => ['nullable', 'exists:companies,id'],
         ];
     }
@@ -48,9 +44,6 @@ class Index extends Component
         $this->form = [
             'name' => $office->name,
             'address' => $office->address,
-            'city' => $office->city,
-            'country' => $office->country,
-            'phone' => $office->phone,
             'company_id' => $office->company_id ? (string) $office->company_id : '',
             'is_active' => $office->is_active,
         ];
@@ -83,8 +76,7 @@ class Index extends Component
     {
         $this->editingId = null;
         $this->form = [
-            'name' => '', 'address' => '', 'city' => '', 'country' => 'Philippines',
-            'phone' => '', 'company_id' => '', 'is_active' => true,
+            'name' => '', 'address' => '', 'company_id' => '', 'is_active' => true,
         ];
         $this->resetErrorBag();
     }

@@ -18,13 +18,10 @@
             <div class="card flex flex-col gap-3 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-raised">
                 <div class="flex items-start justify-between gap-2.5">
                     <p class="font-display text-sm font-bold">{{ $department->name }}</p>
-                    <span class="flex-shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold text-white" style="background: {{ $department->company->color_theme ?? '#790002' }}">
+                    <span class="flex-shrink-0 rounded-full bg-brand-tint px-2.5 py-1 text-[11px] font-bold text-brand">
                         {{ collect(explode(' ', $department->company->name))->map(fn ($w) => $w[0])->take(3)->implode('') }}
                     </span>
                 </div>
-                <p class="flex items-center gap-2 text-xs text-ink-secondary">
-                    <i class="fa-solid fa-id-badge w-3.5 text-ink-tertiary"></i> Head: {{ $department->head?->full_name ?? '—' }}
-                </p>
                 <div class="flex items-center justify-between border-t border-line pt-3">
                     <span class="font-display text-lg font-bold tabular-nums">{{ $department->employees_count }}</span>
                     <a href="{{ route('directory.index') }}?department={{ $department->id }}" wire:navigate class="btn-ghost !px-0 text-xs">

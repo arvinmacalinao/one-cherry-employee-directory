@@ -11,8 +11,8 @@ class ApiSyncLog extends Model
 {
     protected $fillable = [
         'sync_type', 'started_at', 'completed_at', 'status',
-        'records_imported', 'records_updated', 'records_transferred', 'records_deactivated',
-        'errors', 'triggered_by',
+        'records_imported', 'records_updated', 'records_promoted', 'records_status_changed', 'records_deactivated',
+        'warnings', 'errors', 'triggered_by',
     ];
 
     protected $casts = [
@@ -20,6 +20,7 @@ class ApiSyncLog extends Model
         'status' => SyncStatus::class,
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
+        'warnings' => 'array',
         'errors' => 'array',
     ];
 

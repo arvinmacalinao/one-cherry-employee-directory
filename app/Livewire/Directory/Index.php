@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Directory;
 
+use App\Models\EmployeeStatus;
 use App\Repositories\Contracts\CompanyRepositoryInterface;
 use App\Repositories\Contracts\DepartmentRepositoryInterface;
 use App\Services\EmployeeDirectoryService;
@@ -40,13 +41,14 @@ class Index extends Component
             'search' => $this->search,
             'company_id' => $this->company,
             'department_id' => $this->department,
-            'employment_status' => $this->status,
+            'employee_status_id' => $this->status,
         ], $this->sort);
 
         return view('livewire.directory.index', [
             'employees' => $employees,
             'companyOptions' => $companies->allActiveWithCounts(),
             'departmentOptions' => $departments->allActiveWithCounts(),
+            'statusOptions' => EmployeeStatus::orderBy('name')->get(),
         ])->layout('layouts.app', ['header' => 'Employee Directory']);
     }
 }

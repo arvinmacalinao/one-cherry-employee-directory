@@ -16,8 +16,10 @@ return new class extends Migration
             $table->enum('status', ['success', 'partial', 'failed'])->nullable();
             $table->unsignedInteger('records_imported')->default(0);
             $table->unsignedInteger('records_updated')->default(0);
-            $table->unsignedInteger('records_transferred')->default(0);
+            $table->unsignedInteger('records_promoted')->default(0);
+            $table->unsignedInteger('records_status_changed')->default(0);
             $table->unsignedInteger('records_deactivated')->default(0);
+            $table->json('warnings')->nullable();
             $table->json('errors')->nullable();
             $table->foreignId('triggered_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();

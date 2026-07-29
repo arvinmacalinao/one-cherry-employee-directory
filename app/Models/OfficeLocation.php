@@ -13,7 +13,7 @@ class OfficeLocation extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'company_id', 'name', 'address', 'city', 'country', 'phone', 'is_active',
+        'company_id', 'name', 'address', 'is_active',
     ];
 
     protected $casts = [

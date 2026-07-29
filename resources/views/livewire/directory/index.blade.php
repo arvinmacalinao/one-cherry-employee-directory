@@ -22,8 +22,9 @@
 
             <select wire:model.live="status" class="rounded-control border border-line bg-surface-raised px-3 py-2 text-sm">
                 <option value="">All Statuses</option>
-                <option value="active">Active Employee</option>
-                <option value="on_leave">On Leave</option>
+                @foreach ($statusOptions as $option)
+                    <option value="{{ $option->id }}">{{ $option->name }}</option>
+                @endforeach
             </select>
 
             <select wire:model.live="sort" class="rounded-control border border-line bg-surface-raised px-3 py-2 text-sm">
@@ -43,21 +44,21 @@
                     <x-avatar :employee="$employee" size="h-16 w-16" textSize="text-lg" conversion="thumb" />
                     <div class="min-w-0 flex-1">
                         <p class="truncate font-display text-sm font-bold">{{ $employee->full_name }}</p>
-                        <p class="truncate text-xs font-semibold text-brand">{{ $employee->designation->name }}</p>
-                        <p class="truncate text-xs text-ink-secondary">{{ $employee->department->name }} · {{ $employee->company->name }}</p>
+                        <p class="truncate text-xs font-semibold text-brand">{{ $employee->designation?->name }}</p>
+                        <p class="truncate text-xs text-ink-secondary">{{ $employee->department?->name }} · {{ $employee->company?->name }}</p>
                     </div>
                 </div>
                 <div class="flex flex-col gap-1.5 border-t border-line pt-3 text-xs text-ink-secondary">
                     <div class="flex items-center gap-2 truncate"><i class="fa-solid fa-envelope w-3.5 text-ink-tertiary"></i>{{ $employee->email }}</div>
-                    @if ($employee->profile?->mobile_number)
-                        <div class="flex items-center gap-2 truncate"><i class="fa-solid fa-phone w-3.5 text-ink-tertiary"></i>{{ $employee->profile->mobile_number }}</div>
+                    @if ($employee->profile?->viber_number)
+                        <div class="flex items-center gap-2 truncate"><i class="fa-brands fa-viber w-3.5 text-ink-tertiary"></i>{{ $employee->profile->viber_number }}</div>
                     @endif
                 </div>
                 <div class="flex gap-2">
                     <a href="{{ route('directory.show', $employee) }}" wire:navigate class="btn-primary flex-1 justify-center !py-1.5 text-xs">View Profile</a>
                     <a href="mailto:{{ $employee->email }}" class="btn-secondary !px-2.5 !py-1.5"><i class="fa-solid fa-envelope"></i></a>
-                    @if ($employee->profile?->mobile_number)
-                        <a href="tel:{{ $employee->profile->mobile_number }}" class="btn-secondary !px-2.5 !py-1.5"><i class="fa-solid fa-phone"></i></a>
+                    @if ($employee->profile?->viber_number)
+                        <a href="viber://chat?number={{ $employee->profile->viber_number }}" class="btn-secondary !px-2.5 !py-1.5"><i class="fa-brands fa-viber"></i></a>
                     @endif
                 </div>
             </div>

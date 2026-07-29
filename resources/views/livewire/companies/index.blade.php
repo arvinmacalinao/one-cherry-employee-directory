@@ -10,10 +10,14 @@
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @forelse ($companies as $company)
             <a href="{{ route('companies.show', $company) }}" wire:navigate class="card flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-raised">
-                <div class="relative h-16" style="background: linear-gradient(135deg, {{ $company->color_theme ?? '#790002' }}, #1c1c1e)">
-                    <span class="absolute -bottom-5 left-5 flex h-13 w-13 items-center justify-center rounded-2xl border-4 border-surface-raised font-display text-sm font-bold text-white shadow-raised" style="background: {{ $company->color_theme ?? '#790002' }}">
-                        {{ collect(explode(' ', $company->name))->map(fn ($w) => $w[0])->take(3)->implode('') }}
-                    </span>
+                <div class="relative h-16 bg-surface">
+                    @if ($company->getFirstMediaUrl('logo', 'thumb'))
+                        <img src="{{ $company->getFirstMediaUrl('logo', 'thumb') }}" alt="{{ $company->name }}" class="absolute -bottom-5 left-5 h-13 w-13 rounded-2xl border-4 border-surface-raised object-cover shadow-raised">
+                    @else
+                        <span class="absolute -bottom-5 left-5 flex h-13 w-13 items-center justify-center rounded-2xl border-4 border-surface-raised bg-brand-tint font-display text-sm font-bold text-brand shadow-raised">
+                            {{ collect(explode(' ', $company->name))->map(fn ($w) => $w[0])->take(3)->implode('') }}
+                        </span>
+                    @endif
                 </div>
                 <div class="flex flex-col gap-2.5 px-5 pt-8 pb-5">
                     <div>

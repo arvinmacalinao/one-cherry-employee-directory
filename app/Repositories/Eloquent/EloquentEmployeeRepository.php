@@ -13,7 +13,7 @@ class EloquentEmployeeRepository implements EmployeeRepositoryInterface
 {
     protected function directoryEagerLoads(): array
     {
-        return ['company', 'department', 'designation', 'profile.officeLocation'];
+        return ['company', 'department', 'designation', 'status', 'profile.officeLocation'];
     }
 
     public function find(int $id): ?Employee
@@ -46,7 +46,6 @@ class EloquentEmployeeRepository implements EmployeeRepositoryInterface
                 $q->where('first_name', 'like', "%{$term}%")
                     ->orWhere('last_name', 'like', "%{$term}%")
                     ->orWhere('email', 'like', "%{$term}%")
-                    ->orWhereHas('profile', fn (Builder $p) => $p->where('mobile_number', 'like', "%{$term}%"))
                     ->orWhereHas('department', fn (Builder $d) => $d->where('name', 'like', "%{$term}%"))
                     ->orWhereHas('company', fn (Builder $c) => $c->where('name', 'like', "%{$term}%"));
             });
@@ -68,8 +67,8 @@ class EloquentEmployeeRepository implements EmployeeRepositoryInterface
             $query->whereHas('profile', fn (Builder $p) => $p->where('office_location_id', $filters['office_location_id']));
         }
 
-        if (! empty($filters['employment_status'])) {
-            $query->where('employment_status', $filters['employment_status']);
+        if (! empty($filters['employee_status_id'])) {
+            $query->where('employee_status_id', $filters['employee_status_id']);
         }
 
         if (! empty($filters['letter'])) {

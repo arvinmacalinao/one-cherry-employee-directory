@@ -49,7 +49,7 @@
         <div id="sync-toast" class="hidden mb-4 rounded-lg bg-success-tint px-3 py-2 text-xs font-semibold text-success">Sync complete — everything is up to date.</div>
         <div class="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
             <div class="rounded-lg border border-line p-3.5"><p class="font-display text-lg font-bold tabular-nums">{{ $lastSync?->records_imported ?? 0 }}</p><p class="text-xs text-ink-secondary">New Hires</p></div>
-            <div class="rounded-lg border border-line p-3.5"><p class="font-display text-lg font-bold tabular-nums">{{ $lastSync?->records_transferred ?? 0 }}</p><p class="text-xs text-ink-secondary">Promotions</p></div>
+            <div class="rounded-lg border border-line p-3.5"><p class="font-display text-lg font-bold tabular-nums">{{ $lastSync?->records_promoted ?? 0 }}</p><p class="text-xs text-ink-secondary">Promotions</p></div>
             <div class="rounded-lg border border-line p-3.5"><p class="font-display text-lg font-bold tabular-nums">{{ $lastSync?->records_deactivated ?? 0 }}</p><p class="text-xs text-ink-secondary">Deactivated</p></div>
             <div class="rounded-lg border border-line p-3.5"><p class="font-display text-lg font-bold tabular-nums {{ ($lastSync?->errors ? count($lastSync->errors) : 0) > 0 ? 'text-danger' : '' }}">{{ $lastSync?->errors ? count($lastSync->errors) : 0 }}</p><p class="text-xs text-ink-secondary">Warnings</p></div>
         </div>

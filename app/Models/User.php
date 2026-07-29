@@ -5,13 +5,14 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * Administrators only — there is no employee account. See architecture-plan.md §2.4.
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -26,7 +27,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'employee_id',
         'external_id',
         'auth_provider',
         'is_active',
@@ -56,15 +56,5 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
         ];
-    }
-
-    public function employee(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class);
-    }
-
-    public function favoriteEmployees(): BelongsToMany
-    {
-        return $this->belongsToMany(Employee::class, 'employee_favorites')->withPivot('created_at');
     }
 }

@@ -11,12 +11,11 @@
     </div>
 
     <div class="table-wrap overflow-x-auto rounded-card border border-line bg-surface-raised">
-        <table class="w-full min-w-[720px] border-collapse text-sm">
+        <table class="w-full min-w-[640px] border-collapse text-sm">
             <thead>
                 <tr class="border-b border-line bg-surface text-left text-[10.5px] font-bold tracking-wide text-ink-tertiary uppercase">
                     <th class="px-4 py-3">Department</th>
                     <th class="px-4 py-3">Company</th>
-                    <th class="px-4 py-3">Head</th>
                     <th class="px-4 py-3">Employees</th>
                     <th class="px-4 py-3">Status</th>
                     <th class="px-4 py-3"></th>
@@ -30,7 +29,6 @@
                             <p class="text-xs text-ink-tertiary">{{ $department->hr_ref_id ? "ug_id: {$department->hr_ref_id}" : 'Directory-managed' }}</p>
                         </td>
                         <td class="px-4 py-3 text-ink-secondary">{{ $department->company->name }}</td>
-                        <td class="px-4 py-3 text-ink-secondary">{{ $department->head?->full_name ?? '—' }}</td>
                         <td class="px-4 py-3">{{ $department->employees_count }}</td>
                         <td class="px-4 py-3"><span class="badge {{ $department->is_active ? 'badge-active' : 'badge-inactive' }}">{{ $department->is_active ? 'Active' : 'Inactive' }}</span></td>
                         <td class="px-4 py-3 text-right">
@@ -38,7 +36,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="px-4 py-10 text-center text-ink-secondary">No departments match.</td></tr>
+                    <tr><td colspan="5" class="px-4 py-10 text-center text-ink-secondary">No departments match.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -49,7 +47,7 @@
             @if ($lockedHrRef)
                 <div class="mb-4 flex items-start gap-2.5 rounded-lg bg-brand-tint px-3.5 py-3 text-xs text-ink-secondary">
                     <i class="fa-solid fa-circle-info mt-0.5 text-brand"></i>
-                    <span>Linked to HR record <code class="rounded bg-surface-raised px-1.5 py-0.5">ug_id: {{ $lockedHrRef }}</code> (user group). Name stays in sync automatically.</span>
+                    <span>Linked to HR record <code class="rounded bg-surface-raised px-1.5 py-0.5">ug_id: {{ $lockedHrRef }}</code>. Name stays in sync automatically — only visibility is managed here.</span>
                 </div>
             @endif
 
@@ -64,17 +62,6 @@
                             <option value="{{ $company->id }}">{{ $company->name }}</option>
                         @endforeach
                     </select>
-                </x-admin.field>
-                <x-admin.field label="Department Head">
-                    <select wire:model="form.department_head_id" class="input">
-                        <option value="">— None —</option>
-                        @foreach ($headOptions as $option)
-                            <option value="{{ $option->id }}">{{ $option->full_name }}</option>
-                        @endforeach
-                    </select>
-                </x-admin.field>
-                <x-admin.field label="Description">
-                    <textarea wire:model="form.description" rows="3" placeholder="What this department is responsible for…" class="input"></textarea>
                 </x-admin.field>
                 <x-admin.field label="Active">
                     <label class="flex items-center gap-2.5">

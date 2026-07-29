@@ -5,7 +5,7 @@
         </div>
         <div>
             <p class="font-display text-base font-bold">One Cherry</p>
-            <p class="text-sm text-ink-secondary">Employee Directory</p>
+            <p class="text-sm text-ink-secondary">Administrator Sign-in</p>
         </div>
     </div>
 

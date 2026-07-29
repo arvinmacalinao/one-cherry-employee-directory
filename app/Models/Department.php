@@ -13,7 +13,7 @@ class Department extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'hr_ref_id', 'company_id', 'name', 'department_head_id', 'description', 'is_active', 'needs_review',
+        'hr_ref_id', 'company_id', 'name', 'is_active', 'needs_review',
     ];
 
     protected $casts = [
@@ -24,11 +24,6 @@ class Department extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
-    }
-
-    public function head(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class, 'department_head_id');
     }
 
     public function employees(): HasMany
@@ -42,8 +37,10 @@ class Department extends Model
     }
 
     /**
-     * Not currently set by any sync path (Department is fully Admin-assigned — see
-     * architecture-plan.md §2.4) but kept for symmetry with Company/Designation.
+     * Auto-created by HrSyncService when HR sends a department name/id OCED hasn't
+     * seen before — flagged until an Admin opens and saves the record. Department
+     * is now HR-synced like Company/Designation, no longer Admin-assigned — see
+     * architecture-plan.md §2.5.
      */
     public function scopeNeedsReview($query)
     {

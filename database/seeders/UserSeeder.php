@@ -2,35 +2,25 @@
 
 namespace Database\Seeders;
 
-use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
+/**
+ * Administrators only — there is no employee account. See architecture-plan.md §2.4.
+ */
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = Employee::where('employee_id', 'EMP-00034')->first(); // Miguel Torres, IT Support
-        $employee = Employee::where('employee_id', 'EMP-00021')->first(); // Andrea Reyes, Senior UX Designer
-
-        $adminUser = User::updateOrCreate(
-            ['email' => $admin->email],
-            ['name' => $admin->full_name, 'password' => 'password', 'employee_id' => $admin->id, 'is_active' => true],
+        $admin = User::updateOrCreate(
+            ['email' => 'admin@onecherry.group'],
+            ['name' => 'OCED Administrator', 'password' => 'password', 'is_active' => true],
         );
-        $adminUser->syncRoles(['Administrator']);
-
-        $employeeUser = User::updateOrCreate(
-            ['email' => $employee->email],
-            ['name' => $employee->full_name, 'password' => 'password', 'employee_id' => $employee->id, 'is_active' => true],
-        );
-        $employeeUser->syncRoles(['Employee']);
+        $admin->syncRoles(['Administrator']);
 
         $this->command?->table(
             ['Role', 'Email', 'Password'],
-            [
-                ['Administrator', $adminUser->email, 'password'],
-                ['Employee', $employeeUser->email, 'password'],
-            ],
+            [['Administrator', $admin->email, 'password']],
         );
     }
 }

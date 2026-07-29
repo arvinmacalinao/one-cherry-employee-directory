@@ -2,20 +2,22 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Admin\Announcements\Index as AdminAnnouncements;
 use App\Livewire\Admin\Companies\Index as AdminCompanies;
 use App\Livewire\Admin\Departments\Index as AdminDepartments;
 use App\Livewire\Admin\Designations\Index as AdminDesignations;
 use App\Livewire\Admin\Offices\Index as AdminOffices;
+use App\Models\Announcement;
 use App\Models\Company;
 use App\Models\Department;
 use App\Models\Designation;
-use App\Models\Employee;
 use App\Models\OfficeLocation;
 use App\Models\User;
 use Database\Seeders\CompanySeeder;
 use Database\Seeders\DepartmentSeeder;
 use Database\Seeders\DesignationSeeder;
 use Database\Seeders\EmployeeSeeder;
+use Database\Seeders\EmployeeStatusSeeder;
 use Database\Seeders\OfficeLocationSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -38,25 +40,20 @@ class AdminCrudTest extends TestCase
             DesignationSeeder::class,
             DepartmentSeeder::class,
             OfficeLocationSeeder::class,
+            EmployeeStatusSeeder::class,
             EmployeeSeeder::class,
         ]);
 
-        $employee = Employee::where('employee_id', 'EMP-00034')->firstOrFail();
-        $this->admin = User::factory()->create(['employee_id' => $employee->id]);
+        $this->admin = User::factory()->create();
         $this->admin->assignRole('Administrator');
     }
 
-    public function test_non_admin_cannot_reach_any_admin_crud_page(): void
+    public function test_guest_cannot_reach_any_admin_crud_page(): void
     {
-        $employee = Employee::where('employee_id', 'EMP-00021')->firstOrFail();
-        $user = User::factory()->create(['employee_id' => $employee->id]);
-        $user->assignRole('Employee');
-
-        $this->actingAs($user);
-        $this->get('/admin/companies')->assertForbidden();
-        $this->get('/admin/departments')->assertForbidden();
-        $this->get('/admin/designations')->assertForbidden();
-        $this->get('/admin/office-locations')->assertForbidden();
+        $this->get('/admin/companies')->assertRedirect('/login');
+        $this->get('/admin/departments')->assertRedirect('/login');
+        $this->get('/admin/designations')->assertRedirect('/login');
+        $this->get('/admin/office-locations')->assertRedirect('/login');
     }
 
     public function test_admin_can_create_and_edit_a_company(): void
@@ -68,7 +65,6 @@ class AdminCrudTest extends TestCase
             ->call('openCreate')
             ->set('form.name', 'Cherry Ventures')
             ->set('form.email', 'info@cherryventures.onecherry.group')
-            ->set('form.color_theme', '#123456')
             ->call('save')
             ->assertHasNoErrors();
 
@@ -118,13 +114,20 @@ class AdminCrudTest extends TestCase
 
         $department = Department::where('name', 'Data & Analytics')->firstOrFail();
         $this->assertSame($company->id, $department->company_id);
+    }
+
+    public function test_hr_synced_department_name_cannot_be_changed_via_form(): void
+    {
+        $this->actingAs($this->admin);
+        $department = Department::whereNotNull('hr_ref_id')->firstOrFail();
+        $originalName = $department->name;
 
         Livewire::test(AdminDepartments::class)
             ->call('openEdit', $department->id)
-            ->set('form.description', 'Group-wide reporting and analytics.')
+            ->set('form.name', 'Should Not Stick')
             ->call('save');
 
-        $this->assertSame('Group-wide reporting and analytics.', $department->fresh()->description);
+        $this->assertSame($originalName, $department->fresh()->name);
     }
 
     public function test_admin_can_create_and_edit_a_designation(): void
@@ -137,12 +140,11 @@ class AdminCrudTest extends TestCase
             ->call('openCreate')
             ->set('form.name', 'Data Analyst')
             ->set('form.company_id', (string) $company->id)
-            ->set('form.hierarchy_level', 3)
             ->call('save')
             ->assertHasNoErrors();
 
         $designation = Designation::where('name', 'Data Analyst')->firstOrFail();
-        $this->assertSame(3, $designation->hierarchy_level);
+        $this->assertSame($company->id, $designation->company_id);
     }
 
     public function test_admin_can_create_and_edit_an_office_location(): void
@@ -153,12 +155,41 @@ class AdminCrudTest extends TestCase
         Livewire::test(AdminOffices::class)
             ->call('openCreate')
             ->set('form.name', 'Iloilo Branch')
-            ->set('form.city', 'Iloilo City')
+            ->set('form.address', 'Iloilo City')
             ->call('save')
             ->assertHasNoErrors();
 
         $office = OfficeLocation::where('name', 'Iloilo Branch')->firstOrFail();
-        $this->assertSame('Iloilo City', $office->city);
+        $this->assertSame('Iloilo City', $office->address);
         $this->assertNull($office->company_id);
+    }
+
+    public function test_admin_dashboard_renders(): void
+    {
+        $this->actingAs($this->admin)->get('/admin')->assertOk();
+    }
+
+    public function test_admin_can_create_and_edit_an_announcement(): void
+    {
+        $this->actingAs($this->admin);
+        $this->get('/admin/announcements')->assertOk();
+
+        Livewire::test(AdminAnnouncements::class)
+            ->call('openCreate')
+            ->set('form.title', 'Founders Day')
+            ->set('form.body', 'RSVP through your department head.')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $announcement = Announcement::where('title', 'Founders Day')->firstOrFail();
+        $this->assertSame($this->admin->id, $announcement->created_by);
+
+        // Expiry is a display filter, not a deletion — an expired row still shows
+        // in /admin/announcements, it just drops out of Home. See architecture-plan.md §3.2.
+        $announcement->update(['published_at' => now()->subDays(5), 'expires_at' => now()->subDay()]);
+        $this->assertTrue($announcement->fresh()->is_expired);
+
+        $this->get('/admin/announcements')->assertOk()->assertSeeText('Founders Day');
+        $this->get('/')->assertOk()->assertDontSeeText('Founders Day');
     }
 }

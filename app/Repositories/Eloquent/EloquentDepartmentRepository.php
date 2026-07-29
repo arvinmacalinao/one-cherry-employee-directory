@@ -10,7 +10,7 @@ class EloquentDepartmentRepository implements DepartmentRepositoryInterface
 {
     public function find(int $id): ?Department
     {
-        return Department::with(['company', 'head'])->find($id);
+        return Department::with('company')->find($id);
     }
 
     public function findByHrRefId(int $hrRefId): ?Department
@@ -21,7 +21,7 @@ class EloquentDepartmentRepository implements DepartmentRepositoryInterface
     public function allActiveWithCounts(): Collection
     {
         return Department::active()
-            ->with(['company', 'head'])
+            ->with('company')
             ->withCount(['employees' => fn ($q) => $q->visibleInDirectory()])
             ->orderBy('name')
             ->get();

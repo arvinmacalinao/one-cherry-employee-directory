@@ -13,12 +13,11 @@ class Designation extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'hr_ref_id', 'company_id', 'name', 'hierarchy_level', 'description', 'is_active', 'needs_review',
+        'hr_ref_id', 'company_id', 'name', 'is_active', 'needs_review',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
-        'hierarchy_level' => 'integer',
         'needs_review' => 'boolean',
     ];
 

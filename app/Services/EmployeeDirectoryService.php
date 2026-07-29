@@ -32,17 +32,4 @@ class EmployeeDirectoryService
     {
         return $this->employees->birthdaysUpcoming($limit);
     }
-
-    /**
-     * Dashboard "Quick Statistics" — Total Employees, Companies, Departments, Office Locations.
-     */
-    public function dashboardStats(): array
-    {
-        return [
-            'employees' => $this->employees->countVisible(),
-            'companies' => $this->companies->count(),
-            'departments' => $this->departments->count(),
-            'office_locations' => $this->officeLocations->count(),
-        ];
-    }
 }

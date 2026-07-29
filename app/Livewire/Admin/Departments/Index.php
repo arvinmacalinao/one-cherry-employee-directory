@@ -3,8 +3,6 @@
 namespace App\Livewire\Admin\Departments;
 
 use App\Models\Company;
-use App\Models\Department;
-use App\Models\Employee;
 use App\Repositories\Contracts\DepartmentRepositoryInterface;
 use Livewire\Component;
 
@@ -17,7 +15,7 @@ class Index extends Component
     public ?int $editingId = null;
 
     public array $form = [
-        'name' => '', 'company_id' => '', 'department_head_id' => '', 'description' => '', 'is_active' => true,
+        'name' => '', 'company_id' => '', 'is_active' => true,
     ];
 
     public ?int $lockedHrRef = null;
@@ -29,8 +27,6 @@ class Index extends Component
         return [
             'form.name' => ['required', 'string', 'max:255'],
             'form.company_id' => ['required', 'exists:companies,id'],
-            'form.department_head_id' => ['nullable', 'exists:employees,id'],
-            'form.description' => ['nullable', 'string'],
         ];
     }
 
@@ -50,8 +46,6 @@ class Index extends Component
         $this->form = [
             'name' => $department->name,
             'company_id' => (string) $department->company_id,
-            'department_head_id' => $department->department_head_id ? (string) $department->department_head_id : '',
-            'description' => $department->description,
             'is_active' => $department->is_active,
         ];
         $this->showForm = true;
@@ -71,7 +65,6 @@ class Index extends Component
             unset($validated['name']);
         }
 
-        $validated['department_head_id'] = $validated['department_head_id'] ?: null;
         $validated['needs_review'] = false;
 
         if ($this->editingId) {
@@ -90,18 +83,9 @@ class Index extends Component
         $this->editingId = null;
         $this->lockedHrRef = null;
         $this->form = [
-            'name' => '', 'company_id' => '', 'department_head_id' => '', 'description' => '', 'is_active' => true,
+            'name' => '', 'company_id' => '', 'is_active' => true,
         ];
         $this->resetErrorBag();
-    }
-
-    public function employeesForCompany(): \Illuminate\Support\Collection
-    {
-        if (! $this->form['company_id']) {
-            return collect();
-        }
-
-        return Employee::visibleInDirectory()->where('company_id', $this->form['company_id'])->orderBy('last_name')->get();
     }
 
     public function render(DepartmentRepositoryInterface $departments)
@@ -115,7 +99,6 @@ class Index extends Component
         return view('livewire.admin.departments.index', [
             'departments' => $list,
             'companyOptions' => Company::active()->orderBy('name')->get(),
-            'headOptions' => $this->employeesForCompany(),
         ])->layout('layouts.admin', ['header' => 'Departments']);
     }
 }

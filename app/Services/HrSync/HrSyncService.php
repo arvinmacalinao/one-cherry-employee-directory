@@ -2,37 +2,35 @@
 
 namespace App\Services\HrSync;
 
-use App\Enums\EmployeeSource;
-use App\Enums\EmploymentStatus;
 use App\Enums\SyncStatus;
 use App\Enums\SyncType;
 use App\Models\ApiSyncLog;
 use App\Models\Company;
+use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Employee;
+use App\Models\EmployeeStatus;
 use App\Models\User;
 use App\Services\HrSync\Contracts\HrSourceInterface;
 use App\Services\HrSync\DTOs\HrEmployeeData;
+use App\Services\HrSync\DTOs\SyncPreviewResult;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use RuntimeException;
 use Throwable;
 
 /**
  * Pull-based HR sync: HR System -> REST API -> Laravel Scheduler -> this service -> DB.
- * See architecture-plan.md §2.4 and §7 for the full field mapping and design rationale.
+ * See architecture-plan.md §2.5 for the full field mapping and design rationale — this
+ * is the application's core feature, not a peripheral integration.
  *
  * Depends on HrSourceInterface, not a concrete HTTP client, so the HR integration —
  * and later, Active Directory / Google Workspace adapters — can change without this
  * orchestration logic changing.
  *
- * HR only actually provides: employee_id, name, email, company, designation, status
- * (see HrEmployeeData). Department, dates, job level, and supervisor are NOT synced —
- * they're Admin-managed fields on the same `employees` row. Company/Designation are
- * matched by HR's numeric company_id/designation_id when the API sends them
- * (companies.hr_ref_id / designations.hr_ref_id), falling back to a case-insensitive
- * name match when it doesn't — see resolveCompany()/resolveDesignation().
+ * Company, Department, Designation, and Employment Status are all resolved the same
+ * ID-first, name-fallback way via resolveNamedLookup() / resolveEmployeeStatus() —
+ * every one of them is a synced lookup table now, not a hardcoded translation.
  */
 class HrSyncService
 {
@@ -46,25 +44,28 @@ class HrSyncService
             'sync_type' => $type,
             'started_at' => now(),
             'triggered_by' => $triggeredBy?->id,
+            'warnings' => [],
             'errors' => [],
         ]);
 
-        $counts = ['imported' => 0, 'updated' => 0, 'transferred' => 0, 'deactivated' => 0];
+        $counts = ['imported' => 0, 'updated' => 0, 'promoted' => 0, 'status_changed' => 0, 'deactivated' => 0];
+        $warnings = [];
         $errors = [];
 
         try {
             $records = $this->source->fetchEmployees();
             $seenCodes = [];
 
+            // Pass 1: upsert identity + org fields for every record.
             foreach ($records as $data) {
                 $seenCodes[] = $data->employeeCode;
 
                 try {
-                    // NOT an arrow function: `fn()` auto-captures $errors *by value*, so the
-                    // &$errors reference parameter inside upsertEmployee would silently mutate
-                    // a throwaway copy instead of this loop's $errors — `use (&$errors)` is required.
-                    $result = DB::transaction(function () use ($data, &$errors) {
-                        return $this->upsertEmployee($data, $errors);
+                    // NOT an arrow function: `fn()` auto-captures $warnings *by value*, so the
+                    // &$warnings reference parameter inside upsertEmployee would silently mutate
+                    // a throwaway copy instead of this loop's $warnings — `use (&$warnings)` is required.
+                    $result = DB::transaction(function () use ($data, &$warnings) {
+                        return $this->upsertEmployee($data, $warnings);
                     });
                     $counts[$result]++;
                 } catch (Throwable $e) {
@@ -73,15 +74,24 @@ class HrSyncService
                 }
             }
 
-            $counts['deactivated'] += $this->deactivateMissingEmployees($seenCodes);
+            // Pass 2: resolve supervisors, now that every employee_id from this run exists.
+            foreach ($records as $data) {
+                if ($data->supervisorEmployeeCode) {
+                    $this->resolveSupervisor($data, $warnings);
+                }
+            }
+
+            $counts['deactivated'] = $this->deactivateMissingEmployees($seenCodes);
 
             $log->update([
                 'completed_at' => now(),
                 'status' => empty($errors) ? SyncStatus::Success : SyncStatus::Partial,
                 'records_imported' => $counts['imported'],
                 'records_updated' => $counts['updated'],
-                'records_transferred' => $counts['transferred'],
+                'records_promoted' => $counts['promoted'],
+                'records_status_changed' => $counts['status_changed'],
                 'records_deactivated' => $counts['deactivated'],
+                'warnings' => $warnings,
                 'errors' => $errors,
             ]);
         } catch (Throwable $e) {
@@ -89,6 +99,7 @@ class HrSyncService
             $log->update([
                 'completed_at' => now(),
                 'status' => SyncStatus::Failed,
+                'warnings' => $warnings,
                 'errors' => [...$errors, "Sync aborted: {$e->getMessage()}"],
             ]);
         }
@@ -97,41 +108,133 @@ class HrSyncService
     }
 
     /**
-     * @return string one of: imported, updated, transferred, deactivated
+     * Pure read/diff — never persists anything, not even the lookup auto-creates
+     * that a real sync would perform. Mandatory before the first live sync; a
+     * generally useful "what would this do" tool afterward. See architecture-plan.md §2.5.
      */
-    protected function upsertEmployee(HrEmployeeData $data, array &$errors): string
+    public function preview(): SyncPreviewResult
     {
-        $company = $this->resolveCompany($data->companyId, $data->companyName, $errors);
-        $designation = $this->resolveDesignation($data->designationId, $data->designationName, $company, $errors);
-        $status = $this->resolveStatus($data->employmentStatusCode, $errors);
+        $warnings = [];
+        $newEmployees = [];
+        $updatedEmployees = [];
+        $departmentChanges = [];
+        $designationChanges = [];
+        $supervisorChanges = [];
+        $statusChanges = [];
+        $seenCodes = [];
 
-        // Department, dates, job level, supervisor, middle name are deliberately absent
-        // here — HR doesn't provide them, so sync never touches them either way.
+        $records = $this->source->fetchEmployees();
+
+        foreach ($records as $data) {
+            $seenCodes[] = $data->employeeCode;
+            $name = trim("{$data->firstName} {$data->lastName}");
+
+            $company = $this->resolveNamedLookup(Company::class, $data->companyId, $data->companyName, null, false, $warnings);
+            $department = $this->resolveNamedLookup(Department::class, $data->departmentId, $data->departmentName, $company['id'], false, $warnings);
+            $designation = $this->resolveNamedLookup(Designation::class, $data->designationId, $data->designationName, $company['id'], false, $warnings);
+            $status = $this->resolveEmployeeStatus($data->employmentStatusId, $data->employmentStatusName, false, $warnings);
+
+            $existing = Employee::with(['company', 'department', 'designation', 'status', 'supervisor'])
+                ->where('employee_id', $data->employeeCode)->first();
+
+            if (! $existing) {
+                $newEmployees[] = [
+                    'employee_id' => $data->employeeCode,
+                    'name' => $name,
+                    'company' => $company['name'],
+                    'department' => $department['name'],
+                    'designation' => $designation['name'],
+                ];
+
+                continue;
+            }
+
+            $changedFields = [];
+
+            if ($department['name'] !== $existing->department?->name) {
+                $departmentChanges[] = ['employee_id' => $data->employeeCode, 'name' => $name, 'from' => $existing->department?->name, 'to' => $department['name']];
+                $changedFields[] = 'department';
+            }
+
+            if ($designation['name'] !== $existing->designation?->name) {
+                $designationChanges[] = ['employee_id' => $data->employeeCode, 'name' => $name, 'from' => $existing->designation?->name, 'to' => $designation['name']];
+                $changedFields[] = 'designation';
+            }
+
+            if ($data->supervisorEmployeeCode !== $existing->supervisor?->employee_id) {
+                $supervisorChanges[] = ['employee_id' => $data->employeeCode, 'name' => $name, 'from' => $existing->supervisor?->full_name, 'to' => $data->supervisorEmployeeCode];
+                $changedFields[] = 'supervisor';
+            }
+
+            if ($status['name'] !== $existing->status?->name) {
+                $statusChanges[] = ['employee_id' => $data->employeeCode, 'name' => $name, 'from' => $existing->status?->name, 'to' => $status['name']];
+                $changedFields[] = 'employment status';
+            }
+
+            if ($existing->first_name !== $data->firstName
+                || $existing->last_name !== $data->lastName
+                || $existing->email !== $data->email
+                || $company['name'] !== $existing->company?->name) {
+                $changedFields[] = 'identity';
+            }
+
+            if (! empty($changedFields)) {
+                $updatedEmployees[] = ['employee_id' => $data->employeeCode, 'name' => $name, 'fields_changed' => $changedFields];
+            }
+        }
+
+        $becomingInactive = Employee::visibleInDirectory()
+            ->whereNotIn('employee_id', $seenCodes)
+            ->get(['employee_id', 'first_name', 'last_name'])
+            ->map(fn (Employee $e) => ['employee_id' => $e->employee_id, 'name' => $e->full_name])
+            ->all();
+
+        return new SyncPreviewResult(
+            newEmployees: $newEmployees,
+            updatedEmployees: $updatedEmployees,
+            departmentChanges: $departmentChanges,
+            designationChanges: $designationChanges,
+            supervisorChanges: $supervisorChanges,
+            statusChanges: $statusChanges,
+            becomingInactive: $becomingInactive,
+            warnings: $warnings,
+        );
+    }
+
+    /**
+     * @return string one of: imported, updated, promoted, status_changed
+     */
+    protected function upsertEmployee(HrEmployeeData $data, array &$warnings): string
+    {
+        $company = $this->resolveNamedLookup(Company::class, $data->companyId, $data->companyName, null, true, $warnings);
+        $department = $this->resolveNamedLookup(Department::class, $data->departmentId, $data->departmentName, $company['id'], true, $warnings);
+        $designation = $this->resolveNamedLookup(Designation::class, $data->designationId, $data->designationName, $company['id'], true, $warnings);
+        $status = $this->resolveEmployeeStatus($data->employmentStatusId, $data->employmentStatusName, true, $warnings);
+
         $attributes = [
             'first_name' => $data->firstName,
+            'middle_name' => $data->middleName,
             'last_name' => $data->lastName,
+            'username' => $data->username,
             'email' => $data->email,
-            'company_id' => $company->id,
-            'employment_status' => $status,
+            'company_id' => $company['id'],
+            'department_id' => $department['id'],
+            'designation_id' => $designation['id'],
+            'date_hired' => $data->dateHired,
+            'date_regularized' => $data->dateRegularized,
+            'date_separated' => $data->dateSeparated,
+            'is_active' => true,
             'last_synced_at' => now(),
         ];
 
-        if ($designation) {
-            $attributes['designation_id'] = $designation->id;
+        if ($status['id']) {
+            $attributes['employee_status_id'] = $status['id'];
         }
 
         $existing = Employee::withTrashed()->where('employee_id', $data->employeeCode)->first();
 
         if (! $existing) {
-            if (! $designation) {
-                throw new RuntimeException('cannot create — HR did not provide a designation for this employee');
-            }
-
-            $employee = Employee::create([
-                'employee_id' => $data->employeeCode,
-                'source' => EmployeeSource::HrSync,
-                ...$attributes,
-            ]);
+            $employee = Employee::create(['employee_id' => $data->employeeCode, ...$attributes]);
             $employee->profile()->create(['employee_id' => $employee->id]);
 
             return 'imported';
@@ -141,142 +244,157 @@ class HrSyncService
             $existing->restore();
         }
 
-        $wasDesignation = $existing->designation_id;
-        $wasStatus = $existing->employment_status;
+        $wasDesignationId = $existing->designation_id;
+        $wasStatusId = $existing->employee_status_id;
 
         $existing->update($attributes);
 
-        if ($designation && $wasDesignation !== $designation->id) {
-            return 'transferred';
+        if ($designation['id'] && $wasDesignationId !== $designation['id']) {
+            return 'promoted';
         }
 
-        $enteredResignedOrInactive = in_array($status, [EmploymentStatus::Resigned, EmploymentStatus::Inactive], true)
-            && in_array($wasStatus, [EmploymentStatus::Active, EmploymentStatus::OnLeave], true);
+        if ($status['id'] && $wasStatusId !== $status['id']) {
+            return 'status_changed';
+        }
 
-        return $enteredResignedOrInactive ? 'deactivated' : 'updated';
+        return 'updated';
     }
 
     /**
-     * Any employee currently active/on_leave in OCED but absent from this run's feed
-     * entirely is marked inactive. This is now the *primary* way a departure is
-     * detected — the live HR feed only ever contains active employees (it filters
-     * server-side), so there's no separate "resigned" status to read from it.
+     * Runs after every employee_id from this run has been upserted (pass 1), so a
+     * supervisor who appears later in the same feed than their report can still
+     * be resolved. Self-heals on a later run if the supervisor isn't found now.
+     */
+    protected function resolveSupervisor(HrEmployeeData $data, array &$warnings): void
+    {
+        $employee = Employee::where('employee_id', $data->employeeCode)->first();
+
+        if (! $employee) {
+            return;
+        }
+
+        $supervisor = Employee::where('employee_id', $data->supervisorEmployeeCode)->first();
+
+        if (! $supervisor) {
+            $warnings[] = "Could not resolve supervisor \"{$data->supervisorEmployeeCode}\" for {$data->employeeCode} — not found in this sync run.";
+
+            return;
+        }
+
+        if ($employee->immediate_supervisor_id !== $supervisor->id) {
+            $employee->update(['immediate_supervisor_id' => $supervisor->id]);
+        }
+    }
+
+    /**
+     * Any employee currently is_active=true in OCED but absent from this run's feed
+     * entirely is marked inactive — the sole directory-visibility signal (§2.5),
+     * covering employees HR has fully deactivated (u_active=0), which disappear
+     * from the feed rather than arriving with a "departed" status to read.
      */
     protected function deactivateMissingEmployees(array $seenCodes): int
     {
         $missing = Employee::visibleInDirectory()->whereNotIn('employee_id', $seenCodes)->get();
 
         foreach ($missing as $employee) {
-            $employee->update(['employment_status' => EmploymentStatus::Inactive]);
+            $employee->update(['is_active' => false]);
         }
 
         return $missing->count();
     }
 
     /**
-     * Companies are matched by HR's numeric company_id (via hr_ref_id) when the
-     * API sends one — stable across renames on either side. Falls back to a
-     * case-insensitive name match when no ID is given (older HR response shape),
-     * or when the ID doesn't match anything yet — that fallback also opportunistically
-     * backfills hr_ref_id onto the matched row so the *next* sync for this company
-     * can go straight through the ID path. A company HR sends that doesn't exist
-     * yet in OCED under either identity is auto-created (with no branding/address
-     * yet) and flagged for an Admin to fill in — sync never blocks on it.
+     * ID-first, name-fallback resolution shared by Company/Department/Designation —
+     * all three are synced lookup tables with the same shape (hr_ref_id, name,
+     * is_active, needs_review), scoped to a company for Department/Designation.
+     * A name match opportunistically backfills hr_ref_id so the *next* sync for
+     * this record goes straight through the ID path. When $persist is false
+     * (Sync Preview), nothing is written — an unresolved identity is reported
+     * back as "would create" instead of actually being created.
+     *
+     * @param  class-string<Company|Department|Designation>  $modelClass
+     * @return array{id: ?int, name: ?string, is_new: bool}
      */
-    protected function resolveCompany(?int $hrRefId, string $name, array &$errors): Company
+    protected function resolveNamedLookup(string $modelClass, ?int $hrRefId, ?string $name, ?int $companyId, bool $persist, array &$warnings): array
     {
+        if (! $hrRefId && ! $name) {
+            return ['id' => null, 'name' => null, 'is_new' => false];
+        }
+
+        $scoped = fn () => $modelClass === Company::class
+            ? $modelClass::query()
+            : $modelClass::query()->where('company_id', $companyId);
+
         if ($hrRefId) {
-            $company = Company::where('hr_ref_id', $hrRefId)->first();
+            $match = $scoped()->where('hr_ref_id', $hrRefId)->first();
 
-            if ($company) {
-                return $company;
+            if ($match) {
+                return ['id' => $match->id, 'name' => $match->name, 'is_new' => false];
             }
         }
 
-        $company = Company::whereRaw('LOWER(name) = ?', [strtolower($name)])->first();
+        if ($name) {
+            $match = $scoped()->whereRaw('LOWER(name) = ?', [strtolower($name)])->first();
 
-        if ($company) {
-            if ($hrRefId && ! $company->hr_ref_id) {
-                $company->update(['hr_ref_id' => $hrRefId]);
+            if ($match) {
+                if ($persist && $hrRefId && ! $match->hr_ref_id) {
+                    $match->update(['hr_ref_id' => $hrRefId]);
+                }
+
+                return ['id' => $match->id, 'name' => $match->name, 'is_new' => false];
             }
-
-            return $company;
         }
 
-        $company = Company::create([
+        if (! $persist) {
+            return ['id' => null, 'name' => $name ?? "HR #{$hrRefId}", 'is_new' => true];
+        }
+
+        $attributes = [
             'hr_ref_id' => $hrRefId,
             'name' => $name,
-            'slug' => Str::slug($name).'-'.Str::random(4),
+            'company_id' => $companyId,
             'is_active' => true,
             'needs_review' => true,
-        ]);
-        $errors[] = "Auto-created new Company \"{$name}\" from HR — needs Admin review (logo, address, etc.).";
+        ];
 
-        return $company;
+        if ($modelClass === Company::class) {
+            $attributes['slug'] = Str::slug($name).'-'.Str::random(4);
+        }
+
+        $created = $modelClass::create($attributes);
+        $warnings[] = 'Auto-created new '.class_basename($modelClass)." \"{$name}\" from HR — needs Admin review.";
+
+        return ['id' => $created->id, 'name' => $created->name, 'is_new' => true];
     }
 
     /**
-     * Same ID-first, name-fallback matching as resolveCompany(), scoped to the
-     * employee's company (same uniqueness scope as the designations table
-     * itself). Null when HR sends no designation for this record — the caller
-     * decides how to handle that.
+     * Employment status has no name-fallback (HR always sends an id for it) and
+     * is never scoped to a company. See architecture-plan.md §2.5.
+     *
+     * @return array{id: ?int, name: ?string, is_new: bool}
      */
-    protected function resolveDesignation(?int $hrRefId, ?string $name, Company $company, array &$errors): ?Designation
+    protected function resolveEmployeeStatus(?int $hrRefId, ?string $name, bool $persist, array &$warnings): array
     {
-        if (! $name && ! $hrRefId) {
-            return null;
+        if (! $hrRefId) {
+            $warnings[] = 'Employee record missing employment_status.id — status left unchanged.';
+
+            return ['id' => null, 'name' => $name, 'is_new' => false];
         }
 
-        if ($hrRefId) {
-            $designation = Designation::where('company_id', $company->id)
-                ->where('hr_ref_id', $hrRefId)
-                ->first();
+        $status = EmployeeStatus::where('hr_ref_id', $hrRefId)->first();
 
-            if ($designation) {
-                return $designation;
-            }
+        if ($status) {
+            return ['id' => $status->id, 'name' => $status->name, 'is_new' => false];
         }
 
-        if (! $name) {
-            return null;
+        $label = $name ?? "Status #{$hrRefId}";
+
+        if (! $persist) {
+            return ['id' => null, 'name' => $label, 'is_new' => true];
         }
 
-        $designation = Designation::where('company_id', $company->id)
-            ->whereRaw('LOWER(name) = ?', [strtolower($name)])
-            ->first();
+        $status = EmployeeStatus::create(['hr_ref_id' => $hrRefId, 'name' => $label]);
 
-        if ($designation) {
-            if ($hrRefId && ! $designation->hr_ref_id) {
-                $designation->update(['hr_ref_id' => $hrRefId]);
-            }
-
-            return $designation;
-        }
-
-        $designation = Designation::create([
-            'company_id' => $company->id,
-            'hr_ref_id' => $hrRefId,
-            'name' => $name,
-            'hierarchy_level' => 1,
-            'is_active' => true,
-            'needs_review' => true,
-        ]);
-        $errors[] = "Auto-created new Designation \"{$name}\" at {$company->name} — needs Admin review (hierarchy level, description).";
-
-        return $designation;
-    }
-
-    protected function resolveStatus(string $code, array &$errors): EmploymentStatus
-    {
-        $map = config('hr_sync.status_map');
-        $value = $map[$code] ?? null;
-
-        if (! $value) {
-            $errors[] = "Unknown employment status code '{$code}' — defaulted to Active.";
-
-            return EmploymentStatus::Active;
-        }
-
-        return EmploymentStatus::from($value);
+        return ['id' => $status->id, 'name' => $status->name, 'is_new' => true];
     }
 }

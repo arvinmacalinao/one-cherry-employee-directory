@@ -14,8 +14,10 @@ class DatabaseSeeder extends Seeder
             DesignationSeeder::class,
             DepartmentSeeder::class,
             OfficeLocationSeeder::class,
+            EmployeeStatusSeeder::class,
             EmployeeSeeder::class,
             UserSeeder::class,
+            AnnouncementSeeder::class,
         ]);
     }
 }

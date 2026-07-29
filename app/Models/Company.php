@@ -16,8 +16,8 @@ class Company extends Model implements HasMedia
     use HasFactory, InteractsWithMedia, SoftDeletes;
 
     protected $fillable = [
-        'hr_ref_id', 'name', 'slug', 'description', 'address',
-        'phone', 'email', 'website', 'color_theme', 'is_active', 'needs_review',
+        'hr_ref_id', 'name', 'slug', 'address',
+        'phone', 'email', 'website', 'is_active', 'needs_review',
     ];
 
     protected $casts = [

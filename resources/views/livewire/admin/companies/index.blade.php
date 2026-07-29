@@ -27,9 +27,13 @@
                     <tr class="border-b border-line last:border-b-0 hover:bg-surface">
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-2.5">
-                                <span class="flex h-8.5 w-8.5 flex-shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white" style="background: {{ $company->color_theme ?? '#790002' }}">
-                                    {{ collect(explode(' ', $company->name))->map(fn ($w) => $w[0])->take(3)->implode('') }}
-                                </span>
+                                @if ($company->getFirstMediaUrl('logo', 'thumb'))
+                                    <img src="{{ $company->getFirstMediaUrl('logo', 'thumb') }}" alt="{{ $company->name }}" class="h-8.5 w-8.5 flex-shrink-0 rounded-lg object-cover">
+                                @else
+                                    <span class="flex h-8.5 w-8.5 flex-shrink-0 items-center justify-center rounded-lg bg-brand-tint text-xs font-bold text-brand">
+                                        {{ collect(explode(' ', $company->name))->map(fn ($w) => $w[0])->take(3)->implode('') }}
+                                    </span>
+                                @endif
                                 <span class="font-semibold">{{ $company->name }}</span>
                             </div>
                         </td>
@@ -57,12 +61,31 @@
                 </div>
             @endif
 
+            <div class="mb-4 flex items-center gap-4 border-b border-line pb-5">
+                <div class="h-16 w-16 flex-shrink-0">
+                    @if ($logo)
+                        <img src="{{ $logo->temporaryUrl() }}" class="h-16 w-16 rounded-lg border border-line object-cover" alt="Logo preview">
+                    @elseif ($editingCompany?->getFirstMediaUrl('logo', 'thumb'))
+                        <img src="{{ $editingCompany->getFirstMediaUrl('logo', 'thumb') }}" class="h-16 w-16 rounded-lg border border-line object-cover" alt="Current logo">
+                    @else
+                        <span class="flex h-16 w-16 items-center justify-center rounded-lg bg-brand-tint font-display text-lg font-bold text-brand">
+                            {{ collect(explode(' ', $form['name'] ?: 'C'))->map(fn ($w) => $w[0] ?? '')->take(3)->implode('') }}
+                        </span>
+                    @endif
+                </div>
+                <div class="flex flex-col items-start gap-1.5">
+                    <label class="btn-secondary w-fit cursor-pointer !py-1.5 text-xs">
+                        <i class="fa-solid fa-image"></i>{{ $editingCompany?->hasMedia('logo') || $logo ? 'Change Logo' : 'Upload Logo' }}
+                        <input type="file" wire:model="logo" accept="image/*" class="hidden">
+                    </label>
+                    @error('logo') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
+                    <p class="text-[11px] text-ink-tertiary">JPG or PNG, up to 2MB.</p>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <x-admin.field label="Company Name" :locked="(bool) $lockedHrRef" :full="true">
                     <input type="text" wire:model="form.name" @disabled($lockedHrRef) class="input">
-                </x-admin.field>
-                <x-admin.field label="Description" :full="true">
-                    <textarea wire:model="form.description" rows="3" class="input"></textarea>
                 </x-admin.field>
                 <x-admin.field label="Address" :full="true">
                     <input type="text" wire:model="form.address" class="input">
@@ -75,12 +98,6 @@
                 </x-admin.field>
                 <x-admin.field label="Website" :full="true">
                     <input type="text" wire:model="form.website" class="input">
-                </x-admin.field>
-                <x-admin.field label="Color Theme" :full="true">
-                    <div class="flex items-center gap-2.5">
-                        <input type="color" wire:model="form.color_theme" class="h-9 w-12 cursor-pointer rounded border border-line">
-                        <input type="text" wire:model="form.color_theme" class="input">
-                    </div>
                 </x-admin.field>
                 <x-admin.field label="Active" :full="true">
                     <label class="flex items-center gap-2.5">

@@ -37,26 +37,17 @@
             </div>
 
             <nav class="flex flex-1 flex-col gap-0.5 overflow-y-auto">
-                <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-house w-4.5 text-center"></i> Dashboard
+                <a href="{{ route('home') }}" class="nav-item {{ request()->routeIs('home') ? 'nav-item-active' : '' }}">
+                    <i class="fa-solid fa-house w-4.5 text-center"></i> Home
                 </a>
                 <a href="{{ route('directory.index') }}" class="nav-item {{ request()->routeIs('directory.*') ? 'nav-item-active' : '' }}">
                     <i class="fa-solid fa-address-book w-4.5 text-center"></i> Employee Directory
                 </a>
                 <a href="{{ route('companies.index') }}" class="nav-item {{ request()->routeIs('companies.*') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-building w-4.5 text-center"></i> Companies
+                    <i class="fa-solid fa-building w-4.5 text-center"></i> Company Directory
                 </a>
                 <a href="{{ route('departments.index') }}" class="nav-item {{ request()->routeIs('departments.*') ? 'nav-item-active' : '' }}">
                     <i class="fa-solid fa-sitemap w-4.5 text-center"></i> Departments
-                </a>
-
-                <div class="my-2.5 h-px bg-line"></div>
-
-                <a href="{{ route('favorites.index') }}" class="nav-item {{ request()->routeIs('favorites.*') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-star w-4.5 text-center"></i> Favorites
-                </a>
-                <a href="{{ route('profile.me') }}" class="nav-item {{ request()->routeIs('profile.me') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-id-badge w-4.5 text-center"></i> My Profile
                 </a>
 
                 @can('manage employees')
@@ -96,19 +87,20 @@
                 </button>
                 <h1 class="font-display text-base">{{ $header ?? '' }}</h1>
                 <div class="flex-1"></div>
-                <button class="flex h-8.5 w-8.5 items-center justify-center rounded-lg text-ink-secondary hover:bg-surface hover:text-ink" aria-label="Notifications">
-                    <i class="fa-solid fa-bell"></i>
-                </button>
                 @auth
-                    <a href="{{ route('profile.me') }}" class="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-brand font-display text-xs font-bold text-on-brand" title="{{ auth()->user()->name }}">
+                    <span class="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-brand font-display text-xs font-bold text-on-brand" title="{{ auth()->user()->name }}">
                         {{ collect(explode(' ', auth()->user()->name))->map(fn ($p) => $p[0])->take(2)->implode('') }}
-                    </a>
+                    </span>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button class="flex h-8.5 w-8.5 items-center justify-center rounded-lg text-ink-secondary hover:bg-surface hover:text-ink" title="Sign out">
                             <i class="fa-solid fa-arrow-right-from-bracket"></i>
                         </button>
                     </form>
+                @else
+                    <a href="{{ route('login') }}" class="flex h-8.5 w-8.5 items-center justify-center rounded-lg text-ink-secondary hover:bg-surface hover:text-ink" title="Administrator sign in">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </a>
                 @endauth
             </header>
 

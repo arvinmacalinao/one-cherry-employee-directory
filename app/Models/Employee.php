@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
-use App\Enums\EmployeeSource;
-use App\Enums\EmploymentStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,22 +20,19 @@ class Employee extends Model implements Auditable, HasMedia
     use AuditableTrait, HasFactory, InteractsWithMedia, SoftDeletes;
 
     protected $fillable = [
-        // HR-controlled — overwritten by HrSyncService, never edited directly in the UI.
-        'employee_id', 'first_name', 'middle_name', 'last_name', 'email',
+        // HR-owned — overwritten by HrSyncService, never edited directly in the UI.
+        'employee_id', 'first_name', 'middle_name', 'last_name', 'username', 'email',
         'company_id', 'department_id', 'designation_id', 'immediate_supervisor_id',
-        'employment_status', 'date_hired', 'date_regularized', 'date_separated', 'job_level',
-        // Directory bookkeeping.
-        'source', 'last_synced_at',
+        'employee_status_id', 'is_active', 'date_hired', 'date_regularized', 'date_separated',
+        'last_synced_at',
     ];
 
     protected $casts = [
-        'employment_status' => EmploymentStatus::class,
-        'source' => EmployeeSource::class,
+        'is_active' => 'boolean',
         'date_hired' => 'date',
         'date_regularized' => 'date',
         'date_separated' => 'date',
         'last_synced_at' => 'datetime',
-        'job_level' => 'integer',
     ];
 
     /**
@@ -69,6 +63,11 @@ class Employee extends Model implements Auditable, HasMedia
         return $this->belongsTo(Designation::class);
     }
 
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(EmployeeStatus::class, 'employee_status_id');
+    }
+
     public function supervisor(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'immediate_supervisor_id');
@@ -84,22 +83,13 @@ class Employee extends Model implements Auditable, HasMedia
         return $this->hasOne(EmployeeProfile::class);
     }
 
-    public function skills(): BelongsToMany
-    {
-        return $this->belongsToMany(Skill::class, 'employee_skill');
-    }
-
-    public function favoritedByUsers(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'employee_favorites')->withPivot('created_at');
-    }
-
+    /**
+     * Directory visibility is driven purely by presence in the latest HR sync
+     * run — not by interpreting employee_status's name. See architecture-plan.md §2.5.
+     */
     public function scopeVisibleInDirectory(Builder $query): Builder
     {
-        return $query->whereIn('employment_status', array_map(
-            fn (EmploymentStatus $status) => $status->value,
-            EmploymentStatus::visibleInDirectory(),
-        ));
+        return $query->where('is_active', true);
     }
 
     public function scopeSearch(Builder $query, string $term): Builder
@@ -113,7 +103,6 @@ class Employee extends Model implements Auditable, HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('photo')->singleFile();
-        $this->addMediaCollection('cover_banner')->singleFile();
     }
 
     public function registerMediaConversions(?Media $media = null): void

@@ -6,15 +6,16 @@ use App\Livewire\Admin\AuditLogs\Index as AdminAuditLogs;
 use App\Livewire\Admin\Settings as AdminSettings;
 use App\Livewire\Admin\Sync as AdminSync;
 use App\Models\Company;
-use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Employee;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\HrSync\DTOs\SyncPreviewResult;
 use Database\Seeders\CompanySeeder;
 use Database\Seeders\DepartmentSeeder;
 use Database\Seeders\DesignationSeeder;
 use Database\Seeders\EmployeeSeeder;
+use Database\Seeders\EmployeeStatusSeeder;
 use Database\Seeders\OfficeLocationSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -37,18 +38,50 @@ class AdminSyncSettingsAuditTest extends TestCase
             DesignationSeeder::class,
             DepartmentSeeder::class,
             OfficeLocationSeeder::class,
+            EmployeeStatusSeeder::class,
             EmployeeSeeder::class,
         ]);
 
-        $employee = Employee::where('employee_id', 'EMP-00034')->firstOrFail();
-        $this->admin = User::factory()->create(['employee_id' => $employee->id]);
+        $this->admin = User::factory()->create();
         $this->admin->assignRole('Administrator');
+    }
+
+    public function test_admin_can_generate_a_preview_that_writes_nothing(): void
+    {
+        $this->actingAs($this->admin);
+        $this->get('/admin/sync')->assertOk();
+
+        $employeeCountBefore = Employee::count();
+        $companyCountBefore = Company::count();
+
+        // FakeHrSource always injects a synthetic new hire and one promotion (see
+        // its docblock), so the preview is never empty — but none of it should persist.
+        Livewire::test(AdminSync::class)
+            ->call('generatePreview')
+            ->assertSet('preview', fn (?SyncPreviewResult $preview) => $preview !== null && count($preview->newEmployees) === 1);
+
+        $this->assertSame($employeeCountBefore, Employee::count(), 'preview must never write to the database');
+        $this->assertSame($companyCountBefore, Company::count(), 'preview must never auto-create lookup rows either');
+        $this->assertDatabaseCount('api_sync_logs', 0);
+    }
+
+    public function test_confirming_first_sync_runs_it_and_sets_the_completion_flag(): void
+    {
+        $this->actingAs($this->admin);
+        $this->assertNull(Setting::get('hr_first_sync_completed_at'));
+
+        Livewire::test(AdminSync::class)
+            ->call('generatePreview')
+            ->call('confirmFirstSync')
+            ->assertSet('flash', 'Sync complete — everything is up to date.');
+
+        $this->assertDatabaseCount('api_sync_logs', 1);
+        $this->assertNotNull(Setting::get('hr_first_sync_completed_at'));
     }
 
     public function test_admin_can_run_sync_and_see_history(): void
     {
         $this->actingAs($this->admin);
-        $this->get('/admin/sync')->assertOk();
 
         Livewire::test(AdminSync::class)
             ->call('runSync')
@@ -59,12 +92,11 @@ class AdminSyncSettingsAuditTest extends TestCase
 
     public function test_sync_flags_new_designation_names_and_admin_can_merge_a_duplicate(): void
     {
-        // Simulate what HrSyncService creates when it sees a designation name it hasn't seen before.
+        // Simulate what HrSyncService creates when it sees a designation identity it hasn't seen before.
         $company = Company::where('hr_ref_id', 102)->firstOrFail();
         $duplicate = Designation::create([
             'company_id' => $company->id,
             'name' => 'Sr. Software Engineer', // near-duplicate of a real seeded name, needs merging
-            'hierarchy_level' => 1,
             'is_active' => true,
             'needs_review' => true,
         ]);

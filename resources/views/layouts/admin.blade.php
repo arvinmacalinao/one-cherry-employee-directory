@@ -55,11 +55,14 @@
                 <a href="{{ route('admin.offices.index') }}" class="nav-item {{ request()->routeIs('admin.offices.*') ? 'nav-item-active' : '' }}">
                     <i class="fa-solid fa-location-dot w-4.5 text-center"></i> Office Locations
                 </a>
+                <a href="{{ route('admin.announcements.index') }}" class="nav-item {{ request()->routeIs('admin.announcements.*') ? 'nav-item-active' : '' }}">
+                    <i class="fa-solid fa-bullhorn w-4.5 text-center"></i> Announcements
+                </a>
 
                 <div class="my-2.5 h-px bg-line"></div>
 
                 <a href="{{ route('admin.sync') }}" class="nav-item {{ request()->routeIs('admin.sync') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-database w-4.5 text-center"></i> API Sync
+                    <i class="fa-solid fa-database w-4.5 text-center"></i> HR Synchronization
                     @if ($unmappedCount ?? 0)
                         <span class="ml-auto flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-warning px-1 text-[10px] font-bold text-white">{{ $unmappedCount }}</span>
                     @endif
@@ -73,8 +76,8 @@
             </nav>
 
             <div class="flex flex-col gap-2 border-t border-line pt-2.5">
-                <a href="{{ route('dashboard') }}" class="nav-item">
-                    <i class="fa-solid fa-arrow-left w-4.5 text-center"></i> Exit to Employee View
+                <a href="{{ route('home') }}" class="nav-item">
+                    <i class="fa-solid fa-arrow-left w-4.5 text-center"></i> Exit to Directory
                 </a>
                 <button
                     type="button"

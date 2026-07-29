@@ -16,7 +16,6 @@
                 <tr class="border-b border-line bg-surface text-left text-[10.5px] font-bold tracking-wide text-ink-tertiary uppercase">
                     <th class="px-4 py-3">Designation</th>
                     <th class="px-4 py-3">Company</th>
-                    <th class="px-4 py-3">Hierarchy Level</th>
                     <th class="px-4 py-3">Employees</th>
                     <th class="px-4 py-3">Status</th>
                     <th class="px-4 py-3"></th>
@@ -30,7 +29,6 @@
                             <p class="text-xs text-ink-tertiary">{{ $designation->hr_ref_id ? "d_id: {$designation->hr_ref_id}" : 'Directory-managed' }}</p>
                         </td>
                         <td class="px-4 py-3 text-ink-secondary">{{ $designation->company->name }}</td>
-                        <td class="px-4 py-3">Level {{ $designation->hierarchy_level }}</td>
                         <td class="px-4 py-3">{{ $designation->employees_count }}</td>
                         <td class="px-4 py-3"><span class="badge {{ $designation->is_active ? 'badge-active' : 'badge-inactive' }}">{{ $designation->is_active ? 'Active' : 'Inactive' }}</span></td>
                         <td class="px-4 py-3 text-right">
@@ -38,7 +36,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="px-4 py-10 text-center text-ink-secondary">No designations match.</td></tr>
+                    <tr><td colspan="5" class="px-4 py-10 text-center text-ink-secondary">No designations match.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -64,13 +62,6 @@
                             <option value="{{ $company->id }}">{{ $company->name }}</option>
                         @endforeach
                     </select>
-                </x-admin.field>
-                <x-admin.field label="Hierarchy Level">
-                    <input type="number" min="1" max="6" wire:model="form.hierarchy_level" class="input">
-                    <p class="text-[11px] text-ink-tertiary">Used for org-chart grouping — separate from HR's internal job_level.</p>
-                </x-admin.field>
-                <x-admin.field label="Description">
-                    <textarea wire:model="form.description" rows="3" placeholder="Typical scope and seniority for this role…" class="input"></textarea>
                 </x-admin.field>
                 <x-admin.field label="Active">
                     <label class="flex items-center gap-2.5">

@@ -16,32 +16,19 @@ use Throwable;
  *   GET {HR_SYNC_API_URL}{endpoint}   (default endpoint: /api/employees)
  *   Auth: Sanctum bearer token (HR_SYNC_API_KEY) via the Authorization header.
  *   Response: a plain JSON array (NOT a paginated resource) — the endpoint
- *   already filters server-side to `where('status', 'active')`, so:
- *     - Every record this returns has status = "active". Resigned/inactive
- *       employees simply disappear from the feed; HrSyncService's existing
- *       "missing from feed -> mark inactive" pass is what actually detects
- *       departures — there is no explicit resignation signal to read here.
- *     - Employees on leave, if HR tracks that as a *different* status value,
- *       would also disappear from this feed and get marked inactive by the
- *       same pass. This is a known gap — flag if HR's `status` column has a
- *       distinct "on_leave" value that should stay visible in the directory.
- *   Record shape: { employee_id, name, email, company, designation, status }
- *     - `employee_id` here is the human-readable code (what the rest of this
- *       app calls employee_code / employees.employee_id).
- *     - `name` is a single string, naively split on the first space into
- *       first/last (see splitName()) — multi-word first names, suffixes, or
- *       "Last, First" formats will not split correctly. Revisit if HR's
- *       naming convention makes this a real problem in practice.
- *     - `company` / `designation` are resolved display names. HR can also send
- *       `company_id` / `designation_id` — their own stable numeric FK values —
- *       alongside the names; when present, HrSyncService matches on those IDs
- *       (via companies.hr_ref_id / designations.hr_ref_id) instead of by name,
- *       so a rename on either side no longer produces a duplicate. Both fields
- *       are optional here so this keeps working against an HR response that
- *       hasn't added them yet — falls back to name-matching in that case.
- *     - No department, dates, job level, or supervisor are exposed by this
- *       endpoint at all — those fields are Admin-managed in OCED instead of
- *       HR-synced. See architecture-plan.md §2.4 for the full rationale.
+ *   already filters server-side to `where('u_active', 1)` (HR's account-active
+ *   flag, not the same thing as employment_status — see architecture-plan.md §2.5).
+ *
+ *   Record shape:
+ *     employee_id, first_name, middle_name, last_name, name, username, email,
+ *     company: {id, name}, department: {id, name}, designation: {id, name},
+ *     supervisor: {id, employee_id, name},
+ *     employment_status: {id, name}, job_level: {id, name} (received, unused),
+ *     date_hired, date_regularized, date_separated, created_at, updated_at.
+ *
+ *   Department, Supervisor, and the three employment dates are now genuinely
+ *   HR-owned and sync-controlled — this endpoint replaced an earlier, much
+ *   smaller contract that didn't expose any of them. See architecture-plan.md §2.5.
  *
  * Bound in place of FakeHrSource when HR_SYNC_SOURCE=rest_api (see AppServiceProvider).
  */
@@ -86,37 +73,40 @@ class HrRestApiSource implements HrSourceInterface
     {
         $employeeCode = $record['employee_id'] ?? null;
         $email = $record['email'] ?? null;
-        $company = $record['company'] ?? null;
+        $firstName = $record['first_name'] ?? null;
+        $lastName = $record['last_name'] ?? null;
 
-        if (! $employeeCode || ! $email || ! $company) {
-            Log::warning('HR API: skipping unusable employee record (missing employee_id, email, or company)', ['record' => $record]);
+        if (! $employeeCode || ! $email || ! $firstName || ! $lastName) {
+            Log::warning('HR API: skipping unusable employee record (missing employee_id, email, first_name, or last_name)', ['record' => $record]);
 
             return null;
         }
 
-        [$firstName, $lastName] = $this->splitName((string) ($record['name'] ?? ''));
+        $company = $record['company'] ?? [];
+        $department = $record['department'] ?? [];
+        $designation = $record['designation'] ?? [];
+        $supervisor = $record['supervisor'] ?? [];
+        $status = $record['employment_status'] ?? [];
 
         return new HrEmployeeData(
             employeeCode: (string) $employeeCode,
-            firstName: $firstName,
-            lastName: $lastName,
+            firstName: (string) $firstName,
+            middleName: $record['middle_name'] ?? null,
+            lastName: (string) $lastName,
+            username: $record['username'] ?? null,
             email: (string) $email,
-            companyName: (string) $company,
-            companyId: isset($record['company_id']) ? (int) $record['company_id'] : null,
-            designationName: $record['designation'] ?? null,
-            designationId: isset($record['designation_id']) ? (int) $record['designation_id'] : null,
-            employmentStatusCode: (string) ($record['status'] ?? 'active'),
+            companyId: isset($company['id']) ? (int) $company['id'] : null,
+            companyName: $company['name'] ?? null,
+            departmentId: isset($department['id']) ? (int) $department['id'] : null,
+            departmentName: $department['name'] ?? null,
+            designationId: isset($designation['id']) ? (int) $designation['id'] : null,
+            designationName: $designation['name'] ?? null,
+            supervisorEmployeeCode: $supervisor['employee_id'] ?? null,
+            employmentStatusId: isset($status['id']) ? (int) $status['id'] : null,
+            employmentStatusName: $status['name'] ?? null,
+            dateHired: $record['date_hired'] ?? null,
+            dateRegularized: $record['date_regularized'] ?? null,
+            dateSeparated: $record['date_separated'] ?? null,
         );
-    }
-
-    /**
-     * @return array{0: string, 1: string} [firstName, lastName]
-     */
-    protected function splitName(string $name): array
-    {
-        $name = trim($name);
-        $parts = explode(' ', $name, 2);
-
-        return [$parts[0] ?: $name, $parts[1] ?? ''];
     }
 }

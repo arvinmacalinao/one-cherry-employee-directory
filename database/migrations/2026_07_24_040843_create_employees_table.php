@@ -11,31 +11,33 @@ return new class extends Migration
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
 
-            // HR-controlled — overwritten on every sync. See HrSyncService.
+            // HR-controlled — overwritten on every sync. See HrSyncService / architecture-plan.md §2.5.
             $table->string('employee_id')->unique()->comment("HR's employee_code, immutable sync key");
             $table->string('first_name');
             $table->string('middle_name')->nullable();
             $table->string('last_name');
+            $table->string('username')->nullable()->comment('HR-owned, captured for a future SSO adapter — unused in v1 UI');
             $table->string('email')->unique()->comment('Corporate email');
-            $table->foreignId('company_id')->constrained()->restrictOnDelete();
-            $table->foreignId('department_id')->constrained()->restrictOnDelete();
-            $table->foreignId('designation_id')->constrained()->restrictOnDelete();
+            $table->foreignId('company_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('department_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('designation_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('immediate_supervisor_id')->nullable()->constrained('employees')->nullOnDelete();
-            $table->enum('employment_status', ['active', 'on_leave', 'resigned', 'inactive'])->default('active');
+            $table->foreignId('employee_status_id')->nullable()->constrained('employee_statuses')->nullOnDelete()
+                ->comment('HR-owned, synced verbatim — not an OCED enum, see architecture-plan.md §2.5');
+            $table->boolean('is_active')->default(true)
+                ->comment('HR-owned — true iff present in the latest sync run; the sole directory-visibility signal');
             $table->date('date_hired')->nullable();
             $table->date('date_regularized')->nullable();
             $table->date('date_separated')->nullable();
-            $table->unsignedTinyInteger('job_level')->nullable()->comment('Stored only — not surfaced in v1 UI');
 
-            // Directory-side bookkeeping.
-            $table->enum('source', ['hr_sync', 'manual'])->default('hr_sync');
             $table->timestamp('last_synced_at')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
 
             $table->index(['company_id', 'department_id']);
-            $table->index('employment_status');
+            $table->index('is_active');
+            $table->index('immediate_supervisor_id');
             $table->fullText(['first_name', 'last_name']);
         });
     }

@@ -3,11 +3,14 @@
         <a href="{{ route('companies.index') }}" wire:navigate class="mb-3 inline-flex items-center gap-1.5 text-xs font-semibold text-ink-secondary hover:text-ink">
             <i class="fa-solid fa-arrow-left text-[10px]"></i> All Companies
         </a>
-        <div class="h-24 rounded-panel" style="background: linear-gradient(135deg, {{ $company->color_theme ?? '#790002' }}, #1c1c1e)"></div>
-        <div class="-mt-9 flex flex-wrap items-end gap-4 px-1">
-            <span class="flex h-18 w-18 flex-shrink-0 items-center justify-center rounded-2xl border-4 border-bg font-display text-lg font-bold text-white shadow-raised" style="background: {{ $company->color_theme ?? '#790002' }}">
-                {{ collect(explode(' ', $company->name))->map(fn ($w) => $w[0])->take(3)->implode('') }}
-            </span>
+        <div class="flex flex-wrap items-end gap-4 px-1">
+            @if ($company->getFirstMediaUrl('logo', 'thumb'))
+                <img src="{{ $company->getFirstMediaUrl('logo', 'thumb') }}" alt="{{ $company->name }}" class="h-18 w-18 flex-shrink-0 rounded-2xl border border-line object-cover shadow-raised">
+            @else
+                <span class="flex h-18 w-18 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-tint font-display text-lg font-bold text-brand shadow-raised">
+                    {{ collect(explode(' ', $company->name))->map(fn ($w) => $w[0])->take(3)->implode('') }}
+                </span>
+            @endif
             <div class="flex-1 pb-1">
                 <h2 class="font-display text-xl">{{ $company->name }}</h2>
                 <p class="text-sm text-ink-secondary">{{ $employeeCount }} employees · {{ $departmentCount }} departments</p>
@@ -16,7 +19,7 @@
     </div>
 
     <div class="flex gap-1 border-b border-line">
-        @foreach (['overview' => 'Overview', 'departments' => 'Departments', 'employees' => 'Employees', 'orgchart' => 'Org Chart'] as $key => $label)
+        @foreach (['overview' => 'Overview', 'departments' => 'Departments', 'employees' => 'Employees'] as $key => $label)
             <button
                 wire:click="setTab('{{ $key }}')"
                 class="relative top-px border-b-2 px-1 py-2.5 mr-5 text-sm font-semibold transition-colors duration-200 {{ $tab === $key ? 'border-brand text-brand' : 'border-transparent text-ink-secondary hover:text-ink' }}"
@@ -28,9 +31,6 @@
 
     @if ($tab === 'overview')
         <div class="card flex flex-col gap-5 p-6">
-            @if ($company->description)
-                <p class="max-w-[65ch] text-sm leading-relaxed text-ink-secondary">{{ $company->description }}</p>
-            @endif
             <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div><dt class="text-xs text-ink-tertiary">Headquarters</dt><dd class="text-sm font-medium">{{ $company->address ?: '—' }}</dd></div>
                 <div><dt class="text-xs text-ink-tertiary">Phone</dt><dd class="text-sm font-medium">{{ $company->phone ?: '—' }}</dd></div>
@@ -45,7 +45,6 @@
             @forelse ($departments as $department)
                 <div class="card flex flex-col gap-3 p-5">
                     <p class="font-display text-sm font-bold">{{ $department->name }}</p>
-                    <p class="text-xs text-ink-secondary">Head: {{ $department->head?->full_name ?? '—' }}</p>
                     <a href="{{ route('directory.index') }}?department={{ $department->id }}" wire:navigate class="btn-ghost mt-1 !px-0 text-xs">
                         View Members <i class="fa-solid fa-chevron-right text-[10px]"></i>
                     </a>
@@ -65,7 +64,7 @@
                     </span>
                     <span class="min-w-0">
                         <span class="block truncate text-sm font-semibold">{{ $person->full_name }}</span>
-                        <span class="block truncate text-xs text-ink-secondary">{{ $person->designation->name }}</span>
+                        <span class="block truncate text-xs text-ink-secondary">{{ $person->designation?->name }}</span>
                     </span>
                 </a>
             @empty
@@ -73,15 +72,5 @@
             @endforelse
         </div>
         <div>{{ $employees->links() }}</div>
-    @endif
-
-    @if ($tab === 'orgchart')
-        <div class="card p-6">
-            @forelse ($orgRoots as $root)
-                @include('livewire.partials.org-node', ['employee' => $root, 'reportsMap' => $reportsMap])
-            @empty
-                <p class="py-8 text-center text-sm text-ink-secondary">No org chart data available for this company yet.</p>
-            @endforelse
-        </div>
     @endif
 </div>

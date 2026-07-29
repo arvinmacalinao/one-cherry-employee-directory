@@ -15,7 +15,7 @@ class Index extends Component
     public ?int $editingId = null;
 
     public array $form = [
-        'name' => '', 'company_id' => '', 'hierarchy_level' => 1, 'description' => '', 'is_active' => true,
+        'name' => '', 'company_id' => '', 'is_active' => true,
     ];
 
     public ?int $lockedHrRef = null;
@@ -27,8 +27,6 @@ class Index extends Component
         return [
             'form.name' => ['required', 'string', 'max:255'],
             'form.company_id' => ['required', 'exists:companies,id'],
-            'form.hierarchy_level' => ['required', 'integer', 'min:1', 'max:6'],
-            'form.description' => ['nullable', 'string'],
         ];
     }
 
@@ -48,8 +46,6 @@ class Index extends Component
         $this->form = [
             'name' => $designation->name,
             'company_id' => (string) $designation->company_id,
-            'hierarchy_level' => $designation->hierarchy_level,
-            'description' => $designation->description,
             'is_active' => $designation->is_active,
         ];
         $this->showForm = true;
@@ -88,7 +84,7 @@ class Index extends Component
         $this->editingId = null;
         $this->lockedHrRef = null;
         $this->form = [
-            'name' => '', 'company_id' => '', 'hierarchy_level' => 1, 'description' => '', 'is_active' => true,
+            'name' => '', 'company_id' => '', 'is_active' => true,
         ];
         $this->resetErrorBag();
     }

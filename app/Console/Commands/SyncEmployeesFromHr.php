@@ -21,8 +21,8 @@ class SyncEmployeesFromHr extends Command
         );
 
         $this->table(
-            ['Status', 'New Hires', 'Promotions', 'Deactivated', 'Errors'],
-            [[$log->status->value, $log->records_imported, $log->records_transferred, $log->records_deactivated, count($log->errors ?? [])]],
+            ['Status', 'New Hires', 'Promotions', 'Status Changes', 'Deactivated', 'Errors'],
+            [[$log->status->value, $log->records_imported, $log->records_promoted, $log->records_status_changed, $log->records_deactivated, count($log->errors ?? [])]],
         );
 
         foreach ($log->errors ?? [] as $error) {

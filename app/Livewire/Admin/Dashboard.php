@@ -44,6 +44,7 @@ class Dashboard extends Component
                 ['route' => 'admin.companies.index', 'icon' => 'fa-building', 'label' => 'Companies', 'count' => $companies->count()],
                 ['route' => 'admin.departments.index', 'icon' => 'fa-sitemap', 'label' => 'Departments', 'count' => $departments->count()],
                 ['route' => 'admin.designations.index', 'icon' => 'fa-award', 'label' => 'Designations', 'count' => Designation::active()->count()],
+                ['route' => 'admin.announcements.index', 'icon' => 'fa-bullhorn', 'label' => 'Announcements', 'count' => \App\Models\Announcement::count()],
             ],
         ])->layout('layouts.admin', ['header' => 'Admin Dashboard']);
     }

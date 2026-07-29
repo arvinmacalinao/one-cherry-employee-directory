@@ -5,19 +5,26 @@ namespace App\Livewire\Admin\Companies;
 use App\Models\Company;
 use App\Repositories\Contracts\CompanyRepositoryInterface;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class Index extends Component
 {
+    use WithFileUploads;
+
     public string $search = '';
 
     public bool $showForm = false;
 
     public ?int $editingId = null;
 
+    public ?Company $editingCompany = null;
+
     public array $form = [
-        'name' => '', 'description' => '', 'address' => '', 'phone' => '',
-        'email' => '', 'website' => '', 'color_theme' => '#790002', 'is_active' => true,
+        'name' => '', 'address' => '', 'phone' => '',
+        'email' => '', 'website' => '', 'is_active' => true,
     ];
+
+    public $logo = null;
 
     public ?int $lockedHrRef = null;
 
@@ -26,13 +33,12 @@ class Index extends Component
     protected function rules(): array
     {
         return [
+            'logo' => ['nullable', 'image', 'max:2048'],
             'form.name' => ['required', 'string', 'max:255'],
-            'form.description' => ['nullable', 'string'],
             'form.address' => ['nullable', 'string', 'max:255'],
             'form.phone' => ['nullable', 'string', 'max:30'],
             'form.email' => ['nullable', 'email', 'max:255'],
             'form.website' => ['nullable', 'string', 'max:255'],
-            'form.color_theme' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
         ];
     }
 
@@ -48,15 +54,14 @@ class Index extends Component
         abort_if(! $company, 404);
 
         $this->editingId = $company->id;
+        $this->editingCompany = $company;
         $this->lockedHrRef = $company->hr_ref_id;
         $this->form = [
             'name' => $company->name,
-            'description' => $company->description,
             'address' => $company->address,
             'phone' => $company->phone,
             'email' => $company->email,
             'website' => $company->website,
-            'color_theme' => $company->color_theme ?? '#790002',
             'is_active' => $company->is_active,
         ];
         $this->showForm = true;
@@ -72,10 +77,8 @@ class Index extends Component
     {
         $validated = $this->validate()['form'];
 
-        // Identity (name) is HR-controlled once linked — never overwrite it from this form.
-        // Note: HR-synced companies are now matched by name (see HrSyncService), so renaming
-        // one here will cause the next sync to recreate it under HR's original name — this
-        // form intentionally still lets it happen for records not linked to a numeric hr_ref_id.
+        // Identity (name) is HR-owned once linked to a numeric hr_ref_id — never overwrite it
+        // from this form. See architecture-plan.md §2.5, §7.
         if ($this->lockedHrRef) {
             unset($validated['name']);
         }
@@ -84,25 +87,33 @@ class Index extends Component
         $validated['needs_review'] = false;
 
         if ($this->editingId) {
-            $companies->update($companies->find($this->editingId), $validated);
-            $this->flash = 'Company updated';
+            $company = $companies->find($this->editingId);
+            $companies->update($company, $validated);
         } else {
             $validated['slug'] = \Illuminate\Support\Str::slug($validated['name']).'-'.\Illuminate\Support\Str::random(4);
-            $companies->create($validated);
-            $this->flash = 'Company created';
+            $company = $companies->create($validated);
         }
 
+        if ($this->logo) {
+            $company->addMedia($this->logo->getRealPath())
+                ->usingFileName($this->logo->getClientOriginalName())
+                ->toMediaCollection('logo');
+        }
+
+        $this->flash = $this->editingId ? 'Company updated' : 'Company created';
         $this->closeForm();
     }
 
     protected function resetForm(): void
     {
         $this->editingId = null;
+        $this->editingCompany = null;
         $this->lockedHrRef = null;
         $this->form = [
-            'name' => '', 'description' => '', 'address' => '', 'phone' => '',
-            'email' => '', 'website' => '', 'color_theme' => '#790002', 'is_active' => true,
+            'name' => '', 'address' => '', 'phone' => '',
+            'email' => '', 'website' => '', 'is_active' => true,
         ];
+        $this->logo = null;
         $this->resetErrorBag();
     }
 

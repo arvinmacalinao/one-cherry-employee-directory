@@ -12,7 +12,6 @@ class DepartmentSeeder extends Seeder
     {
         $companiesByHrRef = Company::pluck('id', 'hr_ref_id');
 
-        // 'head' is resolved to department_head_id by EmployeeSeeder, once employees exist.
         $departments = [
             ['hr_ref_id' => 201, 'name' => 'Product Design', 'company' => 102],
             ['hr_ref_id' => 202, 'name' => 'Engineering', 'company' => 102],

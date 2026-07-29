@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Admin\Announcements\Index as AdminAnnouncementsIndex;
 use App\Livewire\Admin\AuditLogs\Index as AdminAuditIndex;
 use App\Livewire\Admin\Companies\Index as AdminCompaniesIndex;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
@@ -12,13 +13,24 @@ use App\Livewire\Admin\Sync as AdminSync;
 use App\Livewire\Auth\Login;
 use App\Livewire\Companies\Index as CompaniesIndex;
 use App\Livewire\Companies\Show as CompaniesShow;
-use App\Livewire\Dashboard;
 use App\Livewire\Departments\Index as DepartmentsIndex;
 use App\Livewire\Directory\Index as DirectoryIndex;
 use App\Livewire\EmployeeProfile;
-use App\Livewire\Favorites\Index as FavoritesIndex;
+use App\Livewire\Home;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+
+// The Employee Directory is an internal, network-restricted tool — there is no
+// employee account of any kind, so nothing under here requires authentication.
+// Only Administrators log in, and only to reach /admin. See architecture-plan.md §2.4.
+Route::get('/', Home::class)->name('home');
+
+Route::get('/directory', DirectoryIndex::class)->name('directory.index');
+Route::get('/directory/{employee}', EmployeeProfile::class)->name('directory.show');
+
+Route::get('/companies', CompaniesIndex::class)->name('companies.index');
+Route::get('/companies/{company}', CompaniesShow::class)->name('companies.show');
+Route::get('/departments', DepartmentsIndex::class)->name('departments.index');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', Login::class)->name('login');
@@ -31,22 +43,6 @@ Route::post('/logout', function () {
 
     return redirect()->route('login');
 })->middleware('auth')->name('logout');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/', Dashboard::class)->name('dashboard');
-
-    Route::get('/directory', DirectoryIndex::class)->name('directory.index');
-    Route::get('/directory/{employee}', EmployeeProfile::class)->name('directory.show');
-
-    Route::get('/companies', CompaniesIndex::class)->name('companies.index');
-    Route::get('/companies/{company}', CompaniesShow::class)->name('companies.show');
-    Route::get('/departments', DepartmentsIndex::class)->name('departments.index');
-    Route::get('/favorites', FavoritesIndex::class)->name('favorites.index');
-
-    Route::get('/profile', function () {
-        return redirect()->route('directory.show', auth()->user()->employee_id);
-    })->name('profile.me');
-});
 
 Route::middleware(['auth', 'can:manage employees'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', AdminDashboard::class)->name('dashboard');
@@ -67,6 +63,10 @@ Route::middleware(['auth', 'can:manage designations'])->prefix('admin')->name('a
 
 Route::middleware(['auth', 'can:manage office locations'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/office-locations', AdminOfficesIndex::class)->name('offices.index');
+});
+
+Route::middleware(['auth', 'can:manage announcements'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/announcements', AdminAnnouncementsIndex::class)->name('announcements.index');
 });
 
 Route::middleware(['auth', 'can:run hr sync'])->prefix('admin')->name('admin.')->group(function () {
