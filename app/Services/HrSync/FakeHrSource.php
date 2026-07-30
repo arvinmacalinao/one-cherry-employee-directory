@@ -47,6 +47,7 @@ class FakeHrSource implements HrSourceInterface
 
         return new HrEmployeeData(
             employeeCode: $employee->employee_id,
+            isActiveInHr: $employee->is_active,
             firstName: $employee->first_name,
             middleName: $employee->middle_name,
             lastName: $employee->last_name,
@@ -74,6 +75,7 @@ class FakeHrSource implements HrSourceInterface
 
         return new HrEmployeeData(
             employeeCode: "SYNC-{$suffix}",
+            isActiveInHr: true,
             firstName: 'New',
             middleName: null,
             lastName: 'Hire',

@@ -127,11 +127,13 @@ Accept: application/json
 
 ```php
 // HR-side controller, for reference — App\Http\Controllers\Api\EmployeeController@index
+// As of 2026-07-30: no longer filters to u_active=1 — sends every account, active and
+// inactive alike, and lets OCED decide what to hide. See the u_active discussion below.
 User::with(['company', 'department', 'designation', 'status', 'supervisor'])
-    ->where('u_active', 1)
     ->get()
     ->map(fn ($user) => [
         'employee_id' => $user->employee_code,
+        'u_active' => (bool) $user->u_active,
         'first_name' => $user->first_name, 'middle_name' => $user->middle_name, 'last_name' => $user->last_name,
         'name' => $user->full_name, 'username' => $user->username, 'email' => $user->email,
         'company' => ['id' => $user->c_id, 'name' => optional($user->company)->name],
@@ -159,10 +161,12 @@ User::with(['company', 'department', 'designation', 'status', 'supervisor'])
 | Job level | not returned | `{id, name}` | Received but **intentionally not stored or surfaced** — job level isn't part of the field set required by the current business spec; revisit only if a future requirement needs it. |
 | Username | not returned | returned | Received, stored (`employees.username`), not currently displayed anywhere. Kept for a future AD/Graph/SSO identity-matching adapter — no cost to store it now, real value later. |
 
-**The endpoint still pre-filters to `u_active = 1`.** This is HR's *account*-active flag, not necessarily the same thing as `employment_status`. Practically this means:
+**The endpoint sends everyone, active and inactive, carrying its own `u_active` flag per record (changed 2026-07-30).** Originally the endpoint pre-filtered to `u_active = 1` server-side, so an off-boarded employee simply vanished from the feed and OCED had to infer deactivation from absence alone. That had a real, recurring cost: a supervisor whose own HR account had been deactivated disappeared from the feed too, so every one of their reports failed to resolve `immediate_supervisor_id` and logged an unresolved-supervisor warning on every sync, forever (confirmed against real cases like BPJ0015). Sending inactive accounts too — just flagged, not omitted — lets OCED store and match against them while still hiding them from the public directory. `u_active` is HR's *account*-active flag, not necessarily the same thing as `employment_status`. Practically this means:
 
-- An employee on leave, with a real `employment_status.name` of "On Leave," can still appear in the feed (account active) — this is what finally makes `on_leave` a genuinely HR-driven status, closing the gap the original plan flagged as unresolvable.
-- An employee HR has fully off-boarded (account deactivated, `u_active = 0`) disappears from the feed **entirely** — for this case, OCED still needs the "absent from feed → mark `inactive`" fallback from the original design; it is not superseded, just demoted to a fallback for the one case per-record status can't cover (the record isn't in the payload to read a status *from*).
+- An employee on leave, with a real `employment_status.name` of "On Leave," can still appear in the feed with `u_active = 1` — this is what makes `employment_status` a genuinely HR-driven, independent signal from directory visibility.
+- An employee HR has off-boarded now still appears in the feed, with `u_active = 0` — OCED imports/updates the row as usual but sets `employees.is_active = false`, hiding them from the public directory while keeping them resolvable as someone else's supervisor.
+- The field is read defensively: if a given HR response is ever missing `u_active` on a record (e.g. an older cached response, or a future contract change reverting this), `HrRestApiSource` defaults that record to active rather than failing closed.
+- The original "absent from feed → mark inactive" mechanism is **not removed** — it remains a fallback for the one case a per-record flag can't cover: a record dropped from the feed entirely (hard delete on HR's side, not just deactivation). See `deactivateMissingEmployees()`.
 
 **Email is HR-owned only when HR actually sends one — in practice it rarely does.** Most real employee records come through with `email: null` (confirmed against production data, not a hypothetical). Rather than treat this as a permanent gap, `employees.email` is fallback-editable: an Admin can fill it in from `/admin/employees`, and `HrSyncService` only ever overwrites it when HR's payload has a non-null value — a null from HR never clobbers whatever's already on the row, whether that's a prior HR value or an Admin's manual entry. The moment HR does provide a real email for that employee, it wins again on the next sync; the Admin entry was always a bridge, not a hand-off of ownership.
 
@@ -173,7 +177,7 @@ User::with(['company', 'department', 'designation', 'status', 'supervisor'])
 - Confirmed real values from the live HR API: `es_id` 1=Probationary, 2=Fixed-term, 3=Regular, 4=Project-based. There is no "On Leave" concept in HR's data at all.
 - This means the status badge on an Employee Profile shows HR's actual label verbatim, not a translated OCED value. Presentation-layer color-coding for the badge (e.g. green-ish for statuses that sound "working," gray for ones that sound "departed") is allowed as a purely cosmetic, best-effort lookup with a neutral fallback color for anything unrecognized — but it must never affect directory visibility or any business logic, only pixel color. Directory visibility is governed by a completely separate mechanism (`employees.is_active`, below), not by interpreting the status name.
 - **Incident, fixed 2026-07-30:** `resolveEmployeeStatus()` originally only set the name when *creating* a new `employee_statuses` row — an ID match just returned whatever name was already stored, never checking it against HR's current value. `EmployeeStatusSeeder`'s placeholder guess (`es_id=3 → "On Leave"`) collided with HR's real `es_id=3` (which actually means "Regular"), and because of this bug the wrong guessed label stuck permanently — 573 real "Regular" employees showed as "On Leave" in the live directory. Fixed by having an ID match always sync the name too (there's no Admin-editable branding surface for a status the way there is for a company's logo, so nothing should ever cause the stored name to intentionally diverge from HR's). The live data was corrected directly (a name update, not a reset) the same day.
-- **Directory visibility no longer derives from employment status at all.** Since OCED can't (and per your instruction, shouldn't) know which of HR's arbitrary status labels mean "still here" vs. "gone," visibility is driven purely by **presence in the HR feed**: `employees.is_active` (boolean) is set `true` for every employee present in a sync run and `false` for every employee who was previously `active`/`on_leave`-visible but is absent from the current run. This was already documented as the sync's safety-net fallback in the original plan (§2.4 there) — it's now promoted to the *sole* visibility mechanism, since it's the one signal that doesn't require OCED to interpret HR's status taxonomy.
+- **Directory visibility no longer derives from employment status at all.** Since OCED can't (and per your instruction, shouldn't) know which of HR's arbitrary status labels mean "still here" vs. "gone," visibility is driven by HR's explicit `u_active` flag (§2.5 above): `employees.is_active` is set directly from `u_active` on every synced record — `true`/`false` per record, independent of `employment_status`. The "absent from feed entirely → mark inactive" check still runs afterward as a fallback for records HR stops sending altogether (a hard delete, not a deactivation), since there's no per-record flag to read in that case.
 
 **Department and Designation are organization-wide master data, not per-company records.** Confirmed explicitly: "there should only be one Sales, one IT, one HR, regardless of company." An employee's company comes solely from `employees.company_id`; it was never a property of the department or designation itself. HR reuses department/designation numeric IDs (`ug_id`/`d_id`) across companies precisely *because* it's the same department, not because of an ID-collision quirk to work around — a company Alpha "Sales" employee and a company Beta "Sales" employee both resolve to the same `departments` row. `departments`/`designations` have no `company_id` column at all; `hr_ref_id` and `name` are each globally unique.
 
@@ -198,13 +202,18 @@ HrSyncService::sync()
        upsert employees row keyed on employee_id:
          first_name, middle_name, last_name, username, email,
          company_id, department_id, designation_id, employee_status_id,
-         date_hired, date_regularized, date_separated, is_active = true, last_synced_at
+         date_hired, date_regularized, date_separated, is_active = u_active, last_synced_at
        not found in OCED → also create an empty employee_profiles row [NEW HIRE]
+       was is_active = true, record says u_active = false → log as DEACTIVATION (highest-priority
+         outcome for that record — checked before PROMOTION/STATUS CHANGE below)
        designation_id changed on an existing row → log as PROMOTION (old → new)
        employee_status_id changed on an existing row → log as STATUS CHANGE (old → new)
-  3. Pass 2 — resolve immediate_supervisor_id for every record with a supervisor.employee_id (see above)
-  4. Any employee currently is_active = true in OCED but absent from this run's feed entirely
-       → set is_active = false (the sole directory-visibility signal, see above)
+  3. Pass 2 — resolve immediate_supervisor_id for every record with a supervisor.employee_id, including
+       inactive ones — an inactive supervisor still resolves for their (possibly still-active) reports (see above)
+  4. Fallback only: any employee currently is_active = true in OCED but absent from this run's feed
+       entirely (not just u_active = false, but missing from the payload altogether — a hard delete
+       on HR's side) → set is_active = false. Deactivation is normally driven by step 2's per-record
+       u_active flag; this step only catches records HR stops sending outright.
   5. Write one api_sync_logs row: new-hire / promotion / status-change / deactivation counts + warnings/errors (JSON)
 
 Fields written by sync: first_name, middle_name, last_name, username, email, company_id, department_id,
@@ -228,7 +237,7 @@ Because this cutover reassigns Department for every existing employee and popula
 - **Designation changes** — same, flagged distinctly as it's the PROMOTION log trigger
 - **Supervisor changes** — old supervisor → new supervisor, per affected employee
 - **Employment status changes** — old `employee_statuses.name` → new, per affected employee
-- **Employees that would become inactive** — currently `is_active = true`, absent from this feed
+- **Employees that would become inactive** — currently `is_active = true`, whose record now carries `u_active = false`, or (fallback case) absent from this feed entirely
 
 **Gating the first live sync.** `settings` gains `hr_first_sync_completed_at` (nullable timestamp). While it's `null`:
 
@@ -314,7 +323,7 @@ erDiagram
         bigint designation_id FK "HR-owned, ID-first match"
         bigint immediate_supervisor_id FK "nullable, self — HR-owned, resolved pass 2 (§2.5)"
         bigint employee_status_id FK "HR-owned, synced verbatim from employee_statuses — not an OCED enum (§2.5)"
-        boolean is_active "HR-owned — true iff present in the latest sync run; the sole directory-visibility signal (§2.5)"
+        boolean is_active "HR-owned — set from HR's per-record u_active flag; absence-from-feed is a fallback for hard deletes; the sole directory-visibility signal (§2.5)"
         date date_hired "HR-owned"
         date date_regularized "HR-owned, nullable"
         date date_separated "HR-owned, nullable"

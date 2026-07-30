@@ -43,6 +43,7 @@ class HrRestApiSourceTest extends TestCase
     {
         return array_merge([
             'employee_id' => 'EMP-100',
+            'u_active' => true,
             'first_name' => 'Ramon',
             'middle_name' => null,
             'last_name' => 'Sy',
@@ -454,5 +455,145 @@ class HrRestApiSourceTest extends TestCase
         app(HrSyncService::class)->sync(SyncType::Manual);
 
         $this->assertFalse($employee->fresh()->is_active);
+    }
+
+    public function test_hr_rest_api_source_maps_the_u_active_flag(): void
+    {
+        Http::fake([
+            'hr.example.test/api/employees' => Http::response([
+                $this->record(['employee_id' => 'EMP-990', 'u_active' => false]),
+            ]),
+        ]);
+
+        $dto = $this->source()->fetchEmployees()->first();
+
+        $this->assertFalse($dto->isActiveInHr);
+    }
+
+    public function test_missing_u_active_field_defaults_to_active(): void
+    {
+        // Backward-compat for an HR response from before this flag existed.
+        $record = $this->record(['employee_id' => 'EMP-991']);
+        unset($record['u_active']);
+
+        Http::fake([
+            'hr.example.test/api/employees' => Http::response([$record]),
+        ]);
+
+        $dto = $this->source()->fetchEmployees()->first();
+
+        $this->assertTrue($dto->isActiveInHr);
+    }
+
+    public function test_an_inactive_employee_is_synced_but_hidden_not_omitted(): void
+    {
+        Http::fake([
+            'hr.example.test/api/employees' => Http::response([
+                $this->record(['employee_id' => 'EMP-992', 'u_active' => false]),
+            ]),
+        ]);
+        $this->app->bind(HrSourceInterface::class, fn () => $this->source());
+
+        $log = app(HrSyncService::class)->sync(SyncType::Manual);
+
+        $this->assertSame('success', $log->status->value);
+        $this->assertSame(1, $log->records_imported, 'HR sending an inactive employee is still a real import — it just starts hidden');
+
+        $employee = Employee::where('employee_id', 'EMP-992')->firstOrFail();
+        $this->assertFalse($employee->is_active);
+    }
+
+    public function test_a_flip_to_inactive_is_counted_as_deactivated_not_updated(): void
+    {
+        Http::fakeSequence('hr.example.test/api/employees')
+            ->push([$this->record(['employee_id' => 'EMP-993', 'u_active' => true])])
+            ->push([$this->record(['employee_id' => 'EMP-993', 'u_active' => false])]);
+
+        $this->app->bind(HrSourceInterface::class, fn () => $this->source());
+        app(HrSyncService::class)->sync(SyncType::Manual);
+
+        $log = app(HrSyncService::class)->sync(SyncType::Manual);
+
+        $this->assertSame(1, $log->records_deactivated);
+        $this->assertSame(0, $log->records_updated);
+        $this->assertFalse(Employee::where('employee_id', 'EMP-993')->firstOrFail()->is_active);
+    }
+
+    public function test_a_flip_back_to_active_reactivates_the_employee(): void
+    {
+        Http::fakeSequence('hr.example.test/api/employees')
+            ->push([$this->record(['employee_id' => 'EMP-994', 'u_active' => false])])
+            ->push([$this->record(['employee_id' => 'EMP-994', 'u_active' => true])]);
+
+        $this->app->bind(HrSourceInterface::class, fn () => $this->source());
+        app(HrSyncService::class)->sync(SyncType::Manual);
+        $this->assertFalse(Employee::where('employee_id', 'EMP-994')->firstOrFail()->is_active);
+
+        app(HrSyncService::class)->sync(SyncType::Manual);
+
+        $this->assertTrue(Employee::where('employee_id', 'EMP-994')->firstOrFail()->fresh()->is_active);
+    }
+
+    public function test_supervisor_resolves_even_when_the_supervisors_own_account_is_inactive(): void
+    {
+        // This is the exact real-world scenario that motivated sending inactive
+        // employees at all: a deactivated manager's own account used to be
+        // omitted from the feed entirely, so every one of their reports
+        // permanently logged an unresolved-supervisor warning. Now that HR
+        // sends inactive accounts too (just flagged, not omitted), the
+        // supervisor link resolves normally — it's just hidden from the
+        // public directory, exactly like any other inactive employee.
+        Http::fake([
+            'hr.example.test/api/employees' => Http::response([
+                $this->record([
+                    'employee_id' => 'BPJ0015',
+                    'email' => 'deactivated.manager@onecherry.group',
+                    'first_name' => 'Deactivated',
+                    'last_name' => 'Manager',
+                    'u_active' => false,
+                ]),
+                $this->record([
+                    'employee_id' => 'BPJ0002',
+                    'email' => 'active.report@onecherry.group',
+                    'first_name' => 'Active',
+                    'last_name' => 'Report',
+                    'u_active' => true,
+                    'supervisor' => ['id' => null, 'employee_id' => 'BPJ0015', 'name' => 'Deactivated Manager'],
+                ]),
+            ]),
+        ]);
+
+        $this->app->bind(HrSourceInterface::class, fn () => $this->source());
+
+        $log = app(HrSyncService::class)->sync(SyncType::Manual);
+
+        $supervisorWarnings = array_filter($log->warnings, fn ($w) => str_contains($w, 'Could not resolve supervisor'));
+        $this->assertEmpty($supervisorWarnings, 'the supervisor is present in the feed now, just inactive — no unresolved-supervisor warning should fire');
+
+        $supervisor = Employee::where('employee_id', 'BPJ0015')->firstOrFail();
+        $report = Employee::where('employee_id', 'BPJ0002')->firstOrFail();
+
+        $this->assertFalse($supervisor->is_active, 'the supervisor is hidden from the public directory...');
+        $this->assertSame($supervisor->id, $report->immediate_supervisor_id, '...but the reporting link still resolves correctly');
+    }
+
+    public function test_preview_flags_a_would_be_deactivation_from_the_u_active_flag(): void
+    {
+        // Http::fake() stubs accumulate rather than replace for the same URL —
+        // a response sequence is required to vary the payload across two calls.
+        Http::fakeSequence('hr.example.test/api/employees')
+            ->push([$this->record(['employee_id' => 'EMP-995'])])
+            ->push([$this->record(['employee_id' => 'EMP-995', 'u_active' => false])]);
+
+        $this->app->bind(HrSourceInterface::class, fn () => $this->source());
+        app(HrSyncService::class)->sync(SyncType::Manual);
+
+        $preview = app(HrSyncService::class)->preview();
+
+        $this->assertCount(1, $preview->becomingInactive);
+        $this->assertSame('EMP-995', $preview->becomingInactive[0]['employee_id']);
+
+        // Still hasn't written anything.
+        $this->assertTrue(Employee::where('employee_id', 'EMP-995')->firstOrFail()->is_active);
     }
 }

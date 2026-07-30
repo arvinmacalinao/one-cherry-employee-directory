@@ -15,12 +15,16 @@ use Throwable;
  *
  *   GET {HR_SYNC_API_URL}{endpoint}   (default endpoint: /api/employees)
  *   Auth: Sanctum bearer token (HR_SYNC_API_KEY) via the Authorization header.
- *   Response: a plain JSON array (NOT a paginated resource) — the endpoint
- *   already filters server-side to `where('u_active', 1)` (HR's account-active
- *   flag, not the same thing as employment_status — see architecture-plan.md §2.5).
+ *   Response: a plain JSON array (NOT a paginated resource) — includes inactive
+ *   accounts too (u_active=0), each carrying its own `u_active` flag, which is
+ *   how OCED knows to hide them from the public directory while still storing
+ *   the record (§2.5) — most importantly so a supervisor whose own account has
+ *   been deactivated still resolves correctly for their reports, instead of
+ *   producing an unresolved-supervisor warning forever. `u_active` is HR's
+ *   account-active flag, not the same thing as employment_status.
  *
  *   Record shape:
- *     employee_id, first_name, middle_name, last_name, name, username, email,
+ *     employee_id, u_active, first_name, middle_name, last_name, name, username, email,
  *     company: {id, name}, department: {id, name}, designation: {id, name},
  *     supervisor: {id, employee_id, name},
  *     employment_status: {id, name}, job_level: {id, name} (received, unused),
@@ -107,6 +111,9 @@ class HrRestApiSource implements HrSourceInterface
 
         return new HrEmployeeData(
             employeeCode: (string) $employeeCode,
+            // Defaults to active if the field is absent, so nothing breaks against
+            // an HR response from before this flag existed — see architecture-plan.md §2.5.
+            isActiveInHr: array_key_exists('u_active', $record) ? (bool) $record['u_active'] : true,
             firstName: (string) $firstName,
             middleName: $record['middle_name'] ?? null,
             lastName: (string) $lastName,

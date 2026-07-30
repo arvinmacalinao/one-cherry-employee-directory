@@ -84,7 +84,9 @@ class HrSyncService
                 }
             }
 
-            $counts['deactivated'] = $this->deactivateMissingEmployees($seenCodes);
+            // += because upsertEmployee() may already have counted per-record
+            // deactivations (u_active=0) — this only adds the fallback (hard-delete) cases.
+            $counts['deactivated'] += $this->deactivateMissingEmployees($seenCodes);
 
             $log->update([
                 'completed_at' => now(),
@@ -124,6 +126,7 @@ class HrSyncService
         $designationChanges = [];
         $supervisorChanges = [];
         $statusChanges = [];
+        $becomingInactive = [];
         $seenCodes = [];
 
         $records = $this->source->fetchEmployees();
@@ -150,6 +153,10 @@ class HrSyncService
                 ];
 
                 continue;
+            }
+
+            if ($existing->is_active && ! $data->isActiveInHr) {
+                $becomingInactive[] = ['employee_id' => $data->employeeCode, 'name' => $name];
             }
 
             $changedFields = [];
@@ -186,11 +193,13 @@ class HrSyncService
             }
         }
 
-        $becomingInactive = Employee::visibleInDirectory()
+        // Fallback: employees absent from the feed entirely (e.g. a hard delete in
+        // HR, not just an account deactivation — see deactivateMissingEmployees()).
+        $becomingInactive = [...$becomingInactive, ...Employee::visibleInDirectory()
             ->whereNotIn('employee_id', $seenCodes)
             ->get(['employee_id', 'first_name', 'last_name'])
             ->map(fn (Employee $e) => ['employee_id' => $e->employee_id, 'name' => $e->full_name])
-            ->all();
+            ->all()];
 
         return new SyncPreviewResult(
             newEmployees: $newEmployees,
@@ -205,7 +214,7 @@ class HrSyncService
     }
 
     /**
-     * @return string one of: imported, updated, promoted, status_changed
+     * @return string one of: imported, updated, promoted, status_changed, deactivated
      */
     protected function upsertEmployee(HrEmployeeData $data, array &$warnings): string
     {
@@ -225,7 +234,10 @@ class HrSyncService
             'date_hired' => $data->dateHired,
             'date_regularized' => $data->dateRegularized,
             'date_separated' => $data->dateSeparated,
-            'is_active' => true,
+            // HR's own account-active flag drives visibility directly now — HR sends
+            // inactive employees too rather than omitting them, precisely so a
+            // deactivated supervisor still resolves for their reports. See §2.5.
+            'is_active' => $data->isActiveInHr,
             'last_synced_at' => now(),
         ];
 
@@ -256,10 +268,18 @@ class HrSyncService
             $existing->restore();
         }
 
+        $wasActive = $existing->is_active;
         $wasDesignationId = $existing->designation_id;
         $wasStatusId = $existing->employee_status_id;
 
         $existing->update($attributes);
+
+        // Checked first — going inactive is the most consequential change a sync
+        // can make (it's what drives directory visibility), so it takes priority
+        // over also being promoted/status-changed in the same run.
+        if ($wasActive && ! $data->isActiveInHr) {
+            return 'deactivated';
+        }
 
         if ($designation['id'] && $wasDesignationId !== $designation['id']) {
             return 'promoted';
@@ -299,10 +319,11 @@ class HrSyncService
     }
 
     /**
-     * Any employee currently is_active=true in OCED but absent from this run's feed
-     * entirely is marked inactive — the sole directory-visibility signal (§2.5),
-     * covering employees HR has fully deactivated (u_active=0), which disappear
-     * from the feed rather than arriving with a "departed" status to read.
+     * Fallback safety net only — normal deactivation now happens directly via
+     * each record's own u_active flag inside upsertEmployee(), since HR sends
+     * inactive employees too rather than omitting them (§2.5). This only
+     * catches an employee_id that vanishes from the feed *entirely*, e.g. a
+     * hard delete in HR rather than a simple account deactivation.
      */
     protected function deactivateMissingEmployees(array $seenCodes): int
     {

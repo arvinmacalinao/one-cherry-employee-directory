@@ -11,6 +11,7 @@ final class HrEmployeeData
 {
     public function __construct(
         public readonly string $employeeCode,
+        public readonly bool $isActiveInHr,
         public readonly string $firstName,
         public readonly ?string $middleName,
         public readonly string $lastName,
