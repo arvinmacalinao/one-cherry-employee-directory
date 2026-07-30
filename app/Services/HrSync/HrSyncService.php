@@ -380,6 +380,16 @@ class HrSyncService
      * Employment status has no name-fallback (HR always sends an id for it) and
      * is never scoped to a company. See architecture-plan.md §2.5.
      *
+     * Unlike Company/Department/Designation, an ID match here always syncs the
+     * name too (when $persist), rather than preserving whatever's stored. There's
+     * no Admin-editable branding surface for a status the way there is for a
+     * company's logo/address — nothing ever diverges the stored name from HR's
+     * on purpose, so a mismatch can only mean HR renamed it (or, as happened in
+     * practice, an earlier guessed/seeded name never got corrected). "Whatever
+     * HR calls a status is what OCED displays, verbatim, forever" only holds if
+     * a rename actually propagates — an ID match that just returns the old
+     * stored name forever was a bug, not this comment's original intent.
+     *
      * @return array{id: ?int, name: ?string, is_new: bool}
      */
     protected function resolveEmployeeStatus(?int $hrRefId, ?string $name, bool $persist, array &$warnings): array
@@ -393,6 +403,10 @@ class HrSyncService
         $status = EmployeeStatus::where('hr_ref_id', $hrRefId)->first();
 
         if ($status) {
+            if ($persist && $name && $status->name !== $name) {
+                $status->update(['name' => $name]);
+            }
+
             return ['id' => $status->id, 'name' => $status->name, 'is_new' => false];
         }
 

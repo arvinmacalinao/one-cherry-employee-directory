@@ -407,6 +407,34 @@ class HrRestApiSourceTest extends TestCase
         $this->assertTrue($employee->is_active, 'is_active is presence-based, independent of the status label');
     }
 
+    public function test_a_renamed_hr_status_updates_the_stored_name_on_the_next_sync(): void
+    {
+        // Regression: an ID match used to just return the name already stored,
+        // never checking whether HR's current name for that es_id had changed.
+        // In production this meant an initial guessed/seeded name for an es_id
+        // stuck forever — 573 real "Regular" employees were mislabeled "On Leave"
+        // because a placeholder seed happened to claim es_id=3 first. There's no
+        // Admin-editable branding surface for a status the way there is for a
+        // company, so an ID match must always keep the name in sync with HR.
+        $stale = EmployeeStatus::create(['hr_ref_id' => 3, 'name' => 'On Leave']);
+
+        Http::fake([
+            'hr.example.test/api/employees' => Http::response([$this->record([
+                'employee_id' => 'EMP-980',
+                'employment_status' => ['id' => 3, 'name' => 'Regular'],
+            ])]),
+        ]);
+
+        $this->app->bind(HrSourceInterface::class, fn () => $this->source());
+
+        app(HrSyncService::class)->sync(SyncType::Manual);
+
+        $this->assertSame('Regular', $stale->fresh()->name);
+
+        $employee = Employee::where('employee_id', 'EMP-980')->firstOrFail();
+        $this->assertSame($stale->id, $employee->employee_status_id, 'must still resolve to the same row by hr_ref_id, not create a duplicate');
+    }
+
     public function test_employee_absent_from_a_later_feed_is_marked_inactive(): void
     {
         // Http::fake() stubs accumulate rather than replace on repeated calls for
