@@ -89,7 +89,10 @@ class Employee extends Model implements Auditable, HasMedia
      */
     public function scopeVisibleInDirectory(Builder $query): Builder
     {
-        return $query->where('is_active', true);
+        // Qualified with the table name: sorting by company/department joins in
+        // companies/departments, which also have their own is_active column —
+        // an unqualified where('is_active', ...) becomes ambiguous SQL once joined.
+        return $query->where('employees.is_active', true);
     }
 
     public function scopeSearch(Builder $query, string $term): Builder

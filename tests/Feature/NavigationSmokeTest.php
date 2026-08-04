@@ -90,4 +90,14 @@ class NavigationSmokeTest extends TestCase
         $this->get('/departments')->assertOk()->assertSeeText($department->name);
         $this->get("/directory?department={$department->id}")->assertOk()->assertSeeText($employee->full_name);
     }
+
+    public function test_directory_can_be_sorted_by_company_or_department(): void
+    {
+        // Regression: sorting joins companies/departments, both of which also have
+        // an is_active column — an unqualified where('is_active', ...) inside the
+        // visibleInDirectory scope throws "Column 'is_active' in where clause is
+        // ambiguous" once that join is added.
+        $this->get('/directory?sort=company')->assertOk();
+        $this->get('/directory?sort=department')->assertOk();
+    }
 }
