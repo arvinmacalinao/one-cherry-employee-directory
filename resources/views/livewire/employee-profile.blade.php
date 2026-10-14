@@ -30,10 +30,10 @@
                 @if ($employee->profile?->telephone)
                     <a href="tel:{{ $employee->profile->telephone }}{{ $employee->profile->local_extension ? ',' . $employee->profile->local_extension : '' }}" class="btn-secondary"><i class="fa-solid fa-phone"></i>Call</a>
                 @endif
-                <!-- no need viber -->
-                <!-- @if ($employee->profile?->viber_number)
+                {{-- no need viber --}}
+                {{-- @if ($employee->profile?->viber_number)
                     <a href="viber://chat?number={{ $employee->profile->viber_number }}" class="btn-primary"><i class="fa-brands fa-viber"></i>Viber</a>
-                @endif -->
+                @endif --}}
             </div>
         </div>
     </div>
@@ -49,12 +49,11 @@
                 <div><dt class="text-xs text-ink-tertiary">Office Location</dt><dd class="font-medium">{{ $employee->profile?->officeLocation?->name ?: '—' }}</dd></div>
                 <div><dt class="text-xs text-ink-tertiary">Contact Number</dt><dd class="font-medium">{{ $employee->profile?->viber_number ?: '—' }}</dd></div>
                 <div>
-                    <dt class="text-xs text-ink-tertiary">Telephone</dt>
+                    <dt class="text-xs text-ink-tertiary">Local</dt>
                     <dd class="font-medium">
-                        {{ $employee->profile?->telephone ?: '—' }}{{ $employee->profile?->local_extension ? ' ext. '.$employee->profile->local_extension : '' }}
+                        {{ $employee->profile->local_extension ?? ''}}
                     </dd>
                 </div>
-                <div><dt class="text-xs text-ink-tertiary">Birthday</dt><dd class="font-medium">{{ $employee->profile?->birthday?->format('F j') ?: '—' }}</dd></div>
             </dl>
         </div>
 
