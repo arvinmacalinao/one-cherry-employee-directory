@@ -250,3 +250,28 @@
         @apply inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200;
     }
 }
+
+/*
+ * Phone directory sheet — mirrors the printed "Local Phone Numbers" pages: a dark
+ * column-header bar and a brand-red bar per floor.
+ */
+@layer components {
+    .phone-sheet-head {
+        @apply bg-ink text-bg;
+    }
+    .phone-sheet-floor {
+        @apply bg-brand text-on-brand;
+    }
+}
+
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 10mm;
+    }
+    .phone-sheet-head,
+    .phone-sheet-floor {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+}

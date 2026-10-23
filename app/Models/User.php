@@ -11,7 +11,8 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
- * Administrators only — there is no employee account. See architecture-plan.md §2.4.
+ * Staff accounts only — Super Admins (every module) and Admins (phone directory
+ * editor only). There is no employee account. See architecture-plan.md §2.4.
  */
 class User extends Authenticatable
 {
@@ -42,6 +43,17 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    /**
+     * Where this account lands after signing in — Admins never see the employee
+     * modules, so they go straight to the phone directory editor.
+     */
+    public function homeUrl(): string
+    {
+        return $this->can('manage employees')
+            ? route('admin.dashboard')
+            : route('admin.phone-directory');
+    }
 
     /**
      * Get the attributes that should be cast.

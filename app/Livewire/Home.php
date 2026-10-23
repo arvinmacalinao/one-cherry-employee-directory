@@ -33,6 +33,6 @@ class Home extends Component
             'newHires' => $directory->newHires(),
             'announcements' => $announcements->forHome(),
             'searchResults' => $this->showResults ? $search->globalSearch($this->heroSearch) : null,
-        ])->layout('layouts.app', ['header' => 'Home']);
+        ])->layout('layouts.app', ['header' => 'Dashboard']);
     }
 }

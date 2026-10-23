@@ -44,7 +44,7 @@ class AdminEmployeesTest extends TestCase
         ]);
 
         $this->admin = User::factory()->create();
-        $this->admin->assignRole('Administrator');
+        $this->admin->assignRole('Super Admin');
     }
 
     public function test_admin_can_edit_only_directory_owned_fields(): void
@@ -78,11 +78,10 @@ class AdminEmployeesTest extends TestCase
         $this->assertSame('1990-05-12', $employee->profile->birthday->format('Y-m-d'));
 
         // Directory-owned fields an Admin sets here must actually show up on the
-        // public profile — that's the whole point of editing them.
-        $this->get("/directory/{$employee->id}")
+        // profile — that's the whole point of editing them. (Birthday and the
+        // telephone text are stored but deliberately not shown; only the local is.)
+        $this->actingAs($this->admin)->get("/directory/{$employee->id}")
             ->assertOk()
-            ->assertSeeText('May 12')
-            ->assertSeeText('(02) 8888 1200')
             ->assertSeeText('2231');
     }
 

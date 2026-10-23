@@ -23,7 +23,7 @@ class Login extends Component
             'password' => ['required'],
         ]);
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password, 'is_active' => true], $this->remember)) {
             throw ValidationException::withMessages([
                 'email' => 'Those credentials don\'t match our records.',
             ]);
@@ -32,9 +32,9 @@ class Login extends Component
         request()->session()->regenerate();
         Auth::user()->update(['last_login_at' => now()]);
 
-        // Only Administrators authenticate — land them in the admin area, not
-        // the public directory. See architecture-plan.md §2.4.
-        $this->redirectRoute('admin.dashboard', navigate: true);
+        // Only staff authenticate — land them in the part of the admin area their
+        // role can actually use. See architecture-plan.md §2.4.
+        $this->redirect(Auth::user()->homeUrl(), navigate: true);
     }
 
     public function render()

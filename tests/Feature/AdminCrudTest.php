@@ -45,7 +45,7 @@ class AdminCrudTest extends TestCase
         ]);
 
         $this->admin = User::factory()->create();
-        $this->admin->assignRole('Administrator');
+        $this->admin->assignRole('Super Admin');
     }
 
     public function test_guest_cannot_reach_any_admin_crud_page(): void

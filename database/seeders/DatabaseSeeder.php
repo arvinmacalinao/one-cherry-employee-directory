@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             EmployeeSeeder::class,
             UserSeeder::class,
             AnnouncementSeeder::class,
+            PhoneDirectorySeeder::class,
         ]);
     }
 }

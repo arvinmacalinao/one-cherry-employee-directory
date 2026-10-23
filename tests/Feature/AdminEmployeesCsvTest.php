@@ -45,7 +45,7 @@ class AdminEmployeesCsvTest extends TestCase
         ]);
 
         $this->admin = User::factory()->create();
-        $this->admin->assignRole('Administrator');
+        $this->admin->assignRole('Super Admin');
     }
 
     protected function csvUpload(string $content): UploadedFile

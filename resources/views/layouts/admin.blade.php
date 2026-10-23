@@ -37,48 +37,86 @@
             <span class="w-fit rounded-md bg-brand-tint px-2.5 py-1 text-[10px] font-bold tracking-wide text-brand uppercase">Admin Panel</span>
 
             <nav class="flex flex-1 flex-col gap-0.5 overflow-y-auto">
-                <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-grip w-4.5 text-center"></i> Dashboard
-                </a>
-                <a href="{{ route('admin.employees.index') }}" class="nav-item {{ request()->routeIs('admin.employees.*') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-users w-4.5 text-center"></i> Employees
-                </a>
-                <a href="{{ route('admin.companies.index') }}" class="nav-item {{ request()->routeIs('admin.companies.*') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-building w-4.5 text-center"></i> Companies
-                </a>
-                <a href="{{ route('admin.departments.index') }}" class="nav-item {{ request()->routeIs('admin.departments.*') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-sitemap w-4.5 text-center"></i> Departments
-                </a>
-                <a href="{{ route('admin.designations.index') }}" class="nav-item {{ request()->routeIs('admin.designations.*') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-award w-4.5 text-center"></i> Designations
-                </a>
-                <a href="{{ route('admin.offices.index') }}" class="nav-item {{ request()->routeIs('admin.offices.*') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-location-dot w-4.5 text-center"></i> Office Locations
-                </a>
-                <a href="{{ route('admin.announcements.index') }}" class="nav-item {{ request()->routeIs('admin.announcements.*') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-bullhorn w-4.5 text-center"></i> Announcements
-                </a>
+                @can('manage phone directory')
+                    <a href="{{ route('admin.phone-directory') }}" class="nav-item {{ request()->routeIs('admin.phone-directory') ? 'nav-item-active' : '' }}">
+                        <i class="fa-solid fa-phone w-4.5 text-center"></i> Phone Directory
+                    </a>
+                @endcan
 
-                <div class="my-2.5 h-px bg-line"></div>
+                {{-- Everything below is Super Admin only. --}}
+                @can('manage employees')
+                    <div class="my-2.5 h-px bg-line"></div>
+                    <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'nav-item-active' : '' }}">
+                        <i class="fa-solid fa-grip w-4.5 text-center"></i> Dashboard
+                    </a>
+                    <a href="{{ route('admin.employees.index') }}" class="nav-item {{ request()->routeIs('admin.employees.*') ? 'nav-item-active' : '' }}">
+                        <i class="fa-solid fa-users w-4.5 text-center"></i> Employees
+                    </a>
+                @endcan
+                @can('manage companies')
+                    <a href="{{ route('admin.companies.index') }}" class="nav-item {{ request()->routeIs('admin.companies.*') ? 'nav-item-active' : '' }}">
+                        <i class="fa-solid fa-building w-4.5 text-center"></i> Companies
+                    </a>
+                @endcan
+                @can('manage departments')
+                    <a href="{{ route('admin.departments.index') }}" class="nav-item {{ request()->routeIs('admin.departments.*') ? 'nav-item-active' : '' }}">
+                        <i class="fa-solid fa-sitemap w-4.5 text-center"></i> Departments
+                    </a>
+                @endcan
+                @can('manage designations')
+                    <a href="{{ route('admin.designations.index') }}" class="nav-item {{ request()->routeIs('admin.designations.*') ? 'nav-item-active' : '' }}">
+                        <i class="fa-solid fa-award w-4.5 text-center"></i> Designations
+                    </a>
+                @endcan
+                @can('manage office locations')
+                    <a href="{{ route('admin.offices.index') }}" class="nav-item {{ request()->routeIs('admin.offices.*') ? 'nav-item-active' : '' }}">
+                        <i class="fa-solid fa-location-dot w-4.5 text-center"></i> Office Locations
+                    </a>
+                @endcan
+                @can('manage announcements')
+                    <a href="{{ route('admin.announcements.index') }}" class="nav-item {{ request()->routeIs('admin.announcements.*') ? 'nav-item-active' : '' }}">
+                        <i class="fa-solid fa-bullhorn w-4.5 text-center"></i> Announcements
+                    </a>
+                @endcan
 
-                <a href="{{ route('admin.sync') }}" class="nav-item {{ request()->routeIs('admin.sync') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-database w-4.5 text-center"></i> HR Synchronization
-                    @if ($unmappedCount ?? 0)
-                        <span class="ml-auto flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-warning px-1 text-[10px] font-bold text-white">{{ $unmappedCount }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('admin.settings') }}" class="nav-item {{ request()->routeIs('admin.settings') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-gear w-4.5 text-center"></i> Settings
-                </a>
-                <a href="{{ route('admin.audit.index') }}" class="nav-item {{ request()->routeIs('admin.audit.*') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-shield-halved w-4.5 text-center"></i> Audit Logs
-                </a>
+                @canany(['run hr sync', 'manage settings', 'manage users', 'view audit logs'])
+                    <div class="my-2.5 h-px bg-line"></div>
+                @endcanany
+
+                @can('run hr sync')
+                    <a href="{{ route('admin.sync') }}" class="nav-item {{ request()->routeIs('admin.sync') ? 'nav-item-active' : '' }}">
+                        <i class="fa-solid fa-database w-4.5 text-center"></i> HR Synchronization
+                        @if ($unmappedCount ?? 0)
+                            <span class="ml-auto flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-warning px-1 text-[10px] font-bold text-white">{{ $unmappedCount }}</span>
+                        @endif
+                    </a>
+                @endcan
+                @can('manage users')
+                    <a href="{{ route('admin.users.index') }}" class="nav-item {{ request()->routeIs('admin.users.*') ? 'nav-item-active' : '' }}">
+                        <i class="fa-solid fa-user-shield w-4.5 text-center"></i> Users
+                    </a>
+                @endcan
+                @can('manage settings')
+                    <a href="{{ route('admin.settings') }}" class="nav-item {{ request()->routeIs('admin.settings') ? 'nav-item-active' : '' }}">
+                        <i class="fa-solid fa-gear w-4.5 text-center"></i> Settings
+                    </a>
+                @endcan
+                @can('view audit logs')
+                    <a href="{{ route('admin.audit.index') }}" class="nav-item {{ request()->routeIs('admin.audit.*') ? 'nav-item-active' : '' }}">
+                        <i class="fa-solid fa-shield-halved w-4.5 text-center"></i> Audit Logs
+                    </a>
+                @endcan
             </nav>
 
             <div class="flex flex-col gap-2 border-t border-line pt-2.5">
                 <a href="{{ route('home') }}" class="nav-item">
-                    <i class="fa-solid fa-arrow-left w-4.5 text-center"></i> Exit to Directory
+                    <i class="fa-solid fa-phone w-4.5 text-center"></i> Public Phone Directory
                 </a>
+                @can('view employee directory')
+                    <a href="{{ route('dashboard') }}" class="nav-item">
+                        <i class="fa-solid fa-address-book w-4.5 text-center"></i> Employee Directory
+                    </a>
+                @endcan
                 <button
                     type="button"
                     x-data="{

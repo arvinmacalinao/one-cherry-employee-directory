@@ -37,8 +37,8 @@
             </div>
 
             <nav class="flex flex-1 flex-col gap-0.5 overflow-y-auto">
-                <a href="{{ route('home') }}" class="nav-item {{ request()->routeIs('home') ? 'nav-item-active' : '' }}">
-                    <i class="fa-solid fa-house w-4.5 text-center"></i> Home
+                <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'nav-item-active' : '' }}">
+                    <i class="fa-solid fa-house w-4.5 text-center"></i> Dashboard
                 </a>
                 <a href="{{ route('directory.index') }}" class="nav-item {{ request()->routeIs('directory.*') ? 'nav-item-active' : '' }}">
                     <i class="fa-solid fa-address-book w-4.5 text-center"></i> Employee Directory
@@ -50,8 +50,11 @@
                     <i class="fa-solid fa-sitemap w-4.5 text-center"></i> Departments
                 </a>
 
+                <div class="my-2.5 h-px bg-line"></div>
+                <a href="{{ route('home') }}" class="nav-item">
+                    <i class="fa-solid fa-phone w-4.5 text-center"></i> Phone Directory
+                </a>
                 @can('manage employees')
-                    <div class="my-2.5 h-px bg-line"></div>
                     <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.*') ? 'nav-item-active' : '' }}">
                         <i class="fa-solid fa-gear w-4.5 text-center"></i> Admin Panel
                     </a>
@@ -98,7 +101,7 @@
                         </button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="flex h-8.5 w-8.5 items-center justify-center rounded-lg text-ink-secondary hover:bg-surface hover:text-ink" title="Administrator sign in">
+                    <a href="{{ route('login') }}" class="flex h-8.5 w-8.5 items-center justify-center rounded-lg text-ink-secondary hover:bg-surface hover:text-ink" title="Admin sign in">
                         <i class="fa-solid fa-user-shield"></i>
                     </a>
                 @endauth

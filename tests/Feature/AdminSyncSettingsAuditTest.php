@@ -43,7 +43,7 @@ class AdminSyncSettingsAuditTest extends TestCase
         ]);
 
         $this->admin = User::factory()->create();
-        $this->admin->assignRole('Administrator');
+        $this->admin->assignRole('Super Admin');
     }
 
     public function test_admin_can_generate_a_preview_that_writes_nothing(): void
