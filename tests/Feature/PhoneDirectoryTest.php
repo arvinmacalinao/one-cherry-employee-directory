@@ -79,6 +79,39 @@ class PhoneDirectoryTest extends TestCase
         $this->assertSame([0, 0], $rows['VHON / ROSELLE']);
     }
 
+    public function test_managers_are_highlighted_like_the_printed_sheet(): void
+    {
+        $highlighted = fn (string $name) => PhoneEntry::where('name', $name)->firstOrFail()->is_highlighted;
+
+        $this->assertTrue($highlighted('MAYETH MARQUEZ'));    // ASST. ADMIN MANAGER
+        $this->assertTrue($highlighted('RENELITA TANDUS'));   // ASSISTANT MANAGER RECRUITMENT
+        $this->assertTrue($highlighted('RICHARD FRANCISCO')); // ASSISTANT VICE PRESIDENT
+        $this->assertFalse($highlighted('JASMINE'));          // HR / ADMIN / CORPCOMM
+        $this->assertFalse($highlighted('BEAH'));             // LOBBY / RECEPTION
+
+        $this->get('/')->assertOk()->assertSee('phone-sheet-highlight', false);
+    }
+
+    public function test_admin_can_toggle_a_highlight_and_new_manager_lines_are_pre_ticked(): void
+    {
+        $entry = PhoneEntry::where('name', 'BEAH')->firstOrFail();
+        $floor = $entry->floor;
+
+        $component = Livewire::actingAs($this->admin)->test(AdminPhoneDirectory::class)
+            ->call('toggleHighlight', $entry->id);
+        $this->assertTrue($entry->fresh()->is_highlighted);
+
+        $component->call('startAddEntry', $floor->id)
+            ->set('entryForm.department', 'Assistant Manager - Facilities')
+            ->assertSet('entryForm.is_highlighted', true)
+            ->set('entryForm.is_highlighted', false)
+            ->set('entryForm.name', 'Test')
+            ->call('saveEntry')
+            ->assertHasNoErrors();
+
+        $this->assertFalse(PhoneEntry::where('name', 'Test')->firstOrFail()->is_highlighted);
+    }
+
     public function test_admin_can_manage_buildings_floors_and_lines(): void
     {
         $this->actingAs($this->admin);

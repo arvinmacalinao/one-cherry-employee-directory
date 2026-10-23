@@ -50,7 +50,7 @@
 
         <div class="flex items-start gap-2.5 rounded-lg bg-brand-tint px-3.5 py-3 text-xs text-ink-secondary">
             <i class="fa-solid fa-circle-info mt-0.5 text-brand"></i>
-            <span>Consecutive lines with the same department (or the same local) are merged into one cell on the public page, just like the printed sheet. "Last update" moves to today whenever anything in this building changes.</span>
+            <span>Starred lines (managers) are highlighted, like the shaded rows on the printed sheet. Consecutive lines with the same department (or the same local) are merged into one cell on the public page, just like the printed sheet. "Last update" moves to today whenever anything in this building changes.</span>
         </div>
 
         <datalist id="phone-departments">
@@ -89,11 +89,12 @@
                                 @if ($editingEntryId === $entry->id)
                                     @include('livewire.admin.phone-directory.entry-form', ['key' => "edit-{$entry->id}"])
                                 @else
-                                    <tr wire:key="entry-{{ $entry->id }}" class="border-b border-line last:border-b-0 hover:bg-surface">
+                                    <tr wire:key="entry-{{ $entry->id }}" @class(['border-b border-line last:border-b-0', 'phone-sheet-highlight' => $entry->is_highlighted, 'hover:bg-surface' => ! $entry->is_highlighted])>
                                         <td class="px-4 py-2 font-semibold">{{ $entry->department ?: '—' }}</td>
                                         <td class="px-4 py-2 text-ink-secondary">{{ $entry->name ?: '—' }}</td>
                                         <td class="px-4 py-2 font-bold whitespace-nowrap tabular-nums">{{ $entry->local ?: '—' }}</td>
                                         <td class="px-2 py-1 text-right whitespace-nowrap">
+                                            <button wire:click="toggleHighlight({{ $entry->id }})" @class(['rounded-lg p-2 hover:bg-surface-raised', 'text-brand' => $entry->is_highlighted, 'text-ink-tertiary hover:text-ink' => ! $entry->is_highlighted]) title="{{ $entry->is_highlighted ? 'Remove highlight' : 'Highlight (managers)' }}"><i class="fa-{{ $entry->is_highlighted ? 'solid' : 'regular' }} fa-star text-xs"></i></button>
                                             <button wire:click="moveEntry({{ $entry->id }}, -1)" @disabled($loop->first) class="rounded-lg p-2 text-ink-secondary hover:bg-surface-raised hover:text-ink disabled:opacity-30" title="Move up"><i class="fa-solid fa-arrow-up text-xs"></i></button>
                                             <button wire:click="moveEntry({{ $entry->id }}, 1)" @disabled($loop->last) class="rounded-lg p-2 text-ink-secondary hover:bg-surface-raised hover:text-ink disabled:opacity-30" title="Move down"><i class="fa-solid fa-arrow-down text-xs"></i></button>
                                             <button wire:click="startEditEntry({{ $entry->id }})" class="rounded-lg p-2 text-ink-secondary hover:bg-surface-raised hover:text-ink" title="Edit"><i class="fa-solid fa-pen text-xs"></i></button>

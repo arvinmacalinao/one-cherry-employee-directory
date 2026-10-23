@@ -11,7 +11,20 @@ class PhoneEntry extends Model implements Auditable
 {
     use AuditableTrait;
 
-    protected $fillable = ['phone_floor_id', 'department', 'name', 'local', 'sort_order'];
+    protected $fillable = ['phone_floor_id', 'department', 'name', 'local', 'is_highlighted', 'sort_order'];
+
+    protected $casts = [
+        'is_highlighted' => 'boolean',
+    ];
+
+    /**
+     * Managers' rows are shaded on the printed sheet — used to pre-tick the
+     * highlight for seeded and newly added lines.
+     */
+    public static function looksLikeManager(?string $department): bool
+    {
+        return (bool) preg_match('/\b(manager|vice president)\b/i', (string) $department);
+    }
 
     protected static function booted(): void
     {

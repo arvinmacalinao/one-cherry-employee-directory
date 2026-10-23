@@ -262,6 +262,10 @@
     .phone-sheet-floor {
         @apply bg-brand text-on-brand;
     }
+    /* Managers' rows — shaded on the printed sheet. */
+    .phone-sheet-highlight {
+        @apply bg-brand-tint-strong font-semibold;
+    }
 }
 
 @media print {
@@ -270,7 +274,8 @@
         margin: 10mm;
     }
     .phone-sheet-head,
-    .phone-sheet-floor {
+    .phone-sheet-floor,
+    .phone-sheet-highlight {
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
     }

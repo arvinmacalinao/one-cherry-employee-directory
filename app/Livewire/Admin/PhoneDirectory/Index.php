@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\PhoneDirectory;
 use App\Models\PhoneBuilding;
 use App\Models\PhoneEntry;
 use App\Models\PhoneFloor;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -38,7 +39,7 @@ class Index extends Component
 
     public ?int $addingToFloorId = null;
 
-    public array $entryForm = ['department' => '', 'name' => '', 'local' => ''];
+    public array $entryForm = ['department' => '', 'name' => '', 'local' => '', 'is_highlighted' => false];
 
     public function selectBuilding(int $id): void
     {
@@ -208,6 +209,7 @@ class Index extends Component
             'department' => $entry->department ?? '',
             'name' => $entry->name ?? '',
             'local' => $entry->local ?? '',
+            'is_highlighted' => $entry->is_highlighted,
         ];
     }
 
@@ -217,10 +219,13 @@ class Index extends Component
             'entryForm.department' => ['nullable', 'string', 'max:255', 'required_without_all:entryForm.name,entryForm.local'],
             'entryForm.name' => ['nullable', 'string', 'max:255'],
             'entryForm.local' => ['nullable', 'string', 'max:255'],
+            'entryForm.is_highlighted' => ['boolean'],
         ], [
             'entryForm.department.required_without_all' => 'Fill in at least one field.',
         ])['entryForm'];
-        $data = array_map(fn ($v) => trim((string) $v) === '' ? null : trim($v), $data);
+        $highlighted = (bool) $data['is_highlighted'];
+        $data = array_map(fn ($v) => trim((string) $v) === '' ? null : trim($v), Arr::except($data, 'is_highlighted'));
+        $data['is_highlighted'] = $highlighted;
 
         if ($this->editingEntryId) {
             PhoneEntry::findOrFail($this->editingEntryId)->update($data);
@@ -234,11 +239,28 @@ class Index extends Component
         $this->cancelEntry();
     }
 
+    /**
+     * Typing a manager/VP title into a new line pre-ticks the highlight; the
+     * admin can still untick it. Existing lines are never changed behind their back.
+     */
+    public function updatedEntryFormDepartment(string $value): void
+    {
+        if ($this->addingToFloorId && PhoneEntry::looksLikeManager($value)) {
+            $this->entryForm['is_highlighted'] = true;
+        }
+    }
+
+    public function toggleHighlight(int $id): void
+    {
+        $entry = PhoneEntry::findOrFail($id);
+        $entry->update(['is_highlighted' => ! $entry->is_highlighted]);
+    }
+
     public function cancelEntry(): void
     {
         $this->editingEntryId = null;
         $this->addingToFloorId = null;
-        $this->entryForm = ['department' => '', 'name' => '', 'local' => ''];
+        $this->entryForm = ['department' => '', 'name' => '', 'local' => '', 'is_highlighted' => false];
         $this->resetErrorBag();
     }
 

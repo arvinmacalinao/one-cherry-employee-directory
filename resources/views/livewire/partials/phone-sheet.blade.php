@@ -33,7 +33,7 @@
                                 </th>
                             </tr>
                             @forelse ($directory->rows($floor->entries) as $row)
-                                <tr class="border-b border-line">
+                                <tr @class(['border-b border-line', 'phone-sheet-highlight' => $row['entry']->is_highlighted])>
                                     @if ($row['departmentSpan'] > 0)
                                         <td rowspan="{{ $row['departmentSpan'] }}" class="border-r border-line px-3 py-1.5 align-middle font-semibold uppercase">{{ $row['entry']->department }}</td>
                                     @endif

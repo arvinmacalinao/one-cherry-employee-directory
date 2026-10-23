@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\PhoneBuilding;
+use App\Models\PhoneEntry;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -41,6 +42,7 @@ class PhoneDirectorySeeder extends Seeder
                             'department' => $department,
                             'name' => $name,
                             'local' => $local,
+                            'is_highlighted' => PhoneEntry::looksLikeManager($department),
                             'sort_order' => $entryOrder + 1,
                         ]);
                     }
