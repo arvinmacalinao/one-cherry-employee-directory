@@ -6,9 +6,46 @@
     <title>{{ ($title ?? 'Local Phone Numbers') . ' · ' . \App\Models\Setting::get('app_name', config('app.name')) }}</title>
     <script>
         document.documentElement.setAttribute('data-theme', localStorage.getItem('oced-theme') ?? '');
-        // Printouts always use the light palette, whatever the screen theme is.
-        window.addEventListener('beforeprint', () => document.documentElement.setAttribute('data-theme', 'light'));
-        window.addEventListener('afterprint', () => document.documentElement.setAttribute('data-theme', localStorage.getItem('oced-theme') ?? ''));
+        // Printing: always the light palette, and the sheet scaled to exactly one
+        // A4 page. `.printing` switches on the compact print layout so it can be
+        // measured here, before the browser lays out the printout.
+        (() => {
+            const mm = 96 / 25.4;
+            const pageWidth = 190 * mm;          // A4 minus the 10mm @page margins
+            const pageHeight = 277 * mm * 0.97;  // small safety margin against rounding
+
+            window.addEventListener('beforeprint', () => {
+                const root = document.documentElement;
+                root.setAttribute('data-theme', 'light');
+                root.classList.add('printing');
+
+                const area = document.getElementById('phone-print-area');
+                if (! area) return;
+
+                // Narrower page → taller sheet → more shrink; a few passes settle it.
+                let scale = 1;
+                area.style.zoom = '';
+                for (let i = 0; i < 4; i++) {
+                    area.style.width = (pageWidth / scale) + 'px';
+                    scale = Math.min(1, pageHeight / area.offsetHeight);
+                }
+                area.style.width = (pageWidth / scale) + 'px';
+                scale = Math.min(scale, pageHeight / area.offsetHeight);
+                area.style.zoom = scale;
+            });
+
+            window.addEventListener('afterprint', () => {
+                const root = document.documentElement;
+                root.classList.remove('printing');
+                root.setAttribute('data-theme', localStorage.getItem('oced-theme') ?? '');
+
+                const area = document.getElementById('phone-print-area');
+                if (area) {
+                    area.style.width = '';
+                    area.style.zoom = '';
+                }
+            });
+        })();
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles

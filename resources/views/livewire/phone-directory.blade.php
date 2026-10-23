@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-6 print:gap-3">
+<div class="flex flex-col gap-6">
 
     {{-- Search — looks across every building at once --}}
     <div class="rounded-panel border border-line bg-gradient-to-b from-surface to-bg px-5 py-8 text-center sm:px-8 print:hidden">
@@ -62,30 +62,32 @@
             <button type="button" onclick="window.print()" class="btn-secondary ml-auto text-xs"><i class="fa-solid fa-print"></i>Print {{ $building->name }}</button>
         </div>
 
-        {{-- Sheet title, as on the printout --}}
-        <div class="text-center">
-            <p class="font-display text-lg font-bold tracking-wide uppercase print:text-[14pt]">Local Phone Numbers</p>
-            <p class="text-xs font-semibold tracking-[0.2em] text-ink-secondary uppercase print:text-[8pt]">{{ $building->name }}</p>
-        </div>
-
-        @if ($floors->isEmpty())
-            <div class="card px-6 py-12 text-center text-sm text-ink-secondary">No floors have been added to {{ $building->name }} yet.</div>
-        @else
-            @include('livewire.partials.phone-sheet', ['floors' => $floors])
-        @endif
-
-        @if ($building->trunkline || $building->mobile || $building->last_updated_on)
-            <div class="flex flex-wrap justify-end gap-x-6 gap-y-1 text-xs font-semibold tracking-wide text-ink-secondary uppercase print:text-[8pt] print:text-ink">
-                @if ($building->trunkline)
-                    <span>Trunkline: <span class="text-ink tabular-nums">{{ $building->trunkline }}</span></span>
-                @endif
-                @if ($building->mobile)
-                    <span>Mobile: <span class="text-ink tabular-nums">{{ $building->mobile }}</span></span>
-                @endif
-                @if ($building->last_updated_on)
-                    <span>Last update: <span class="text-ink">{{ $building->last_updated_on->format('F j, Y') }}</span></span>
-                @endif
+        {{-- Everything a printout contains — scaled to one A4 page when printing (see layouts/public). --}}
+        <div id="phone-print-area" class="phone-print-area flex flex-col gap-6">
+            <div class="text-center">
+                <p class="phone-print-title font-display text-lg font-bold tracking-wide uppercase">Local Phone Numbers</p>
+                <p class="phone-print-subtitle text-xs font-semibold tracking-[0.2em] text-ink-secondary uppercase">{{ $building->name }}</p>
             </div>
-        @endif
+
+            @if ($floors->isEmpty())
+                <div class="card px-6 py-12 text-center text-sm text-ink-secondary">No floors have been added to {{ $building->name }} yet.</div>
+            @else
+                @include('livewire.partials.phone-sheet', ['floors' => $floors])
+            @endif
+
+            @if ($building->trunkline || $building->mobile || $building->last_updated_on)
+                <div class="phone-print-footer flex flex-wrap justify-end gap-x-6 gap-y-1 text-xs font-semibold tracking-wide text-ink-secondary uppercase">
+                    @if ($building->trunkline)
+                        <span>Trunkline: <span class="text-ink tabular-nums">{{ $building->trunkline }}</span></span>
+                    @endif
+                    @if ($building->mobile)
+                        <span>Mobile: <span class="text-ink tabular-nums">{{ $building->mobile }}</span></span>
+                    @endif
+                    @if ($building->last_updated_on)
+                        <span>Last update: <span class="text-ink">{{ $building->last_updated_on->format('F j, Y') }}</span></span>
+                    @endif
+                </div>
+            @endif
+        </div>
     @endif
 </div>

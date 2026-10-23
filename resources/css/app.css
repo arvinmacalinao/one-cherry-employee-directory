@@ -268,10 +268,69 @@
     }
 }
 
+/*
+ * Compact one-page print layout. Keyed on `.printing` (set on <html> just before
+ * printing) rather than @media print, so the fit-to-page script in
+ * layouts/public can measure exactly what will be printed.
+ */
+.printing body {
+    background: #fff;
+}
+.printing .phone-print-area {
+    gap: 2.5mm;
+    color: #000;
+}
+.printing .phone-print-title {
+    font-size: 13pt;
+    line-height: 1.2;
+}
+.printing .phone-print-subtitle {
+    font-size: 7.5pt;
+}
+.printing .phone-print-footer {
+    font-size: 7pt;
+    color: #000;
+}
+.printing .phone-sheet-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3mm;
+}
+.printing .phone-sheet-wrap {
+    overflow: visible;
+    border-radius: 0;
+    box-shadow: none;
+}
+.printing .phone-sheet-table {
+    min-width: 0;
+    font-size: 7.5pt;
+    line-height: 1.15;
+}
+.printing .phone-sheet-table th,
+.printing .phone-sheet-table td {
+    padding: 0.6mm 1.5mm;
+}
+.printing .phone-sheet-head {
+    font-size: 6.5pt;
+}
+.printing .phone-sheet-floor-name {
+    font-size: 8.5pt;
+}
+.printing .phone-sheet-access {
+    font-size: 6.5pt;
+}
+
 @media print {
     @page {
         size: A4 portrait;
         margin: 10mm;
+    }
+    html,
+    body {
+        height: auto;
+        min-height: 0;
+    }
+    .phone-print-area {
+        break-inside: avoid;
     }
     .phone-sheet-head,
     .phone-sheet-floor,
