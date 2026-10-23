@@ -178,7 +178,7 @@ class PhoneDirectorySeeder extends Seeder
                         ['RDU', 'JERRSON / MICHAEL', '(20) 2500'],
                         ['QC', 'TEEDWARD', '1521'],
                     ]],
-                    ['7th Floor', null, [
+                    ['7th Floor', '27', [
                         ['EKILA 888 - SALES MANAGER', 'LORRAINE JAVALERA', '2714'],
                         ['VI - DIGITAL RETAIL MANAGER', 'DUINKIE TAN - ANG', '2801'],
                         ['WBS - ASSISTANT MANAGER FINANCE / SUPPLY CHAIN', 'MARLON JOHN BAGUSTO', '(20) 2075'],
@@ -191,14 +191,14 @@ class PhoneDirectorySeeder extends Seeder
                         ['ONZ - ACCOUNTING', 'RIZA / MARIAH', '(20) 2030'],
                         ['ONZ', 'ARSY / MACC', '(20) 2025'],
                     ]],
-                    ['8th Floor', null, [
+                    ['8th Floor', '29', [
                         ['PARAGON - GENERAL MANAGER', 'LEONCIO CANTONJOS', '2901'],
                         ['PARAGON', 'AILEEN', '2910'],
                         ['PARAGON - ACCOUNTING', 'QUEENCEL / MYRA / DARILLE', '2917'],
                         ['PARAGON - ACCOUNTING', 'HANNAH / ANDRE', '2917'],
                         ['PARAGON - OPERATIONS', 'ANDREA / LORNHEY', '2922'],
                     ]],
-                    ['9th Floor', null, [
+                    ['9th Floor', '20', [
                         ['ASSISTANT VICE PRESIDENT VENTURE DEVELOPMENT', 'RICHARD FRANCISCO', '2001'],
                         ['SENIOR MANAGER - HR & ADMIN', 'VIVIAN CASTILLO', '1907 / 2005'],
                         ['CORPCOMM MANAGER', 'KEREN SIBLAG', '2020'],
@@ -211,7 +211,7 @@ class PhoneDirectorySeeder extends Seeder
                         ['VENTURE DEVELOPMENT', 'EMMIE / DEO', '2018'],
                         ['VENTURE DEVELOPMENT', 'JAMES / JOBIN', '2019'],
                     ]],
-                    ['11th Floor', null, [
+                    ['11th Floor', '29', [
                         ['LANBENA', null, '2911'],
                     ]],
                 ],

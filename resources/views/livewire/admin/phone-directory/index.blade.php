@@ -64,10 +64,12 @@
             <div wire:key="floor-{{ $floor->id }}" class="overflow-hidden rounded-card border border-line bg-surface-raised">
                 <div class="phone-sheet-floor flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5">
                     <p class="font-display text-sm font-bold tracking-wide uppercase">{{ $floor->name }}</p>
-                    @if ($floor->access_code)
-                        <span class="text-[11px] font-semibold tracking-wide uppercase opacity-80">Access code – {{ $floor->access_code }}</span>
-                    @endif
                     <div class="ml-auto flex items-center gap-0.5">
+                        @if ($floor->access_code)
+                            <button wire:click="openEditFloor({{ $floor->id }})" class="mr-1 rounded-lg px-2 py-1 text-[11px] font-semibold tracking-wide uppercase opacity-90 hover:bg-white/15" title="Edit access code">Access code – {{ $floor->access_code }}</button>
+                        @else
+                            <button wire:click="openEditFloor({{ $floor->id }})" class="mr-1 rounded-lg border border-dashed border-white/40 px-2 py-0.5 text-[11px] font-semibold opacity-80 hover:bg-white/15 hover:opacity-100"><i class="fa-solid fa-key mr-1 text-[10px]"></i>Add access code</button>
+                        @endif
                         <button wire:click="moveFloor({{ $floor->id }}, -1)" @disabled($loop->first) class="rounded-lg p-1.5 opacity-80 hover:bg-white/15 hover:opacity-100 disabled:opacity-30" title="Move floor up"><i class="fa-solid fa-arrow-up text-xs"></i></button>
                         <button wire:click="moveFloor({{ $floor->id }}, 1)" @disabled($loop->last) class="rounded-lg p-1.5 opacity-80 hover:bg-white/15 hover:opacity-100 disabled:opacity-30" title="Move floor down"><i class="fa-solid fa-arrow-down text-xs"></i></button>
                         <button wire:click="openEditFloor({{ $floor->id }})" class="rounded-lg p-1.5 opacity-80 hover:bg-white/15 hover:opacity-100" title="Edit floor"><i class="fa-solid fa-pen text-xs"></i></button>
@@ -161,7 +163,8 @@
                     <input type="text" wire:model="floorForm.name" placeholder="e.g. 9th Floor" class="input">
                 </x-admin.field>
                 <x-admin.field label="Access Code (optional)" :error="$errors->first('floorForm.access_code')">
-                    <input type="text" wire:model="floorForm.access_code" placeholder="Shown on the right of the floor bar" class="input">
+                    <input type="text" wire:model="floorForm.access_code" placeholder="e.g. 27" class="input">
+                    <span class="text-[11px] text-ink-tertiary">Shown on the right of the floor's title bar as "Access code – 27". Leave blank if the floor has none.</span>
                 </x-admin.field>
             </div>
 

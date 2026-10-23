@@ -49,6 +49,16 @@ class PhoneDirectoryTest extends TestCase
             ->assertDontSeeText('MAYETH MARQUEZ');
     }
 
+    public function test_floor_access_codes_show_on_the_floor_title_bar(): void
+    {
+        $buildingB = PhoneBuilding::where('name', 'Building B')->firstOrFail();
+
+        Livewire::test(PhoneDirectory::class)
+            ->call('selectBuilding', $buildingB->id)
+            ->assertSeeText('Access code – 27')
+            ->assertSeeText('Access code – 20');
+    }
+
     public function test_search_looks_across_every_building(): void
     {
         Livewire::test(PhoneDirectory::class)
